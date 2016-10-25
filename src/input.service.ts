@@ -239,9 +239,10 @@ export class InputService {
   constructor(private focus: FocusService) {}
 
   /**
-   * Bootstrap attaches event listeners from the service to the DOM.
+   * Bootstrap attaches event listeners from the service to the DOM and sets
+   * up the focuser rooted in the target element.
    */
-  public bootstrap() {
+  public bootstrap(root: HTMLElement = document.body) {
     // The gamepadInputEmulation is a string property that exists in
     // JavaScript UWAs and in WebViews in UWAs. It won't exist in
     // Win8.1 style apps or browsers.
@@ -256,6 +257,7 @@ export class InputService {
     }
 
     this.addKeyboardListeners();
+    this.focus.setRoot(root);
   }
 
   /**
