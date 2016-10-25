@@ -12,62 +12,61 @@ paths.indexTemplate = path.resolve(__dirname, 'src/index.ejs');
 paths.tsconfig = path.resolve(__dirname, '../tsconfig.json');
 
 module.exports = {
-    devtool: 'source-map',
-    context: paths.root,
-    entry: {
-        main: path.resolve(__dirname, 'src/bundles/main.ts'),
-        polyfills: path.resolve(__dirname, 'src/bundles/polyfills.ts')
-    },
-    output: {
-        path: paths.dist,
-        filename: 'bundles/[name].bundle.js',
-    },
-    resolve: {
-        extensions: ['.js', '.ts'],
-    },
-    devServer: {
-        port: 8080,
-        historyApiFallback: true,
-        contentBase: 'demo/dist'
-    },
-    module: {
+  devtool: 'source-map',
+  context: paths.root,
+  entry: {
+    main: path.resolve(__dirname, 'src/bundles/main.ts'),
+    polyfills: path.resolve(__dirname, 'src/bundles/polyfills.ts')
+  },
+  output: {
+    path: paths.dist,
+    filename: 'bundles/[name].bundle.js',
+  },
+  resolve: {
+    extensions: ['.js', '.ts'],
+  },
+  devServer: {
+    port: 8080,
+    historyApiFallback: true,
+    contentBase: 'demo/dist'
+  },
+  module: {
+    loaders: [
+      {
+        test: /\.ts$/,
         loaders: [
-            {
-                test: /\.ts$/,
-                loaders: [
-                    {
-                        loader: 'awesome-typescript-loader',
-                        query: {
-                            useForkChecker: true,
-                            tsconfig: paths.tsconfig
-                        }
-                    },
-                ],
+          {
+            loader: 'awesome-typescript-loader',
+            query: {
+              useForkChecker: true,
+              tsconfig: paths.tsconfig
             }
-        ]
-    },
-    plugins: [
-        new HtmlWebpackPlugin({
-            template: paths.indexTemplate,
-            hash: true,
-            chunksSortMode: (a, b) => chunkOrder.indexOf(a.names[0]) > chunkOrder.indexOf(b.names[0]),
-        }),
+          },
+        ],
+      }
+    ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: paths.indexTemplate,
+      hash: true,
+      chunksSortMode: (a, b) => chunkOrder.indexOf(a.names[0]) > chunkOrder.indexOf(b.names[0]),
+    }),
 
-        new atl.ForkCheckerPlugin(),
+    new atl.ForkCheckerPlugin(),
 
-        // Fix for critical dependency warning due to System.import in angular.
-        // See https://github.com/angular/angular/issues/11580
-        new webpack.ContextReplacementPlugin(
-            /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
-            paths.app
-        ),
-
-    ],
-    node: {
-        fs: 'empty',
-        crypto: 'empty',
-        module: false,
-        clearImmediate: false,
-        setImmediate: false
-    }
+    // Fix for critical dependency warning due to System.import in angular.
+    // See https://github.com/angular/angular/issues/11580
+    new webpack.ContextReplacementPlugin(
+      /angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/,
+      paths.app
+    ),
+  ],
+  node: {
+    fs: 'empty',
+    crypto: 'empty',
+    module: false,
+    clearImmediate: false,
+    setImmediate: false
+  }
 };
