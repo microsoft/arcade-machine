@@ -1,0 +1,64 @@
+{
+  "extends": "tslint-microsoft-contrib",
+  "rulesDirectory": [
+    "node_modules/codelyzer",
+    "node_modules/tslint-microsoft-contrib"
+  ],
+  "rules": {
+    "no-increment-decrement": false,
+    "no-multiline-string": false,
+    "no-for-in-array": false,
+    "restrict-plus-operands": false,
+    "no-constructor-vars": false,
+    "no-relative-imports": false,
+    "mocha-no-side-effect-code": false,
+    "missing-jsdoc": false,
+    "export-name": false,
+    "no-stateless-class": false,
+    "no-any": false,
+    "trailing-comma": [true, {"multiline": "always", "singleline": "never"}],
+
+    // Angular
+    "directive-selector-name": [
+      true,
+      "camelCase"
+    ],
+    "component-selector-name": [
+      true,
+      "kebab-case"
+    ],
+    "directive-selector-type": [
+      true,
+      "attribute"
+    ],
+    "component-selector-type": [
+      true,
+      "element"
+    ],
+    "directive-selector-prefix": [
+      true,
+      "bui"
+    ],
+    "component-selector-prefix": [
+      true,
+      "bui"
+    ],
+    "use-input-property-decorator": true,
+    "use-output-property-decorator": true,
+    "use-host-property-decorator": true,
+    "no-attribute-parameter-decorator": true,
+    "no-input-rename": false,
+    "no-output-rename": false,
+    "no-forward-ref": false,
+    "use-life-cycle-interface": true,
+    "use-pipe-transform-interface": true,
+    "pipe-naming": [
+      true,
+      "camelCase",
+      "bui"
+    ],
+    "component-class-suffix": true,
+    "directive-class-suffix": true,
+    "import-destructuring-spacing": true
+  }
+}

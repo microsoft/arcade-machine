@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "forceConsistentCasingInFileNames": true,
+        "allowSyntheticDefaultImports": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "moduleResolution": "node",
+        "noImplicitAny": true,
+        "strictNullChecks": false,
+        "module": "commonjs",
+        "sourceMap": true,
+        "target": "es5",
+        "pretty": true,
+        "declaration": true,
+        "lib": [
+            "dom",
+            "es2015"
+        ],
+        "typeRoots": [
+            "node_modules/@types"
+        ],
+        "types": [
+            "jasmine",
+            "node"
+        ]
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}
