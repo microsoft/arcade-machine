@@ -1,11 +1,13 @@
+import { ArcDirective } from './arc.directive';
 import { NgModule } from '@angular/core';
 
 export { InputService } from './input.service';
 export { FocusService } from './focus.service';
+export { RegistryService } from './registry.service';
 
 @NgModule({
-  imports: [],
-  exports: [],
+  declarations: [ArcDirective],
+  exports: [ArcDirective],
 })
 export class ArcModule {
 }

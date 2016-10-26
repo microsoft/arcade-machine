@@ -1,4 +1,5 @@
-import { Direction, FocusService } from './focus.service';
+import { FocusService } from './focus.service';
+import { Direction } from './model';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
@@ -264,6 +265,7 @@ export class InputService {
    * Unregisters all listeners and frees resources associated with the service.
    */
   public teardown() {
+    this.focus.teardown();
     this.gamepads = [];
     cancelAnimationFrame(this.pollRaf);
     while (this.subscriptions.length) {
@@ -329,7 +331,7 @@ export class InputService {
   private pollGamepad(now: number) {
     navigator.getGamepads(); // refreshes all checked-out gamepads
 
-    for (let i = 0; i < this.gamepads.length; i++) {
+    for (let i = 0; i < this.gamepads.length; i += 1) {
       const gamepad = this.gamepads[i];
       if (!gamepad.isConnected()) {
           this.gamepads.splice(i, 1);

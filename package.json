@@ -6,7 +6,7 @@
     "build": "gulp build",
     "prepublish": "npm run build",
     "clean": "rimraf node_modules doc dist && npm cache clean",
-    "test:lint": "tslint 'src/**/*.ts' --project tsconfig.json",
+    "test:lint": "tslint 'src/**/*.ts' --project tsconfig.json --type-check",
     "test:unit": "gulp test",
     "test": "npm-run-all --parallel test:lint test:unit",
     "start": "npm run serve",

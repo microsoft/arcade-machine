@@ -5,17 +5,15 @@
     "node_modules/tslint-microsoft-contrib"
   ],
   "rules": {
-    "no-increment-decrement": false,
-    "no-multiline-string": false,
-    "no-for-in-array": false,
-    "restrict-plus-operands": false,
-    "no-constructor-vars": false,
-    "no-relative-imports": false,
-    "mocha-no-side-effect-code": false,
-    "missing-jsdoc": false,
     "export-name": false,
-    "no-stateless-class": false,
+    "missing-jsdoc": false,
+    "mocha-no-side-effect-code": false,
     "no-any": false,
+    "no-conditional-assignment": false,
+    "no-constructor-vars": false,
+    "no-multiline-string": false,
+    "no-relative-imports": false,
+    "no-stateless-class": false,
     "trailing-comma": [true, {"multiline": "always", "singleline": "never"}],
 
     // Angular
@@ -37,11 +35,11 @@
     ],
     "directive-selector-prefix": [
       true,
-      "bui"
+      "arc"
     ],
     "component-selector-prefix": [
       true,
-      "bui"
+      "arc"
     ],
     "use-input-property-decorator": true,
     "use-output-property-decorator": true,
@@ -55,7 +53,7 @@
     "pipe-naming": [
       true,
       "camelCase",
-      "bui"
+      "arc"
     ],
     "component-class-suffix": true,
     "directive-class-suffix": true,

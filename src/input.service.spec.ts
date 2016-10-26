@@ -1,12 +1,18 @@
-import { Direction } from './focus.service';
 import { InputService } from './input.service';
+import { Direction } from './model';
 
 describe('input service', () => {
   let fire: jasmine.Spy;
+  let setRoot: jasmine.Spy;
   let input: InputService;
   beforeEach(() => {
     fire = jasmine.createSpy('fire');
-    input = new InputService(<any> { fire });
+    setRoot = jasmine.createSpy('fire');
+    input = new InputService(<any> {
+      fire,
+      setRoot,
+      teardown: () => { /* noop */},
+    });
   });
 
   afterEach(() => input.teardown());
@@ -61,7 +67,7 @@ describe('input service', () => {
         axes: [0, 0],
         buttons: <{ pressed: boolean }[]> [],
       };
-      for (let i = 0; i < 15; i++) {
+      for (let i = 0; i < 15; i += 1) {
         pad.buttons.push({ pressed: false });
       }
       return pad;
@@ -85,7 +91,7 @@ describe('input service', () => {
         afterTwoFrames(() => {
           expect((<any> input).pollRaf).toBeNull();
           done();
-        })
+        });
       });
     });
 
@@ -95,10 +101,13 @@ describe('input service', () => {
       pad.axes[0] = -1;
       setTimeout(() => expect(fire.calls.count()).toEqual(1), 400);
       setTimeout(() => expect(fire.calls.count()).toEqual(2), 550);
-      setTimeout(() => {
-        expect(fire.calls.count()).toEqual(4);
-        done();
-      }, 850);
+      setTimeout(
+        () => {
+          expect(fire.calls.count()).toEqual(4);
+          done();
+        },
+        850
+      );
     });
 
     it('starts triggers when joysticks are newly moved', done => {
