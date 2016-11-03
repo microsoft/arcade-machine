@@ -2,11 +2,9 @@ const gulp = require('gulp');
 const gulpMerge = require('merge2');
 const gulpRunSequence = require('run-sequence');
 const gulpConcat = require('gulp-concat');
-const gulpAutoprefixer = require('gulp-autoprefixer');
 
 const tsc = require('gulp-typescript');
 const karma = require('karma');
-const autoprefixer = require('autoprefixer');
 const gulpClean = require('gulp-clean');
 const path = require('path');
 const webpack = require('webpack');
