@@ -31,12 +31,8 @@ node_modules
 #IntelliJ configuration files
 .idea
 
-dist
-dev
-docs
-lib
-test
-
+/demo
+/test
 Thumbs.db
 .DS_Store
 *.yml
