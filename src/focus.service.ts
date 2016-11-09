@@ -378,6 +378,7 @@ export class FocusService {
       || el.tagName === 'INPUT'
       || el.tagName === 'SELECT'
       || el.tagName === 'TEXTAREA'
+      || el.getAttribute('role') === 'button'
       || this.registry.find(el) !== undefined;
   }
 
