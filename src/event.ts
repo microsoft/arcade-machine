@@ -23,6 +23,6 @@ export class ArcEvent implements IArcEvent {
   }
 
   public preventDefault() {
-    this.defaultPrevented = false;
+    this.defaultPrevented = true;
   }
 }
