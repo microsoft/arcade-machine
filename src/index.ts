@@ -1,5 +1,9 @@
 import { ArcDirective } from './arc.directive';
-import { NgModule } from '@angular/core';
+import { NgModule, ModuleWithProviders } from '@angular/core';
+
+import { InputService } from './input.service';
+import { FocusService } from './focus.service';
+import { RegistryService } from './registry.service';
 
 export { InputService } from './input.service';
 export { FocusService } from './focus.service';
@@ -11,4 +15,10 @@ export * from './model';
   exports: [ArcDirective],
 })
 export class ArcModule {
+  public static forRoot(): ModuleWithProviders {
+    return {
+      ngModule: ArcModule,
+      providers: [InputService, FocusService, RegistryService],
+    };
+  }
 }
