@@ -332,7 +332,7 @@ export class FocusService {
     if (directional && ev.next !== null) {
       this.selectNode(ev.next);
     } else if (direction === Direction.SUBMIT) {
-      (<HTMLElement> ev.next).click();
+      (<HTMLElement> this.selected).click();
     } else if (direction === Direction.BACK) {
       history.back();
     } else {

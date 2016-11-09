@@ -101,7 +101,7 @@ import 'rxjs/add/observable/interval';
     <h1>A Grid</h1>
     <div class="area">
       <div class="box-wrapper" *ngFor="let box of boxes">
-        <div class="box" arc>{{ box }}</div>
+        <div class="box" #el arc (click)="onClick(el)">{{ box }}</div>
       </div>
     </div>
 
@@ -153,6 +153,10 @@ export class DemoComponent implements AfterContentInit {
   public toggleDefaultBox() {
     this.defaultBox = false;
     setTimeout(() => this.defaultBox = true, 1000);
+  }
+
+  public onClick(el: HTMLElement) {
+    el.style.background = '#0f0';
   }
 }
 
