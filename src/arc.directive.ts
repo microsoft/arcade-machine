@@ -25,7 +25,6 @@ function createDirectionCapture(direction: Direction, target: Element) {
   return (ev: IArcEvent) => {
     if (ev.event === direction && !ev.defaultPrevented) {
       ev.next = target;
-      ev.preventDefault();
     }
   };
 }

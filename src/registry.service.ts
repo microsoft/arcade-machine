@@ -8,7 +8,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 @Injectable()
 export class RegistryService {
 
-  private arcs = new Map<Element, IArcDirective>();
+  private static arcs = new Map<Element, IArcDirective>();
 
   /**
    * Subject on which observable can request focus.
@@ -18,12 +18,12 @@ export class RegistryService {
   /**
    * Stores a directive into the registry.
    */
-  public add(arc: IArcDirective) { this.arcs.set(arc.getElement(), arc); }
+  public add(arc: IArcDirective) { RegistryService.arcs.set(arc.getElement(), arc); }
 
   /**
    * Removes a directive from the registry.
    */
-  public remove(arc: IArcDirective) { this.arcs.delete(arc.getElement()); }
+  public remove(arc: IArcDirective) { RegistryService.arcs.delete(arc.getElement()); }
 
   /**
    * Returns the ArcDirective associated with the element. Returns
@@ -34,6 +34,6 @@ export class RegistryService {
       return undefined;
     }
 
-    return this.arcs.get(el);
+    return RegistryService.arcs.get(el);
   }
 }
