@@ -401,6 +401,7 @@ export class FocusService {
    */
   private isFocusable(el: Element) {
     const role = el.getAttribute('role');
+    const tabIndex = el.getAttribute('tabIndex');
 
     return el.tagName === 'A'
       || el.tagName === 'BUTTON'
@@ -408,6 +409,7 @@ export class FocusService {
       || el.tagName === 'SELECT'
       || el.tagName === 'TEXTAREA'
       || (role && focusableRoles.indexOf(role) > -1)
+      || (tabIndex && Number(tabIndex) > -1)
       || this.registry.find(el) !== undefined;
   }
 
