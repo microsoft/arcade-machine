@@ -40,6 +40,24 @@ const defaultRect: ClientRect = Object.freeze({
     width: 0,
 });
 
+// A list of aria `roles` which can receive focus.
+const focusableRoles = Object.freeze([
+  'button',
+  'checkbox',
+  'combobox',
+  'link',
+  'menuitem',
+  'menuitemcheckbox',
+  'menuitemradio',
+  'option',
+  'radio',
+  'slider',
+  'spinbutton',
+  'tab',
+  'textbox',
+  'treeitem',
+]);
+
 function roundRect(rect: Element | ClientRect): ClientRect {
   if (rect instanceof Element) {
     rect = rect.getBoundingClientRect();
@@ -240,6 +258,15 @@ export class FocusService {
   }
 
   /**
+   * onFocusChange is called when any element in the DOM gains focus. We use
+   * this is handle adjustments if the user interacts with other input
+   * devices, or if other application logic requests focus.
+   */
+  public onFocusChange(focus: Element) {
+      this.selectNode(focus);
+  }
+
+  /**
    * Updates the selected DOM node.
    */
   public selectNode(next: Element) {
@@ -285,10 +312,10 @@ export class FocusService {
       }
     }
 
-    (<HTMLElement> next).focus();
-    next.classList.add(cssClass.direct);
     this.referenceRect = next.getBoundingClientRect();
     this.selected = next;
+    next.classList.add(cssClass.direct);
+    (<HTMLElement> next).focus(); // intentially done last in case onFocusChange fires
   }
 
   private triggerFocusChange(el: Element, next: Element) {
@@ -373,12 +400,16 @@ export class FocusService {
    * Returns if the element can receive focus.
    */
   private isFocusable(el: Element) {
+    const role = el.getAttribute('role');
+    const tabIndex = el.getAttribute('tabIndex');
+
     return el.tagName === 'A'
       || el.tagName === 'BUTTON'
       || el.tagName === 'INPUT'
       || el.tagName === 'SELECT'
       || el.tagName === 'TEXTAREA'
-      || el.getAttribute('role') === 'button'
+      || (role && focusableRoles.indexOf(role) > -1)
+      || (tabIndex && Number(tabIndex) > -1)
       || this.registry.find(el) !== undefined;
   }
 

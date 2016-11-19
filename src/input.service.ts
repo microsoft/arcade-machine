@@ -208,6 +208,7 @@ export class InputService {
       ]],
     [Direction.SUBMIT, [
         13,  // Enter
+        32,  // Space
         142, // NavigationAccept
         195, // GamepadA
       ]],
@@ -259,6 +260,11 @@ export class InputService {
 
     this.addKeyboardListeners();
     this.focus.setRoot(root);
+
+    this.subscriptions.push(
+      Observable.fromEvent<FocusEvent>(document, 'focusin', { passive: true })
+        .subscribe(ev => this.focus.onFocusChange(<Element> ev.target))
+    );
   }
 
   /**
