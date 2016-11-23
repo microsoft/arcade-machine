@@ -210,15 +210,14 @@ function isForForm(direction: Direction, selected: Element): boolean {
   // Deal with the output ourselves, allowing arcade-machine to handle it only
   // if the key press would not have any effect in the context of the input.
   const input = <HTMLInputElement | HTMLTextAreaElement> selected;
-  const start = input.selectionStart as number;
-  const end = input.selectionEnd as number;
-  if (start !== end) { // key input on any range selection will be effectual.
+  const cursor = input.selectionStart;
+  if (cursor !== input.selectionEnd) { // key input on any range selection will be effectual.
     return true;
   }
 
-  return (start > 0 && direction === Direction.LEFT)
-    || (start > 0 && direction === Direction.BACK)
-    || (start < input.value.length && direction === Direction.RIGHT);
+  return (cursor > 0 && direction === Direction.LEFT)
+    || (cursor > 0 && direction === Direction.BACK)
+    || (cursor < input.value.length && direction === Direction.RIGHT);
 }
 
 /**
