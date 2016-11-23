@@ -197,7 +197,6 @@ function isForForm(direction: Direction, selected: Element): boolean {
   }
 
   // Enter key presses on textareas can be handled normally.
-  // todo(connor4312): handle control+enter
   if (tag === 'TEXTAREA' && direction === Direction.SUBMIT) {
     return true;
   }
