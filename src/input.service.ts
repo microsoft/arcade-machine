@@ -172,6 +172,56 @@ class XboxGamepadWrapper implements IGamepadWrapper {
 }
 
 /**
+ * Based on the currently focused DOM element, returns whether the directional
+ * input is part of a form control and should be allowed to bubble through.
+ */
+function isForForm(direction: Direction, selected: Element): boolean {
+  if (!selected) {
+    return false;
+  }
+
+  // If we hit enter and we weren't in a text area, let the form handle it.
+  const tag = selected.tagName;
+  if (direction === Direction.SUBMIT && tag !== 'TEXTAREA') {
+    for (let parent = selected.parentElement; parent; parent = parent.parentElement) {
+      if (parent.tagName === 'FORM') {
+        return true;
+      }
+    }
+  }
+
+  // Okay, no form? Well, if we aren't inside a textbox, go ahead and let
+  // arcade-machine try to deal with the output.
+  if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+    return false;
+  }
+
+  // Enter key presses on textareas can be handled normally.
+  // todo(connor4312): handle control+enter
+  if (tag === 'TEXTAREA' && direction === Direction.SUBMIT) {
+    return true;
+  }
+
+  // We'll say that up/down has no effect either.
+  if (direction === Direction.DOWN || direction === Direction.UP) {
+    return false;
+  }
+
+  // Deal with the output ourselves, allowing arcade-machine to handle it only
+  // if the key press would not have any effect in the context of the input.
+  const input = <HTMLInputElement | HTMLTextAreaElement> selected;
+  const start = input.selectionStart as number;
+  const end = input.selectionEnd as number;
+  if (start !== end) { // key input on any range selection will be effectual.
+    return true;
+  }
+
+  return (start > 0 && direction === Direction.LEFT)
+    || (start > 0 && direction === Direction.BACK)
+    || (start < input.value.length && direction === Direction.RIGHT);
+}
+
+/**
  * InputService handles passing input from the external device (gamepad API
  * or keyboard) to the arc internals.
  */
@@ -383,9 +433,15 @@ export class InputService {
   private handleKeyDown(keyCode: number): boolean {
     let result: boolean;
     InputService.directionCodes.forEach((codes, direction) => {
-      if (result === undefined && codes.indexOf(keyCode) !== -1) {
-        result = this.handleDirection(direction);
+      // Abort if we already handled the event (can't abort a forEach!)
+      // or if we don't have the right code.
+      if (result !== undefined || codes.indexOf(keyCode) === -1) {
+        return;
       }
+
+        console.log(direction);
+      result = !isForForm(direction, this.focus.selected)
+        && this.handleDirection(direction);
     });
 
     return result;
