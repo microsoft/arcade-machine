@@ -429,7 +429,6 @@ export class InputService {
         return;
       }
 
-        console.log(direction);
       result = !isForForm(direction, this.focus.selected)
         && this.handleDirection(direction);
     });
