@@ -172,6 +172,46 @@ class XboxGamepadWrapper implements IGamepadWrapper {
 }
 
 /**
+ * Based on the currently focused DOM element, returns whether the directional
+ * input is part of a form control and should be allowed to bubble through.
+ */
+function isForForm(direction: Direction, selected: Element): boolean {
+  if (!selected) {
+    return false;
+  }
+
+  // Always allow the browser to handle enter key presses. This will either
+  // submit the form or put a line break in a textarea (if control is not held).
+  if (direction === Direction.SUBMIT) {
+    return true;
+  }
+
+  // Okay, not a submission? Well, if we aren't inside a text input, go ahead
+  // and let arcade-machine try to deal with the output.
+  const tag = selected.tagName;
+  if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+    return false;
+  }
+
+  // We'll say that up/down has no effect.
+  if (direction === Direction.DOWN || direction === Direction.UP) {
+    return false;
+  }
+
+  // Deal with the output ourselves, allowing arcade-machine to handle it only
+  // if the key press would not have any effect in the context of the input.
+  const input = <HTMLInputElement | HTMLTextAreaElement> selected;
+  const cursor = input.selectionStart;
+  if (cursor !== input.selectionEnd) { // key input on any range selection will be effectual.
+    return true;
+  }
+
+  return (cursor > 0 && direction === Direction.LEFT)
+    || (cursor > 0 && direction === Direction.BACK)
+    || (cursor < input.value.length && direction === Direction.RIGHT);
+}
+
+/**
  * InputService handles passing input from the external device (gamepad API
  * or keyboard) to the arc internals.
  */
@@ -383,9 +423,14 @@ export class InputService {
   private handleKeyDown(keyCode: number): boolean {
     let result: boolean;
     InputService.directionCodes.forEach((codes, direction) => {
-      if (result === undefined && codes.indexOf(keyCode) !== -1) {
-        result = this.handleDirection(direction);
+      // Abort if we already handled the event (can't abort a forEach!)
+      // or if we don't have the right code.
+      if (result !== undefined || codes.indexOf(keyCode) === -1) {
+        return;
       }
+
+      result = !isForForm(direction, this.focus.selected)
+        && this.handleDirection(direction);
     });
 
     return result;

@@ -52,16 +52,24 @@ import 'rxjs/add/observable/interval';
     }
 
     form {
+      display: flex;
       margin: 15px;
+      align-content: center;
     }
 
-    input, button {
+    form div {
+      margin-right: 5px;
+    }
+
+    input, button, textarea {
       border: 1px solid #000;
+      padding: 5px 8px;
       border-radius: 0;
       box-shadow: 0;
+      outline: 0 !important;
     }
 
-    input.arc--selected, button.arc--selected {
+    input.arc--selected, button.arc--selected, textarea.arc--selected {
       border-color: #f00;
     }
   `],
@@ -121,9 +129,10 @@ import 'rxjs/add/observable/interval';
     <h1>A Form</h1>
     <div class="area">
       <form (submit)="alert('Submitting form')">
-        <input placeholder="Username">
-        <input placeholder="Password" type="password">
-        <button>Submit</button>
+        <div><input placeholder="Username"></div>
+        <div><input placeholder="Password" type="password"></div>
+        <div><textarea></textarea></div>
+        <div><button>Submit</button></div>
       </form>
     </div>
 

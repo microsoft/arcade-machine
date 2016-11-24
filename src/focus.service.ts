@@ -234,7 +234,7 @@ export class FocusService {
   private registrySubscription: Subscription;
 
   // The currently selected element.
-  private selected: Element;
+  public selected: Element;
   // Parents of the selected element.
   private parents: Element[] = [];
   // The client bounding rect when we first selected the element, cached
