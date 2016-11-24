@@ -180,28 +180,20 @@ function isForForm(direction: Direction, selected: Element): boolean {
     return false;
   }
 
-  // If we hit enter and we weren't in a text area, let the form handle it.
-  const tag = selected.tagName;
-  if (direction === Direction.SUBMIT && tag !== 'TEXTAREA') {
-    for (let parent = selected.parentElement; parent; parent = parent.parentElement) {
-      if (parent.tagName === 'FORM') {
-        return true;
-      }
-    }
+  // Always allow the browser to handle enter key presses. This will either
+  // submit the form or put a line break in a textarea (if enter is not held).
+  if (direction === Direction.SUBMIT) {
+    return true;
   }
 
-  // Okay, no form? Well, if we aren't inside a textbox, go ahead and let
-  // arcade-machine try to deal with the output.
+  // Okay, not a submission? Well, if we aren't inside a text input, go ahead
+  // and let arcade-machine try to deal with the output.
+  const tag = selected.tagName;
   if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
     return false;
   }
 
-  // Enter key presses on textareas can be handled normally.
-  if (tag === 'TEXTAREA' && direction === Direction.SUBMIT) {
-    return true;
-  }
-
-  // We'll say that up/down has no effect either.
+  // We'll say that up/down has no effect.
   if (direction === Direction.DOWN || direction === Direction.UP) {
     return false;
   }
