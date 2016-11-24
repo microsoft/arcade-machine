@@ -23,6 +23,7 @@
       "static-method-regex": "^[a-z][\\w\\d]+$",
       "function-regex": "^[a-z][\\w\\d]+$"
     }],
+    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
 
     // Angular
     "directive-selector-name": [
