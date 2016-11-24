@@ -181,7 +181,7 @@ function isForForm(direction: Direction, selected: Element): boolean {
   }
 
   // Always allow the browser to handle enter key presses. This will either
-  // submit the form or put a line break in a textarea (if enter is not held).
+  // submit the form or put a line break in a textarea (if control is not held).
   if (direction === Direction.SUBMIT) {
     return true;
   }
