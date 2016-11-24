@@ -193,13 +193,14 @@ function calculateScore(
  * Returns the common ancestor in the DOM of two nodes. From:
  * http://stackoverflow.com/a/7648545
  */
-function getCommonAncestor(a: Element, b: Element) {
+function getCommonAncestor(a: Element, b: Element): Element {
   const mask = 0x10;
   while (a = a.parentElement) {
     if ((a.compareDocumentPosition(b) & mask) === mask) { // tslint:disable-line
       return a;
     }
   }
+  return undefined;
 }
 
 /**
