@@ -214,6 +214,13 @@ function isDirectional(ev: Direction) {
 }
 
 /**
+ * Linearly interpolates between two numbers.
+ */
+function lerp(from: number, to: number, progress: number): number {
+  return from + (to - from) * progress;
+}
+
+/**
  * Returns whether the target DOM node is a child of the root.
  */
 function isNodeAttached(node: Element, root: Element) {
@@ -392,14 +399,14 @@ export class FocusService {
       const duration = Math.abs(target - original) / scrollSpeed * 1000;
       const run = (now: number) => {
         const progress = Math.min((now - start) / duration, 1);
-        set(original + (target - original) * progress);
+        set(lerp(original, target, progress));
 
         if (progress < 1) {
-          requestAnimationFrame(next => run(next));
+          requestAnimationFrame(run);
         }
       };
 
-      requestAnimationFrame(now => run(now));
+      requestAnimationFrame(run);
     };
 
     // The scroll calculation loop. Starts at the element and goes up, ensuring
