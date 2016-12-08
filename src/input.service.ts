@@ -1,6 +1,6 @@
 import { FocusService } from './focus.service';
 import { Direction } from './model';
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { Subscription } from 'rxjs/Subscription';
@@ -336,7 +336,15 @@ export class InputService {
   private subscriptions: Subscription[] = [];
   private pollRaf: number = null;
 
-  constructor(private focus: FocusService) { }
+  public onYPressed = new EventEmitter<void>();
+
+  constructor(private focus: FocusService) {
+
+    const focusService = this;
+
+    focusService.onYPressed.subscribe(() => alert('You pressed y!'));
+
+  }
 
   /**
    * Bootstrap attaches event listeners from the service to the DOM and sets
@@ -481,7 +489,7 @@ export class InputService {
         this.handleDirection(Direction.X);
       }
       if (gamepad.y(now)) {
-        this.handleDirection(Direction.Y);
+        this.onYPressed.emit();
       }
     }
 
