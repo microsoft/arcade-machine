@@ -338,7 +338,7 @@ export class FocusService {
    * Attempts to effect the focus command, returning a
    * boolean if it was handled.
    */
-  public fire(direction: Direction): boolean {
+  public fire(direction: Direction, scrollSpeed: number = Infinity): boolean {
     const directional = isDirectional(direction);
     const ev = new ArcEvent({
       directive: this.registry.find(this.selected),
@@ -359,6 +359,7 @@ export class FocusService {
     // Otherwise see if we can handle it...
     if (directional && ev.next !== null) {
       this.selectNode(ev.next);
+      this.rescroll(<HTMLElement> ev.next, scrollSpeed);
     } else if (direction === Direction.SUBMIT) {
       (<HTMLElement> this.selected).click();
     } else if (direction === Direction.BACK) {
@@ -368,6 +369,80 @@ export class FocusService {
     }
 
     return true;
+  }
+
+  /**
+   * Scrolls the page so that the selected element is visible.
+   */
+  private rescroll(el: HTMLElement, scrollSpeed: number) {
+    // Abort if scrolling is disabled.
+    if (scrollSpeed === null) {
+      return;
+    }
+
+    // Animation function to transition a scroll on the `parent` from the
+    // `original` value to the `target` value by calling `set.
+    const animate = (parent: HTMLElement, target: number, original: number, set: (x: number) => void) => {
+      if (scrollSpeed === Infinity) {
+        parent.scrollTop = target;
+        return;
+      }
+
+      const start = performance.now();
+      const duration = Math.abs(target - original) / scrollSpeed * 1000;
+      const run = (now: number) => {
+        const progress = Math.min((now - start) / duration, 1);
+        set(original + (target - original) * progress);
+
+        if (progress < 1) {
+          requestAnimationFrame(next => run(next));
+        }
+      };
+
+      requestAnimationFrame(now => run(now));
+    };
+
+    // The scroll calculation loop. Starts at the element and goes up, ensuring
+    // that the element (or the box where the element will be after scrolling
+    // is applied) is visible in all containers.
+    let { top, left, width, height } = el.getBoundingClientRect();
+    for (let parent = el.parentElement; parent !== null; parent = parent.parentElement) {
+
+      // Special case: treat the body as the viewport as far as scrolling goes.
+      const prect = parent === document.body
+          ? { top: 0, left: 0, height: window.innerHeight, width: window.innerWidth }
+          : parent.getBoundingClientRect();
+
+      // Trigger if this element has a vertical scrollbar
+      if (parent.scrollHeight > parent.clientHeight) {
+        const scrollTop = parent.scrollTop;
+        const showsBottom = scrollTop + (top - prect.top + height) - prect.height;
+        const showsTop = scrollTop + (top - prect.top);
+
+        if (showsTop < scrollTop) {
+          animate(parent, showsTop, scrollTop, x => parent.scrollTop = x);
+          top += scrollTop - showsTop;
+        } else if (showsBottom > scrollTop) {
+          animate(parent, showsBottom, scrollTop, x => parent.scrollTop = x);
+          top += scrollTop - showsBottom;
+        }
+      }
+
+      // Trigger if this element has a horizontal scrollbar
+      if (parent.scrollWidth > parent.clientWidth) {
+        const scrollLeft = parent.scrollLeft;
+        const showsRight = scrollLeft + (left - prect.left + width) - prect.width;
+        const showsLeft = scrollLeft + (left - prect.left);
+
+        if (showsLeft < scrollLeft) {
+          animate(parent, showsLeft, scrollLeft, x => parent.scrollLeft = x);
+          left += scrollLeft - showsLeft;
+        } else if (showsRight > scrollLeft) {
+          animate(parent, showsRight, scrollLeft, x => parent.scrollLeft = x);
+          left += scrollLeft - showsRight;
+        }
+      }
+    }
   }
 
   /**

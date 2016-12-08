@@ -274,6 +274,12 @@ export class InputService {
     preventDefault: () => void,
   }>();
 
+  /**
+   * Animation duration for scrolling elements into view, in pixels per second.
+   * This can be Infinity to disable the animation, or null to disable scrolling.
+   */
+  public scrollDuration = 300;
+
   private gamepads: IGamepadWrapper[] = [];
   private subscriptions: Subscription[] = [];
   private pollRaf: number = null;
@@ -413,7 +419,7 @@ export class InputService {
   }
 
   private handleDirection(direction: Direction): boolean {
-    return this.focus.fire(direction);
+    return this.focus.fire(direction, this.scrollDuration);
   }
 
   /**
