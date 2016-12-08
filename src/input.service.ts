@@ -16,6 +16,12 @@ interface IGamepadWrapper {
   up(now: number): boolean;
   down(now: number): boolean;
 
+  // Navigational directions
+  tabLeft(now: number): boolean;
+  tabRight(now: number): boolean;
+  tabUp(now: number): boolean;
+  tabDown(now: number): boolean;
+
   /**
    * Returns if the user is pressing the "back" button.
    */
@@ -25,6 +31,12 @@ interface IGamepadWrapper {
    * Returns if the user is pressing the "submit" button.
    */
   submit(now: number): boolean;
+
+  /**
+   * Returns if the user is pressing the "X" or "Y" button.
+   */
+  x(now: number): boolean;
+  y(now: number): boolean;
 
   /**
    * Returns whether the gamepad is still connected;
@@ -63,7 +75,7 @@ class DirectionalDebouncer {
   private heldAt = 0;
   private stage = DebouncerStage.IDLE;
 
-  constructor(private predicate: () => boolean) {}
+  constructor(private predicate: () => boolean) { }
 
   /**
    * Returns whether the key should be registered as pressed.
@@ -76,28 +88,28 @@ class DirectionalDebouncer {
     }
 
     switch (this.stage) {
-    case DebouncerStage.IDLE:
-      this.stage = DebouncerStage.HELD;
-      this.heldAt = now;
-      return true;
+      case DebouncerStage.IDLE:
+        this.stage = DebouncerStage.HELD;
+        this.heldAt = now;
+        return true;
 
-    case DebouncerStage.HELD:
-      if (now - this.heldAt < DirectionalDebouncer.initialDebounce) {
-        return false;
-      }
-      this.heldAt = now;
-      this.stage = DebouncerStage.FAST;
-      return true;
+      case DebouncerStage.HELD:
+        if (now - this.heldAt < DirectionalDebouncer.initialDebounce) {
+          return false;
+        }
+        this.heldAt = now;
+        this.stage = DebouncerStage.FAST;
+        return true;
 
-    case DebouncerStage.FAST:
-      if (now - this.heldAt < DirectionalDebouncer.fastDebounce) {
-        return false;
-      }
-      this.heldAt = now;
-      return true;
+      case DebouncerStage.FAST:
+        if (now - this.heldAt < DirectionalDebouncer.fastDebounce) {
+          return false;
+        }
+        this.heldAt = now;
+        return true;
 
-    default:
-      throw new Error(`Unknown debouncer stage ${this.stage}!`);
+      default:
+        throw new Error(`Unknown debouncer stage ${this.stage}!`);
     }
   }
 }
@@ -108,7 +120,7 @@ class DirectionalDebouncer {
 class FiredDebouncer {
   private fired = false;
 
-  constructor(private predicate: () => boolean) {}
+  constructor(private predicate: () => boolean) { }
 
   /**
    * Returns whether the key should be registered as pressed.
@@ -134,36 +146,55 @@ class XboxGamepadWrapper implements IGamepadWrapper {
   public right: (now: number) => boolean;
   public up: (now: number) => boolean;
   public down: (now: number) => boolean;
+  public tabLeft: (now: number) => boolean;
+  public tabRight: (now: number) => boolean;
+  public tabUp: (now: number) => boolean;
+  public tabDown: (now: number) => boolean;
   public back: (now: number) => boolean;
   public submit: (now: number) => boolean;
+  public x: (now: number) => boolean;
+  public y: (now: number) => boolean;
 
   constructor(private pad: Gamepad) {
     const left = new DirectionalDebouncer(() => {
-             /* left joystick                                 */    /* left dpad arrow   */
+      /* left joystick                                 */    /* left dpad arrow   */
       return pad.axes[0] < -XboxGamepadWrapper.joystickThreshold || pad.buttons[13].pressed;
     });
     const right = new DirectionalDebouncer(() => {
-             /* right joystick                               */    /* right dpad arrow  */
+      /* right joystick                               */    /* right dpad arrow  */
       return pad.axes[0] > XboxGamepadWrapper.joystickThreshold || pad.buttons[14].pressed;
     });
     const up = new DirectionalDebouncer(() => {
-             /* up joystick                                   */    /* up dpad arrow    */
+      /* up joystick                                   */    /* up dpad arrow    */
       return pad.axes[1] < -XboxGamepadWrapper.joystickThreshold || pad.buttons[11].pressed;
     });
     const down = new DirectionalDebouncer(() => {
-             /* down joystick                                */    /* down dpad arrow    */
+      /* down joystick                                */    /* down dpad arrow    */
       return pad.axes[1] > XboxGamepadWrapper.joystickThreshold || pad.buttons[12].pressed;
     });
 
+    const tabLeft = new FiredDebouncer(() => pad.buttons[4].pressed); // Left Bumper
+    const tabRight = new FiredDebouncer(() => pad.buttons[5].pressed); // Right Bumper
+    const tabUp = new FiredDebouncer(() => pad.buttons[6].pressed); // Left Trigger
+    const tabDown = new FiredDebouncer(() => pad.buttons[7].pressed); // Right Trigger
+
     const back = new FiredDebouncer(() => pad.buttons[1].pressed); // B button
     const submit = new FiredDebouncer(() => pad.buttons[0].pressed); // A button
+    const x = new FiredDebouncer(() => pad.buttons[2].pressed); // X button
+    const y = new FiredDebouncer(() => pad.buttons[3].pressed); // Y button
 
     this.left = now => left.attempt(now);
     this.right = now => right.attempt(now);
     this.up = now => up.attempt(now);
     this.down = now => down.attempt(now);
+    this.tabLeft = () => tabLeft.attempt();
+    this.tabRight = () => tabRight.attempt();
+    this.tabUp = () => tabUp.attempt();
+    this.tabDown = () => tabDown.attempt();
     this.back = () => back.attempt();
     this.submit = () => submit.attempt();
+    this.x = () => x.attempt();
+    this.y = () => y.attempt();
   }
 
   public isConnected() {
@@ -194,13 +225,16 @@ function isForForm(direction: Direction, selected: Element): boolean {
   }
 
   // We'll say that up/down has no effect.
-  if (direction === Direction.DOWN || direction === Direction.UP) {
+  if (direction === Direction.DOWN || direction === Direction.UP
+    || direction === Direction.TABLEFT || direction === Direction.TABRIGHT
+    || direction === Direction.TABUP || direction === Direction.TABDOWN
+    || direction === Direction.X || direction === Direction.Y) {
     return false;
   }
 
   // Deal with the output ourselves, allowing arcade-machine to handle it only
   // if the key press would not have any effect in the context of the input.
-  const input = <HTMLInputElement | HTMLTextAreaElement> selected;
+  const input = <HTMLInputElement | HTMLTextAreaElement>selected;
   const cursor = input.selectionStart;
   if (cursor !== input.selectionEnd) { // key input on any range selection will be effectual.
     return true;
@@ -223,39 +257,63 @@ export class InputService {
    */
   public static directionCodes = new Map<Direction, number[]>([
     [Direction.LEFT, [
-        37,  // LeftArrow
-        214, // GamepadLeftThumbstickLeft
-        205, // GamepadDPadLeft
-        140, // NavigationLeft
-      ]],
+      37,  // LeftArrow
+      214, // GamepadLeftThumbstickLeft
+      205, // GamepadDPadLeft
+      140, // NavigationLeft
+    ]],
     [Direction.RIGHT, [
-        39,  // RightArrow
-        213, // GamepadLeftThumbstickRight
-        206, // GamepadDPadRight
-        141, // NavigationRight
-      ]],
+      39,  // RightArrow
+      213, // GamepadLeftThumbstickRight
+      206, // GamepadDPadRight
+      141, // NavigationRight
+    ]],
     [Direction.UP, [
-        38,  // UpArrow
-        211, // GamepadLeftThumbstickUp
-        203, // GamepadDPadUp
-        138, // NavigationUp
-      ]],
+      38,  // UpArrow
+      211, // GamepadLeftThumbstickUp
+      203, // GamepadDPadUp
+      138, // NavigationUp
+    ]],
     [Direction.DOWN, [
-        40,  // UpArrow
-        212, // GamepadLeftThumbstickDown
-        204, // GamepadDPadDown
-        139, // NavigationDown
-      ]],
+      40,  // UpArrow
+      212, // GamepadLeftThumbstickDown
+      204, // GamepadDPadDown
+      139, // NavigationDown
+    ]],
     [Direction.SUBMIT, [
-        13,  // Enter
-        32,  // Space
-        142, // NavigationAccept
-        195, // GamepadA
-      ]],
+      13,  // Enter
+      32,  // Space
+      142, // NavigationAccept
+      195, // GamepadA
+    ]],
     [Direction.BACK, [
-        8,   // Backspace
-        196, // GamepadB
-      ]],
+      8,   // Backspace
+      196, // GamepadB
+    ]],
+    [Direction.X, [
+      103, // Numpad 7
+      197, // GamepadX
+    ]],
+    [Direction.Y, [
+      105,   // Numpad 9
+      198, // GamepadY
+    ]],
+    [Direction.TABLEFT, [
+      100, // Numbpad Left
+      200, // Left Bumper
+    ]],
+    [Direction.TABRIGHT, [
+      102, // Numpad Right
+      199, // Right Bumper
+    ]],
+    [Direction.TABUP, [
+      104, // Numpad Up
+      201, // Left Trigger
+    ]],
+    [Direction.TABDOWN, [
+      98, // Numpad Down
+      202, // Right Trigger
+    ]],
   ]);
 
   /**
@@ -278,13 +336,15 @@ export class InputService {
   private subscriptions: Subscription[] = [];
   private pollRaf: number = null;
 
-  constructor(private focus: FocusService) {}
+  constructor(private focus: FocusService) { }
 
   /**
    * Bootstrap attaches event listeners from the service to the DOM and sets
    * up the focuser rooted in the target element.
    */
-  public bootstrap(root: HTMLElement = document.body) {
+  public bootstrap(handleTab : (direction : Direction) => any = (direction : Direction) => { direction }, root: HTMLElement = document.body) {
+    this.handleTab = handleTab;
+
     // The gamepadInputEmulation is a string property that exists in
     // JavaScript UWAs and in WebViews in UWAs. It won't exist in
     // Win8.1 style apps or browsers.
@@ -292,7 +352,7 @@ export class InputService {
       // We want the gamepad to provide gamepad VK keyboard events rather than moving a
       // mouse like cursor. Set to "keyboard", the gamepad will provide such keyboard events
       // and provide input to the DOM navigator.getGamepads API.
-      (<any> navigator).gamepadInputEmulation = 'keyboard';
+      (<any>navigator).gamepadInputEmulation = 'keyboard';
     } else if (typeof navigator.getGamepads === 'function') {
       // Otherwise poll for connected gamepads and use that for input.
       this.watchForGamepad();
@@ -303,7 +363,7 @@ export class InputService {
 
     this.subscriptions.push(
       Observable.fromEvent<FocusEvent>(document, 'focusin', { passive: true })
-        .subscribe(ev => this.focus.onFocusChange(<Element> ev.target))
+        .subscribe(ev => this.focus.onFocusChange(<Element>ev.target))
     );
   }
 
@@ -319,7 +379,7 @@ export class InputService {
     }
 
     if ('gamepadInputEmulation' in navigator) {
-      (<any> navigator).gamepadInputEmulation = 'mouse';
+      (<any>navigator).gamepadInputEmulation = 'mouse';
     }
   }
 
@@ -355,7 +415,7 @@ export class InputService {
         this.gamepadSrc,
         Observable.fromEvent(window, 'gamepadconnected')
       ).subscribe(ev => {
-        addGamepad((<any> ev).gamepad);
+        addGamepad((<any>ev).gamepad);
         cancelAnimationFrame(this.pollRaf);
         this.scheduleGamepadPoll();
       })
@@ -366,7 +426,9 @@ export class InputService {
    * Schedules a new gamepad poll at the next animation frame.
    */
   private scheduleGamepadPoll() {
-      this.pollRaf = requestAnimationFrame(now => this.pollGamepad(now));
+    this.pollRaf = requestAnimationFrame(now => {
+      this.pollGamepad(now)
+    });
   }
 
   /**
@@ -380,9 +442,9 @@ export class InputService {
     for (let i = 0; i < this.gamepads.length; i += 1) {
       const gamepad = this.gamepads[i];
       if (!gamepad.isConnected()) {
-          this.gamepads.splice(i, 1);
-          i -= 1;
-          continue;
+        this.gamepads.splice(i, 1);
+        i -= 1;
+        continue;
       }
 
       if (gamepad.left(now)) {
@@ -397,11 +459,29 @@ export class InputService {
       if (gamepad.up(now)) {
         this.handleDirection(Direction.UP);
       }
+      if (gamepad.tabLeft(now)) {
+        this.handleTab(Direction.TABLEFT);
+      }
+      if (gamepad.tabRight(now)) {
+        this.handleTab(Direction.TABRIGHT);
+      }
+      if (gamepad.tabDown(now)) {
+        this.handleTab(Direction.TABDOWN);
+      }
+      if (gamepad.tabUp(now)) {
+        this.handleTab(Direction.TABUP);
+      }
       if (gamepad.submit(now)) {
         this.handleDirection(Direction.SUBMIT);
       }
       if (gamepad.back(now)) {
         this.handleDirection(Direction.BACK);
+      }
+      if (gamepad.x(now)) {
+        this.handleDirection(Direction.X);
+      }
+      if (gamepad.y(now)) {
+        this.handleDirection(Direction.Y);
       }
     }
 
@@ -415,6 +495,8 @@ export class InputService {
   private handleDirection(direction: Direction): boolean {
     return this.focus.fire(direction);
   }
+
+  public handleTab : (direction : Direction) => any;
 
   /**
    * Handles a key down event, returns whether the event has resulted

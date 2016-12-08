@@ -10,6 +10,12 @@ export enum Direction {
   DOWN,
   SUBMIT,
   BACK,
+  X,
+  Y,
+  TABLEFT,
+  TABRIGHT,
+  TABUP,
+  TABDOWN
 }
 
 /**
