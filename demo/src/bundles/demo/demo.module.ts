@@ -72,6 +72,11 @@ import 'rxjs/add/observable/interval';
     input.arc--selected, button.arc--selected, textarea.arc--selected {
       border-color: #f00;
     }
+
+    .scroll-restriction {
+      overflow: auto;
+      height: 100px;
+    }
   `],
   template:   `
     <h1>Special Handlers</h1>
@@ -134,6 +139,16 @@ import 'rxjs/add/observable/interval';
         <div><textarea></textarea></div>
         <div><button>Submit</button></div>
       </form>
+    </div>
+
+    <h1>Scrolling</h1>
+    <div class="area scroll-restriction">
+      <div class="box" arc>Lorem</div>
+      <div class="box" arc>Ipsum</div>
+      <div class="box" arc>Dolor</div>
+      <div class="box" arc>Sit</div>
+      <div class="box" arc>Amet</div>
+      <div class="box" arc>Consectur</div>
     </div>
 
     <h1>Adding/Removing Elements</h1>
