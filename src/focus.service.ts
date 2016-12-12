@@ -216,8 +216,8 @@ function isDirectional(ev: Direction) {
 /**
  * Linearly interpolates between two numbers.
  */
-function lerp(from: number, to: number, progress: number): number {
-  return from + (to - from) * progress;
+function lerp(start: number, end: number, progress: number): number {
+  return start + (end - start) * progress;
 }
 
 /**
@@ -389,7 +389,7 @@ export class FocusService {
 
     // Animation function to transition a scroll on the `parent` from the
     // `original` value to the `target` value by calling `set.
-    const animate = (parent: HTMLElement, target: number, original: number, set: (x: number) => void) => {
+    const animate = (parent: HTMLElement, target: number, original: number, setter: (x: number) => void) => {
       if (scrollSpeed === Infinity) {
         parent.scrollTop = target;
         return;
@@ -399,7 +399,7 @@ export class FocusService {
       const duration = Math.abs(target - original) / scrollSpeed * 1000;
       const run = (now: number) => {
         const progress = Math.min((now - start) / duration, 1);
-        set(lerp(original, target, progress));
+        setter(lerp(original, target, progress));
 
         if (progress < 1) {
           requestAnimationFrame(run);
@@ -412,7 +412,10 @@ export class FocusService {
     // The scroll calculation loop. Starts at the element and goes up, ensuring
     // that the element (or the box where the element will be after scrolling
     // is applied) is visible in all containers.
-    let { top, left, width, height } = el.getBoundingClientRect();
+    const rect = el.getBoundingClientRect();
+    const { width, height } = rect;
+    let { top, left } = rect;
+
     for (let parent = el.parentElement; parent !== null; parent = parent.parentElement) {
 
       // Special case: treat the body as the viewport as far as scrolling goes.
