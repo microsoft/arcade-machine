@@ -30,5 +30,10 @@
     },
     "exclude": [
         "node_modules"
-    ]
+    ],
+    "angularCompilerOptions": {
+        "genDir": "compiled",
+        "skipMetadataEmit": false,
+        "strictMetadataEmit": true
+    }
 }

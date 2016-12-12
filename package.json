@@ -4,6 +4,7 @@
   "scripts": {
     "gulp": "gulp",
     "build": "gulp build",
+    "ngc": "cd staging && ngc",
     "prepublish": "npm run build",
     "clean": "rimraf node_modules doc dist && npm cache clean",
     "test:lint": "tslint --project tsconfig.json \"src/**/*.ts\"",
@@ -20,14 +21,15 @@
     "url": "git://github.com/WatchBeam/arcade-machine.git"
   },
   "dependencies": {
-    "@angular/core": "^2.2.3",
+    "@angular/core": "2.2.3",
     "rxjs": "5.0.0-beta.12"
   },
   "devDependencies": {
-    "@angular/common": "^2.2.3",
-    "@angular/compiler": "^2.2.3",
-    "@angular/platform-browser": "^2.2.3",
-    "@angular/platform-browser-dynamic": "^2.2.3",
+    "@angular/common": "2.2.3",
+    "@angular/compiler": "2.2.3",
+    "@angular/compiler-cli": "^2.2.3",
+    "@angular/platform-browser": "2.2.3",
+    "@angular/platform-browser-dynamic": "2.2.3",
     "@types/core-js": "^0.9.34",
     "@types/jasmine": "^2.5.35",
     "@types/node": "^6.0.45",
@@ -53,6 +55,7 @@
     "karma-sauce-launcher": "^1.0.0",
     "karma-sourcemap-loader": "^0.3.7",
     "merge2": "^1.0.2",
+    "ngc": "^1.0.0",
     "npm-run-all": "^3.1.1",
     "rimraf": "^2.5.1",
     "run-sequence": "^1.2.2",
