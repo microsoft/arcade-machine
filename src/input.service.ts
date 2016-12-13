@@ -225,10 +225,7 @@ function isForForm(direction: Direction, selected: Element): boolean {
   }
 
   // We'll say that up/down has no effect.
-  if (direction === Direction.DOWN || direction === Direction.UP
-    || direction === Direction.TABLEFT || direction === Direction.TABRIGHT
-    || direction === Direction.TABUP || direction === Direction.TABDOWN
-    || direction === Direction.X || direction === Direction.Y) {
+  if (direction === Direction.DOWN || direction === Direction.UP) {
     return false;
   }
 
