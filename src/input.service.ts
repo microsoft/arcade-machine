@@ -337,21 +337,20 @@ export class InputService {
   private pollRaf: number = null;
 
   public onYPressed = new EventEmitter<void>();
+  public onXPressed = new EventEmitter<void>();
+  public onLeftTab = new EventEmitter<void>();
+  public onRightTab = new EventEmitter<void>();
+  public onLeftTrigger = new EventEmitter<void>();
+  public onRightTrigger = new EventEmitter<void>();
 
   constructor(private focus: FocusService) {
-
-    const focusService = this;
-
-    focusService.onYPressed.subscribe(() => alert('You pressed y!'));
-
   }
 
   /**
    * Bootstrap attaches event listeners from the service to the DOM and sets
    * up the focuser rooted in the target element.
    */
-  public bootstrap(handleTab : (direction : Direction) => any = (direction : Direction) => { direction }, root: HTMLElement = document.body) {
-    this.handleTab = handleTab;
+  public bootstrap(root: HTMLElement = document.body) {
 
     // The gamepadInputEmulation is a string property that exists in
     // JavaScript UWAs and in WebViews in UWAs. It won't exist in
@@ -468,16 +467,16 @@ export class InputService {
         this.handleDirection(Direction.UP);
       }
       if (gamepad.tabLeft(now)) {
-        this.handleTab(Direction.TABLEFT);
+        this.onLeftTab.emit();
       }
       if (gamepad.tabRight(now)) {
-        this.handleTab(Direction.TABRIGHT);
+        this.onRightTab.emit();
       }
       if (gamepad.tabDown(now)) {
-        this.handleTab(Direction.TABDOWN);
+        this.onRightTrigger.emit();
       }
       if (gamepad.tabUp(now)) {
-        this.handleTab(Direction.TABUP);
+        this.onLeftTrigger.emit();
       }
       if (gamepad.submit(now)) {
         this.handleDirection(Direction.SUBMIT);
@@ -486,7 +485,7 @@ export class InputService {
         this.handleDirection(Direction.BACK);
       }
       if (gamepad.x(now)) {
-        this.handleDirection(Direction.X);
+        this.onXPressed.emit();
       }
       if (gamepad.y(now)) {
         this.onYPressed.emit();
@@ -503,8 +502,6 @@ export class InputService {
   private handleDirection(direction: Direction): boolean {
     return this.focus.fire(direction);
   }
-
-  public handleTab : (direction : Direction) => any;
 
   /**
    * Handles a key down event, returns whether the event has resulted
