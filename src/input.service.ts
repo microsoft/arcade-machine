@@ -343,8 +343,7 @@ export class InputService {
   public onLeftTrigger = new EventEmitter<void>();
   public onRightTrigger = new EventEmitter<void>();
 
-  constructor(private focus: FocusService) {
-  }
+  constructor(private focus: FocusService) { }
 
   /**
    * Bootstrap attaches event listeners from the service to the DOM and sets
