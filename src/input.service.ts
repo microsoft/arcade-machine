@@ -157,26 +157,26 @@ class XboxGamepadWrapper implements IGamepadWrapper {
 
   constructor(private pad: Gamepad) {
     const left = new DirectionalDebouncer(() => {
-      /* left joystick                                 */    /* left dpad arrow   */
+      /* left joystick                                 */
       return pad.axes[0] < -XboxGamepadWrapper.joystickThreshold || pad.buttons[Direction.LEFT].pressed;
     });
     const right = new DirectionalDebouncer(() => {
-      /* right joystick                               */    /* right dpad arrow  */
+      /* right joystick                               */
       return pad.axes[0] > XboxGamepadWrapper.joystickThreshold || pad.buttons[Direction.RIGHT].pressed;
     });
     const up = new DirectionalDebouncer(() => {
-      /* up joystick                                   */    /* up dpad arrow    */
+      /* up joystick                                   */
       return pad.axes[1] < -XboxGamepadWrapper.joystickThreshold || pad.buttons[Direction.UP].pressed;
     });
     const down = new DirectionalDebouncer(() => {
-      /* down joystick                                */    /* down dpad arrow    */
+      /* down joystick                                */
       return pad.axes[1] > XboxGamepadWrapper.joystickThreshold || pad.buttons[Direction.DOWN].pressed;
     });
 
-    const tabLeft = new FiredDebouncer(() => pad.buttons[Direction.TABLEFT].pressed); // Left Bumper
-    const tabRight = new FiredDebouncer(() => pad.buttons[Direction.TABRIGHT].pressed); // Right Bumper
-    const tabUp = new FiredDebouncer(() => pad.buttons[Direction.TABUP].pressed); // Left Trigger
-    const tabDown = new FiredDebouncer(() => pad.buttons[Direction.TABDOWN].pressed); // Right Trigger
+    const tabLeft = new FiredDebouncer(() => pad.buttons[Direction.TABLEFT].pressed);
+    const tabRight = new FiredDebouncer(() => pad.buttons[Direction.TABRIGHT].pressed);
+    const tabUp = new FiredDebouncer(() => pad.buttons[Direction.TABUP].pressed);
+    const tabDown = new FiredDebouncer(() => pad.buttons[Direction.TABDOWN].pressed);
 
     const back = new FiredDebouncer(() => pad.buttons[Direction.BACK].pressed);
     const submit = new FiredDebouncer(() => pad.buttons[Direction.SUBMIT].pressed);
