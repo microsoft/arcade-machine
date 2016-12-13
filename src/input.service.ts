@@ -158,30 +158,30 @@ class XboxGamepadWrapper implements IGamepadWrapper {
   constructor(private pad: Gamepad) {
     const left = new DirectionalDebouncer(() => {
       /* left joystick                                 */    /* left dpad arrow   */
-      return pad.axes[0] < -XboxGamepadWrapper.joystickThreshold || pad.buttons[13].pressed;
+      return pad.axes[0] < -XboxGamepadWrapper.joystickThreshold || pad.buttons[Direction.LEFT].pressed;
     });
     const right = new DirectionalDebouncer(() => {
       /* right joystick                               */    /* right dpad arrow  */
-      return pad.axes[0] > XboxGamepadWrapper.joystickThreshold || pad.buttons[14].pressed;
+      return pad.axes[0] > XboxGamepadWrapper.joystickThreshold || pad.buttons[Direction.RIGHT].pressed;
     });
     const up = new DirectionalDebouncer(() => {
       /* up joystick                                   */    /* up dpad arrow    */
-      return pad.axes[1] < -XboxGamepadWrapper.joystickThreshold || pad.buttons[11].pressed;
+      return pad.axes[1] < -XboxGamepadWrapper.joystickThreshold || pad.buttons[Direction.UP].pressed;
     });
     const down = new DirectionalDebouncer(() => {
       /* down joystick                                */    /* down dpad arrow    */
-      return pad.axes[1] > XboxGamepadWrapper.joystickThreshold || pad.buttons[12].pressed;
+      return pad.axes[1] > XboxGamepadWrapper.joystickThreshold || pad.buttons[Direction.DOWN].pressed;
     });
 
-    const tabLeft = new FiredDebouncer(() => pad.buttons[4].pressed); // Left Bumper
-    const tabRight = new FiredDebouncer(() => pad.buttons[5].pressed); // Right Bumper
-    const tabUp = new FiredDebouncer(() => pad.buttons[6].pressed); // Left Trigger
-    const tabDown = new FiredDebouncer(() => pad.buttons[7].pressed); // Right Trigger
+    const tabLeft = new FiredDebouncer(() => pad.buttons[Direction.TABLEFT].pressed); // Left Bumper
+    const tabRight = new FiredDebouncer(() => pad.buttons[Direction.TABRIGHT].pressed); // Right Bumper
+    const tabUp = new FiredDebouncer(() => pad.buttons[Direction.TABUP].pressed); // Left Trigger
+    const tabDown = new FiredDebouncer(() => pad.buttons[Direction.TABDOWN].pressed); // Right Trigger
 
-    const back = new FiredDebouncer(() => pad.buttons[1].pressed); // B button
-    const submit = new FiredDebouncer(() => pad.buttons[0].pressed); // A button
-    const x = new FiredDebouncer(() => pad.buttons[2].pressed); // X button
-    const y = new FiredDebouncer(() => pad.buttons[3].pressed); // Y button
+    const back = new FiredDebouncer(() => pad.buttons[Direction.BACK].pressed);
+    const submit = new FiredDebouncer(() => pad.buttons[Direction.SUBMIT].pressed);
+    const x = new FiredDebouncer(() => pad.buttons[Direction.X].pressed);
+    const y = new FiredDebouncer(() => pad.buttons[Direction.Y].pressed);
 
     this.left = now => left.attempt(now);
     this.right = now => right.attempt(now);

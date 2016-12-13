@@ -4,18 +4,18 @@ export const directiveName = 'arc';
  * Direction is an enum of possible gamepad events which can fire.
  */
 export enum Direction {
-  LEFT,
-  RIGHT,
-  UP,
-  DOWN,
-  SUBMIT,
-  BACK,
-  X,
-  Y,
-  TABLEFT,
-  TABRIGHT,
-  TABUP,
-  TABDOWN
+  LEFT = 14,
+  RIGHT = 15,
+  UP = 12,
+  DOWN = 13,
+  SUBMIT = 0,
+  BACK = 1,
+  X = 2,
+  Y = 3,
+  TABLEFT = 4, // Left Bumper
+  TABRIGHT = 5, // Right Bumper
+  TABUP = 6, // Left Trigger
+  TABDOWN = 7 // Right Trigger
 }
 
 /**
