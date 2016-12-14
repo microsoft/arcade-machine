@@ -43,6 +43,9 @@ interface IGamepadWrapper {
    */
   isConnected(): boolean;
 
+  /**
+   * The actual Gamepad object that can be updated/accessed;
+   */
   pad: Gamepad;
 }
 
