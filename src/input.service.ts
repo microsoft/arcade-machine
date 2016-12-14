@@ -346,7 +346,7 @@ export class InputService {
    */
   public scrollDuration = 300;
 
-  private gamepads: IGamepadWrapper[] = [];
+  private gamepads: { [key: string]: IGamepadWrapper } = {};
   private subscriptions: Subscription[] = [];
   private pollRaf: number = null;
 
@@ -392,7 +392,7 @@ export class InputService {
    */
   public teardown() {
     this.focus.teardown();
-    this.gamepads = [];
+    this.gamepads = {};
     cancelAnimationFrame(this.pollRaf);
     while (this.subscriptions.length) {
       this.subscriptions.pop().unsubscribe();
@@ -419,14 +419,14 @@ export class InputService {
         gamepad = new XboxGamepadWrapper(pad);
       }
 
-      this.gamepads.push(gamepad);
+      this.gamepads[pad.id] = gamepad;
     };
 
     Array.from(navigator.getGamepads())
       .filter(pad => !!pad)
       .forEach(addGamepad);
 
-    if (this.gamepads.length > 0) {
+    if (Object.keys(this.gamepads).length > 0) {
       this.scheduleGamepadPoll();
     }
 
@@ -457,14 +457,17 @@ export class InputService {
    * a connected gamepad somewhere.
    */
   private pollGamepad(now: number) {
-    const rawpads = navigator.getGamepads(); // refreshes all checked-out gamepads
+    const rawpads = navigator.getGamepads().filter(pad => !!pad); // refreshes all checked-out gamepads
 
-    for (let i = 0; i < this.gamepads.length; i += 1) {
-      this.gamepads[i].pad = rawpads[i];
-      const gamepad = this.gamepads[i];
+    for (let i = 0; i < rawpads.length; i += 1) {
+      const gamepad = this.gamepads[rawpads[i].id];
+      if (!gamepad) {
+        continue;
+      }
+      gamepad.pad = rawpads[i];
+
       if (!gamepad.isConnected()) {
-        this.gamepads.splice(i, 1);
-        i -= 1;
+        delete this.gamepads[rawpads[i].id];
         continue;
       }
 
@@ -506,7 +509,7 @@ export class InputService {
       }
     }
 
-    if (this.gamepads.length > 0) {
+    if (Object.keys(this.gamepads).length > 0) {
       this.scheduleGamepadPoll();
     } else {
       this.pollRaf = null;
