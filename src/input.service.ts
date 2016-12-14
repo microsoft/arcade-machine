@@ -42,6 +42,8 @@ interface IGamepadWrapper {
    * Returns whether the gamepad is still connected;
    */
   isConnected(): boolean;
+
+  pad: Gamepad;
 }
 
 enum DebouncerStage {
@@ -155,33 +157,33 @@ class XboxGamepadWrapper implements IGamepadWrapper {
   public x: (now: number) => boolean;
   public y: (now: number) => boolean;
 
-  constructor(private pad: Gamepad) {
+  constructor(public pad: Gamepad) {
     const left = new DirectionalDebouncer(() => {
       /* left joystick                                 */
-      return pad.axes[0] < -XboxGamepadWrapper.joystickThreshold || pad.buttons[Direction.LEFT].pressed;
+      return this.pad.axes[0] < -XboxGamepadWrapper.joystickThreshold || this.pad.buttons[Direction.LEFT].pressed;
     });
     const right = new DirectionalDebouncer(() => {
       /* right joystick                               */
-      return pad.axes[0] > XboxGamepadWrapper.joystickThreshold || pad.buttons[Direction.RIGHT].pressed;
+      return this.pad.axes[0] > XboxGamepadWrapper.joystickThreshold || this.pad.buttons[Direction.RIGHT].pressed;
     });
     const up = new DirectionalDebouncer(() => {
       /* up joystick                                   */
-      return pad.axes[1] < -XboxGamepadWrapper.joystickThreshold || pad.buttons[Direction.UP].pressed;
+      return this.pad.axes[1] < -XboxGamepadWrapper.joystickThreshold || this.pad.buttons[Direction.UP].pressed;
     });
     const down = new DirectionalDebouncer(() => {
       /* down joystick                                */
-      return pad.axes[1] > XboxGamepadWrapper.joystickThreshold || pad.buttons[Direction.DOWN].pressed;
+      return this.pad.axes[1] > XboxGamepadWrapper.joystickThreshold || this.pad.buttons[Direction.DOWN].pressed;
     });
 
-    const tabLeft = new FiredDebouncer(() => pad.buttons[Direction.TABLEFT].pressed);
-    const tabRight = new FiredDebouncer(() => pad.buttons[Direction.TABRIGHT].pressed);
-    const tabUp = new FiredDebouncer(() => pad.buttons[Direction.TABUP].pressed);
-    const tabDown = new FiredDebouncer(() => pad.buttons[Direction.TABDOWN].pressed);
+    const tabLeft = new FiredDebouncer(() => this.pad.buttons[Direction.TABLEFT].pressed);
+    const tabRight = new FiredDebouncer(() => this.pad.buttons[Direction.TABRIGHT].pressed);
+    const tabUp = new FiredDebouncer(() => this.pad.buttons[Direction.TABUP].pressed);
+    const tabDown = new FiredDebouncer(() => this.pad.buttons[Direction.TABDOWN].pressed);
 
-    const back = new FiredDebouncer(() => pad.buttons[Direction.BACK].pressed);
-    const submit = new FiredDebouncer(() => pad.buttons[Direction.SUBMIT].pressed);
-    const x = new FiredDebouncer(() => pad.buttons[Direction.X].pressed);
-    const y = new FiredDebouncer(() => pad.buttons[Direction.Y].pressed);
+    const back = new FiredDebouncer(() => this.pad.buttons[Direction.BACK].pressed);
+    const submit = new FiredDebouncer(() => this.pad.buttons[Direction.SUBMIT].pressed);
+    const x = new FiredDebouncer(() => this.pad.buttons[Direction.X].pressed);
+    const y = new FiredDebouncer(() => this.pad.buttons[Direction.Y].pressed);
 
     this.left = now => left.attempt(now);
     this.right = now => right.attempt(now);
@@ -362,18 +364,18 @@ export class InputService {
    * up the focuser rooted in the target element.
    */
   public bootstrap(root: HTMLElement = document.body) {
-
+    if (typeof navigator.getGamepads === 'function') {
+      // Poll connected gamepads and use that for input if possible.
+      this.watchForGamepad();
+    }
     // The gamepadInputEmulation is a string property that exists in
     // JavaScript UWAs and in WebViews in UWAs. It won't exist in
     // Win8.1 style apps or browsers.
-    if ('gamepadInputEmulation' in navigator) {
+    else if ('gamepadInputEmulation' in navigator) {
       // We want the gamepad to provide gamepad VK keyboard events rather than moving a
       // mouse like cursor. Set to "keyboard", the gamepad will provide such keyboard events
       // and provide input to the DOM navigator.getGamepads API.
       (<any>navigator).gamepadInputEmulation = 'keyboard';
-    } else if (typeof navigator.getGamepads === 'function') {
-      // Otherwise poll for connected gamepads and use that for input.
-      this.watchForGamepad();
     }
 
     this.addKeyboardListeners();
@@ -455,9 +457,10 @@ export class InputService {
    * a connected gamepad somewhere.
    */
   private pollGamepad(now: number) {
-    navigator.getGamepads(); // refreshes all checked-out gamepads
+    const rawpads = navigator.getGamepads(); // refreshes all checked-out gamepads
 
     for (let i = 0; i < this.gamepads.length; i += 1) {
+      this.gamepads[i].pad = rawpads[i];
       const gamepad = this.gamepads[i];
       if (!gamepad.isConnected()) {
         this.gamepads.splice(i, 1);
