@@ -8,9 +8,9 @@ import 'rxjs/add/operator/filter';
 
 // These factors can be tweaked to adjust which elements are favored by the focus algorithm
 const scoringConstants = Object.freeze({
-    primaryAxisDistanceWeight: 30,
-    secondaryAxisDistanceWeight: 20,
-    percentInHistoryShadowWeight: 100000,
+  primaryAxisDistanceWeight: 30,
+  secondaryAxisDistanceWeight: 20,
+  percentInHistoryShadowWeight: 100000,
 });
 
 const cssClass = Object.freeze({
@@ -32,12 +32,12 @@ interface IMutableClientRect {
 // because we want to make sure that even elements that are up to the edge
 // of the screen can receive focus.
 const defaultRect: ClientRect = Object.freeze({
-    top: -1,
-    bottom: -1,
-    right: -1,
-    left: -1,
-    height: 0,
-    width: 0,
+  top: -1,
+  bottom: -1,
+  right: -1,
+  left: -1,
+  height: 0,
+  width: 0,
 });
 
 // A list of aria `roles` which can receive focus.
@@ -248,7 +248,7 @@ export class FocusService {
   // so that we can reuse it if the element gets detached.
   private referenceRect: ClientRect;
 
-  constructor(private registry: RegistryService) {}
+  constructor(private registry: RegistryService) { }
 
   /**
    * Sets the root element to use for focusing.
@@ -271,7 +271,7 @@ export class FocusService {
    * devices, or if other application logic requests focus.
    */
   public onFocusChange(focus: Element) {
-      this.selectNode(focus);
+    this.selectNode(focus);
   }
 
   /**
@@ -323,7 +323,7 @@ export class FocusService {
     this.referenceRect = next.getBoundingClientRect();
     this.selected = next;
     next.classList.add(cssClass.direct);
-    (<HTMLElement> next).focus(); // intentially done last in case onFocusChange fires
+    (<HTMLElement>next).focus(); // intentially done last in case onFocusChange fires
   }
 
   private triggerFocusChange(el: Element, next: Element) {
@@ -366,9 +366,9 @@ export class FocusService {
     // Otherwise see if we can handle it...
     if (directional && ev.next !== null) {
       this.selectNode(ev.next);
-      this.rescroll(<HTMLElement> ev.next, scrollSpeed);
+      this.rescroll(<HTMLElement>ev.next, scrollSpeed);
     } else if (direction === Direction.SUBMIT) {
-      (<HTMLElement> this.selected).click();
+      (<HTMLElement>this.selected).click();
     } else if (direction === Direction.BACK) {
       history.back();
     } else {
@@ -420,8 +420,8 @@ export class FocusService {
 
       // Special case: treat the body as the viewport as far as scrolling goes.
       const prect = parent === document.body
-          ? { top: 0, left: 0, height: window.innerHeight, width: window.innerWidth }
-          : parent.getBoundingClientRect();
+        ? { top: 0, left: 0, height: window.innerHeight, width: window.innerWidth }
+        : parent.getBoundingClientRect();
 
       // Trigger if this element has a vertical scrollbar
       if (parent.scrollHeight > parent.clientHeight) {
@@ -514,8 +514,8 @@ export class FocusService {
 
     // Calculate scores for each element in the root
     const bestPotential = {
-      element: <Element> null,
-      rect: <ClientRect> null,
+      element: <Element>null,
+      rect: <ClientRect>null,
       score: 0,
     };
 
@@ -577,45 +577,45 @@ export class FocusService {
     // If that is the case, we need to reset the coordinates to
     // the edge of the target element.
     if (direction === Direction.LEFT || direction === Direction.RIGHT) {
-        newHistoryRect.top = Math.max(
-          result.rect.top,
-          result.referenceRect.top,
-          this.historyRect ? this.historyRect.top : Number.MIN_VALUE
-        );
-        newHistoryRect.bottom = Math.min(
-          result.rect.bottom,
-          result.referenceRect.bottom,
-          this.historyRect ? this.historyRect.bottom : Number.MAX_VALUE
-        );
+      newHistoryRect.top = Math.max(
+        result.rect.top,
+        result.referenceRect.top,
+        this.historyRect ? this.historyRect.top : Number.MIN_VALUE
+      );
+      newHistoryRect.bottom = Math.min(
+        result.rect.bottom,
+        result.referenceRect.bottom,
+        this.historyRect ? this.historyRect.bottom : Number.MAX_VALUE
+      );
 
-        if (newHistoryRect.bottom <= newHistoryRect.top) {
-            newHistoryRect.top = result.rect.top;
-            newHistoryRect.bottom = result.rect.bottom;
-        }
-        newHistoryRect.height = newHistoryRect.bottom - newHistoryRect.top;
-        newHistoryRect.width = Number.MAX_VALUE;
-        newHistoryRect.left = Number.MIN_VALUE;
-        newHistoryRect.right = Number.MAX_VALUE;
+      if (newHistoryRect.bottom <= newHistoryRect.top) {
+        newHistoryRect.top = result.rect.top;
+        newHistoryRect.bottom = result.rect.bottom;
+      }
+      newHistoryRect.height = newHistoryRect.bottom - newHistoryRect.top;
+      newHistoryRect.width = Number.MAX_VALUE;
+      newHistoryRect.left = Number.MIN_VALUE;
+      newHistoryRect.right = Number.MAX_VALUE;
     } else {
-        newHistoryRect.left = Math.max(
-          result.rect.left,
-          result.referenceRect.left,
-          this.historyRect ? this.historyRect.left : Number.MIN_VALUE
-        );
-        newHistoryRect.right = Math.min(
-          result.rect.right,
-          result.referenceRect.right,
-          this.historyRect ? this.historyRect.right : Number.MAX_VALUE
-        );
+      newHistoryRect.left = Math.max(
+        result.rect.left,
+        result.referenceRect.left,
+        this.historyRect ? this.historyRect.left : Number.MIN_VALUE
+      );
+      newHistoryRect.right = Math.min(
+        result.rect.right,
+        result.referenceRect.right,
+        this.historyRect ? this.historyRect.right : Number.MAX_VALUE
+      );
 
-        if (newHistoryRect.right <= newHistoryRect.left) {
-            newHistoryRect.left = result.rect.left;
-            newHistoryRect.right = result.rect.right;
-        }
-        newHistoryRect.width = newHistoryRect.right - newHistoryRect.left;
-        newHistoryRect.height = Number.MAX_VALUE;
-        newHistoryRect.top = Number.MIN_VALUE;
-        newHistoryRect.bottom = Number.MAX_VALUE;
+      if (newHistoryRect.right <= newHistoryRect.left) {
+        newHistoryRect.left = result.rect.left;
+        newHistoryRect.right = result.rect.right;
+      }
+      newHistoryRect.width = newHistoryRect.right - newHistoryRect.left;
+      newHistoryRect.height = Number.MAX_VALUE;
+      newHistoryRect.top = Number.MIN_VALUE;
+      newHistoryRect.bottom = Number.MAX_VALUE;
     }
     this.historyRect = newHistoryRect;
   }
