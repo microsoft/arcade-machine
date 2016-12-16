@@ -81,7 +81,7 @@ export class ArcDirective implements OnInit, OnDestroy, IArcDirective {
   constructor(
     private el: ElementRef,
     private registry: RegistryService
-  ) {}
+  ) { }
 
   public ngOnInit() {
     this.registry.add(this);
@@ -100,13 +100,13 @@ export class ArcDirective implements OnInit, OnDestroy, IArcDirective {
     this.arcCapture.emit(ev);
 
     switch (ev.event) {
-    case Direction.SUBMIT:
-      this.arcSubmit.next(ev);
-      break;
-    case Direction.BACK:
-      this.arcBack.next(ev);
-      break;
-    default:
+      case Direction.SUBMIT:
+        this.arcSubmit.next(ev);
+        break;
+      case Direction.BACK:
+        this.arcBack.next(ev);
+        break;
+      default:
       // ignore
     }
 
