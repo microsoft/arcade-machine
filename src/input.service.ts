@@ -4,6 +4,7 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { Subscription } from 'rxjs/Subscription';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/observable/merge';
@@ -263,6 +264,9 @@ function isForForm(direction: Direction, selected: Element): boolean {
 @Injectable()
 export class InputService {
 
+  private inputPane : Windows.UI.ViewManagement.InputPane = Windows.UI.ViewManagement.InputPane.getForCurrentView();
+  public keyboardVisible : BehaviorSubject<boolean> = new BehaviorSubject(false);
+
   /**
    * DirectionCodes is a map of directions to key code names.
    */
@@ -388,6 +392,17 @@ export class InputService {
       Observable.fromEvent<FocusEvent>(document, 'focusin', { passive: true })
         .subscribe(ev => this.focus.onFocusChange(<Element>ev.target))
     );
+
+    this.inputPane.onshowing = this.handleKeyboardShow.bind(this);
+    this.inputPane.onhiding = this.handleKeyboardHide.bind(this);
+  }
+
+  private handleKeyboardShow() {
+    this.keyboardVisible.next(true);
+  }
+
+  private handleKeyboardHide() {
+    this.keyboardVisible.next(false);
   }
 
   /**
@@ -471,6 +486,10 @@ export class InputService {
 
       if (!gamepad.isConnected()) {
         delete this.gamepads[rawpads[i].id];
+        continue;
+      }
+
+      if (this.keyboardVisible.getValue()) {
         continue;
       }
 

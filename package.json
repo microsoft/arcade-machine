@@ -33,6 +33,7 @@
     "@types/core-js": "^0.9.34",
     "@types/jasmine": "^2.5.35",
     "@types/node": "^6.0.45",
+    "@types/winrt-uwp": "0.0.16",
     "awesome-typescript-loader": "^2.2.4",
     "clean-webpack-plugin": "^0.1.10",
     "codelyzer": "0.0.28",
