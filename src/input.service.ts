@@ -264,8 +264,8 @@ function isForForm(direction: Direction, selected: Element): boolean {
 @Injectable()
 export class InputService {
 
-  private inputPane : Windows.UI.ViewManagement.InputPane = Windows.UI.ViewManagement.InputPane.getForCurrentView();
-  public keyboardVisible : BehaviorSubject<boolean> = new BehaviorSubject(false);
+  private inputPane = Windows.UI.ViewManagement.InputPane.getForCurrentView();
+  public keyboardVisible = new BehaviorSubject(false);
 
   /**
    * DirectionCodes is a map of directions to key code names.
