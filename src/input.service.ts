@@ -7,7 +7,6 @@ import { Subscription } from 'rxjs/Subscription';
 
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/observable/merge';
-import 'rxjs/add/operator/do';
 
 interface IGamepadWrapper {
   // Directional returns from the gamepad. They debounce themselves and
