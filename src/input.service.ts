@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs/Subscription';
 
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/observable/merge';
+import 'rxjs/add/operator/do';
 
 interface IGamepadWrapper {
   // Directional returns from the gamepad. They debounce themselves and
@@ -263,6 +264,9 @@ function isForForm(direction: Direction, selected: Element): boolean {
 @Injectable()
 export class InputService {
 
+  public inputPane : Windows.UI.ViewManagement.InputPane = Windows.UI.ViewManagement.InputPane.getForCurrentView();
+  public keyboardVisible : boolean = false;
+
   /**
    * DirectionCodes is a map of directions to key code names.
    */
@@ -388,6 +392,17 @@ export class InputService {
       Observable.fromEvent<FocusEvent>(document, 'focusin', { passive: true })
         .subscribe(ev => this.focus.onFocusChange(<Element>ev.target))
     );
+
+    this.inputPane.onshowing = this.handleKeyboardShow.bind(this);
+    this.inputPane.onhiding = this.handleKeyboardHide.bind(this);
+  }
+
+  private handleKeyboardShow() {
+    this.keyboardVisible = true;
+  }
+
+  private handleKeyboardHide() {
+    this.keyboardVisible = false;
   }
 
   /**
@@ -471,6 +486,10 @@ export class InputService {
 
       if (!gamepad.isConnected()) {
         delete this.gamepads[rawpads[i].id];
+        continue;
+      }
+
+      if (this.keyboardVisible) {
         continue;
       }
 

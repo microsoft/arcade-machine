@@ -25,7 +25,8 @@
         ],
         "types": [
             "jasmine",
-            "node"
+            "node",
+            "winrt-uwp"
         ]
     },
     "exclude": [
