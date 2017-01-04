@@ -41,6 +41,7 @@ jspm_packages
 dist
 .idea/
 .DS_Store
+desktop.ini
 
 # Editor
 .vscode

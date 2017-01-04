@@ -56,6 +56,14 @@ enum DebouncerStage {
   FAST,
 }
 
+export interface TriggerNavigable {
+  /**
+   * A Subject that we can call next on to focus the element.
+   */
+  captureFocus: Subject<boolean>;
+}
+
+
 /**
  * DirectionalDebouncer debounces directional navigation like arrow keys,
  * handling "holding" states.
@@ -264,8 +272,16 @@ function isForForm(direction: Direction, selected: Element): boolean {
 @Injectable()
 export class InputService {
 
-  private inputPane = Windows.UI.ViewManagement.InputPane.getForCurrentView();
-  public keyboardVisible = new BehaviorSubject(false);
+  /**
+   * Inputpane and boolean to indicate whether it's visible
+   */
+  private inputPane = (<any>window).Windows ? Windows.UI.ViewManagement.InputPane.getForCurrentView() : null;
+  public keyboardVisible = (<any>window).Windows ? new BehaviorSubject(false) : null;
+
+  /**
+   * Default trigger navigation element
+   */
+  public defaultTrigger: TriggerNavigable = null;
 
   /**
    * DirectionCodes is a map of directions to key code names.
@@ -393,8 +409,10 @@ export class InputService {
         .subscribe(ev => this.focus.onFocusChange(<Element>ev.target))
     );
 
-    this.inputPane.onshowing = this.handleKeyboardShow.bind(this);
-    this.inputPane.onhiding = this.handleKeyboardHide.bind(this);
+    if (this.inputPane) {
+      this.inputPane.onshowing = this.handleKeyboardShow.bind(this);
+      this.inputPane.onhiding = this.handleKeyboardHide.bind(this);
+    }
   }
 
   private handleKeyboardShow() {
@@ -475,7 +493,7 @@ export class InputService {
    * a connected gamepad somewhere.
    */
   private pollGamepad(now: number) {
-    const rawpads = navigator.getGamepads().filter(pad => !!pad); // refreshes all checked-out gamepads
+    const rawpads = Array.from(navigator.getGamepads()).filter(pad => !!pad); // refreshes all checked-out gamepads
 
     for (let i = 0; i < rawpads.length; i += 1) {
       const gamepad = this.gamepads[rawpads[i].id];
@@ -489,7 +507,7 @@ export class InputService {
         continue;
       }
 
-      if (this.keyboardVisible.getValue()) {
+      if (this.keyboardVisible !== null && this.keyboardVisible.getValue()) {
         continue;
       }
 
