@@ -264,7 +264,10 @@ function isForForm(direction: Direction, selected: Element): boolean {
 @Injectable()
 export class InputService {
 
-  private inputPane = Windows.UI.ViewManagement.InputPane.getForCurrentView();
+  /**
+   * Inputpane and boolean to indicate whether it's visible
+   */
+  private inputPane = (<any>window).Windows ? Windows.UI.ViewManagement.InputPane.getForCurrentView() : null;
   public keyboardVisible = new BehaviorSubject(false);
 
   /**
@@ -393,8 +396,10 @@ export class InputService {
         .subscribe(ev => this.focus.onFocusChange(<Element>ev.target))
     );
 
-    this.inputPane.onshowing = this.handleKeyboardShow.bind(this);
-    this.inputPane.onhiding = this.handleKeyboardHide.bind(this);
+    if (this.inputPane) {
+      this.inputPane.onshowing = () => this.handleKeyboardShow;
+      this.inputPane.onhiding = () => this.handleKeyboardHide;
+    }
   }
 
   private handleKeyboardShow() {
@@ -475,7 +480,7 @@ export class InputService {
    * a connected gamepad somewhere.
    */
   private pollGamepad(now: number) {
-    const rawpads = navigator.getGamepads().filter(pad => !!pad); // refreshes all checked-out gamepads
+    const rawpads = Array.from(navigator.getGamepads()).filter(pad => !!pad); // refreshes all checked-out gamepads
 
     for (let i = 0; i < rawpads.length; i += 1) {
       const gamepad = this.gamepads[rawpads[i].id];
