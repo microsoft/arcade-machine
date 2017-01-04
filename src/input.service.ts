@@ -56,14 +56,6 @@ enum DebouncerStage {
   FAST,
 }
 
-export interface TriggerNavigable {
-  /**
-   * A Subject that we can call next on to focus the element.
-   */
-  captureFocus: Subject<boolean>;
-}
-
-
 /**
  * DirectionalDebouncer debounces directional navigation like arrow keys,
  * handling "holding" states.
@@ -277,11 +269,6 @@ export class InputService {
    */
   private inputPane = (<any>window).Windows ? Windows.UI.ViewManagement.InputPane.getForCurrentView() : null;
   public keyboardVisible = new BehaviorSubject(false);
-
-  /**
-   * Default trigger navigation element
-   */
-  public defaultTrigger: TriggerNavigable = null;
 
   /**
    * DirectionCodes is a map of directions to key code names.
