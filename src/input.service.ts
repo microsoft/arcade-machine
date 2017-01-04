@@ -276,7 +276,7 @@ export class InputService {
    * Inputpane and boolean to indicate whether it's visible
    */
   private inputPane = (<any>window).Windows ? Windows.UI.ViewManagement.InputPane.getForCurrentView() : null;
-  public keyboardVisible = (<any>window).Windows ? new BehaviorSubject(false) : null;
+  public keyboardVisible = new BehaviorSubject(false);
 
   /**
    * Default trigger navigation element
@@ -410,8 +410,8 @@ export class InputService {
     );
 
     if (this.inputPane) {
-      this.inputPane.onshowing = this.handleKeyboardShow.bind(this);
-      this.inputPane.onhiding = this.handleKeyboardHide.bind(this);
+      this.inputPane.onshowing = () => this.handleKeyboardShow;
+      this.inputPane.onhiding = () => this.handleKeyboardHide;
     }
   }
 
@@ -507,7 +507,7 @@ export class InputService {
         continue;
       }
 
-      if (this.keyboardVisible !== null && this.keyboardVisible.getValue()) {
+      if (this.keyboardVisible.getValue()) {
         continue;
       }
 
