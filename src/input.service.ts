@@ -364,8 +364,8 @@ export class InputService {
   public onXPressed = new EventEmitter<void>();
   public onLeftTab = new EventEmitter<void>();
   public onRightTab = new EventEmitter<void>();
-  public onLeftTrigger = new EventEmitter<void>();
-  public onRightTrigger = new EventEmitter<void>();
+  public onLeftTrigger = new EventEmitter<Element>();
+  public onRightTrigger = new EventEmitter<Element>();
 
   constructor(private focus: FocusService) { }
 
@@ -517,10 +517,10 @@ export class InputService {
         this.onRightTab.emit();
       }
       if (gamepad.tabDown(now)) {
-        this.onRightTrigger.emit();
+        this.onRightTrigger.emit(this.focus.selected);
       }
       if (gamepad.tabUp(now)) {
-        this.onLeftTrigger.emit();
+        this.onLeftTrigger.emit(this.focus.selected);
       }
       if (gamepad.submit(now)) {
         this.handleDirection(Direction.SUBMIT);
