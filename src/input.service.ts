@@ -360,12 +360,12 @@ export class InputService {
   private subscriptions: Subscription[] = [];
   private pollRaf: number = null;
 
-  public onYPressed = new EventEmitter<void>();
-  public onXPressed = new EventEmitter<void>();
-  public onLeftTab = new EventEmitter<void>();
-  public onRightTab = new EventEmitter<void>();
-  public onLeftTrigger = new EventEmitter<void>();
-  public onRightTrigger = new EventEmitter<void>();
+  public onYPressed = new EventEmitter<Element>();
+  public onXPressed = new EventEmitter<Element>();
+  public onLeftTab = new EventEmitter<Element>();
+  public onRightTab = new EventEmitter<Element>();
+  public onLeftTrigger = new EventEmitter<Element>();
+  public onRightTrigger = new EventEmitter<Element>();
 
   constructor(private focus: FocusService) { }
 
@@ -511,16 +511,16 @@ export class InputService {
         this.handleDirection(Direction.UP);
       }
       if (gamepad.tabLeft(now)) {
-        this.onLeftTab.emit();
+        this.onLeftTab.emit(this.focus.selected);
       }
       if (gamepad.tabRight(now)) {
-        this.onRightTab.emit();
+        this.onRightTab.emit(this.focus.selected);
       }
       if (gamepad.tabDown(now)) {
-        this.onRightTrigger.emit();
+        this.onRightTrigger.emit(this.focus.selected);
       }
       if (gamepad.tabUp(now)) {
-        this.onLeftTrigger.emit();
+        this.onLeftTrigger.emit(this.focus.selected);
       }
       if (gamepad.submit(now)) {
         this.handleDirection(Direction.SUBMIT);
@@ -529,10 +529,10 @@ export class InputService {
         this.handleDirection(Direction.BACK);
       }
       if (gamepad.x(now)) {
-        this.onXPressed.emit();
+        this.onXPressed.emit(this.focus.selected);
       }
       if (gamepad.y(now)) {
-        this.onYPressed.emit();
+        this.onYPressed.emit(this.focus.selected);
       }
     }
 
