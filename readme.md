@@ -101,7 +101,7 @@ export enum Direction {
 
 `arc-back` is a shortcut to create a handler via `arc-capture` that fires when a "back" event is fired.
 
-##### [arc-[left|right|up|down]]="ElementRef"
+##### [arc-[left|right|up|down]]="Element"
 
 Allows you to explicitly tell the directive which element to focus when off the element in the provided direction. Again, this is a shortcut to a `arc-capture` handler which sets the `next` element if it matches the target direction.
 
