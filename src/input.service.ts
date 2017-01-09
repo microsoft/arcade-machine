@@ -1,10 +1,10 @@
 import { FocusService } from './focus.service';
 import { Direction } from './model';
 import { EventEmitter, Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { Subscription } from 'rxjs/Subscription';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/observable/merge';
@@ -377,11 +377,10 @@ export class InputService {
     if (typeof navigator.getGamepads === 'function') {
       // Poll connected gamepads and use that for input if possible.
       this.watchForGamepad();
-    }
     // The gamepadInputEmulation is a string property that exists in
     // JavaScript UWAs and in WebViews in UWAs. It won't exist in
     // Win8.1 style apps or browsers.
-    else if ('gamepadInputEmulation' in navigator) {
+    } else if ('gamepadInputEmulation' in navigator) {
       // We want the gamepad to provide gamepad VK keyboard events rather than moving a
       // mouse like cursor. Set to "keyboard", the gamepad will provide such keyboard events
       // and provide input to the DOM navigator.getGamepads API.
@@ -470,7 +469,7 @@ export class InputService {
    */
   private scheduleGamepadPoll() {
     this.pollRaf = requestAnimationFrame(now => {
-      this.pollGamepad(now)
+      this.pollGamepad(now);
     });
   }
 
