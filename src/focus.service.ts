@@ -234,7 +234,7 @@ function isNodeAttached(node: Element, root: Element) {
 export class FocusService {
 
   // Focus root, the service operates below here.
-  private root: Element;
+  private root: HTMLElement;
   // The previous rectange that the user had selected.
   private historyRect = defaultRect;
   // Subscription to focus update events.
@@ -253,7 +253,7 @@ export class FocusService {
   /**
    * Sets the root element to use for focusing.
    */
-  public setRoot(root: Element) {
+  public setRoot(root: HTMLElement) {
     if (this.registrySubscription) {
       this.registrySubscription.unsubscribe();
     }
@@ -366,7 +366,7 @@ export class FocusService {
     // Otherwise see if we can handle it...
     if (directional && ev.next !== null) {
       this.selectNode(ev.next);
-      this.rescroll(<HTMLElement>ev.next, scrollSpeed);
+      this.rescroll(<HTMLElement>ev.next, scrollSpeed, this.root);
     } else if (direction === Direction.SUBMIT) {
       (<HTMLElement>this.selected).click();
     } else if (direction === Direction.BACK) {
@@ -381,7 +381,7 @@ export class FocusService {
   /**
    * Scrolls the page so that the selected element is visible.
    */
-  private rescroll(el: HTMLElement, scrollSpeed: number) {
+  private rescroll(el: HTMLElement, scrollSpeed: number, container: HTMLElement) {
     // Abort if scrolling is disabled.
     if (scrollSpeed === null) {
       return;
@@ -416,25 +416,35 @@ export class FocusService {
     const { width, height } = rect;
     let { top, left } = rect;
 
-    for (let parent = el.parentElement; parent !== null; parent = parent.parentElement) {
+    for (let parent = el.parentElement; parent !== container.parentElement; parent = parent.parentElement) {
 
       // Special case: treat the body as the viewport as far as scrolling goes.
-      const prect = parent === document.body
-        ? { top: 0, left: 0, height: window.innerHeight, width: window.innerWidth }
+      const prect = parent === container
+        ? {
+          top: Number(window.getComputedStyle(container, null).paddingTop.slice(0, -2)),
+          left: 0,
+          height: container.clientHeight - Number(window.getComputedStyle(container, null).paddingBottom.slice(0, -2)),
+          width: container.clientWidth
+        }
         : parent.getBoundingClientRect();
 
       // Trigger if this element has a vertical scrollbar
       if (parent.scrollHeight > parent.clientHeight) {
         const scrollTop = parent.scrollTop;
-        const showsBottom = scrollTop + (top - prect.top + height) - prect.height;
+        const showsBottom = scrollTop + top + (height - prect.height);
         const showsTop = scrollTop + (top - prect.top);
 
         if (showsTop < scrollTop) {
-          animate(parent, showsTop, scrollTop, x => parent.scrollTop = x);
-          top += scrollTop - showsTop;
+          animate(parent, showsTop, scrollTop, x => {
+            parent.scrollTop = x;
+            top += scrollTop - showsTop;
+          });
+
         } else if (showsBottom > scrollTop) {
-          animate(parent, showsBottom, scrollTop, x => parent.scrollTop = x);
-          top += scrollTop - showsBottom;
+          animate(parent, showsBottom, scrollTop, x => {
+            parent.scrollTop = x;
+            top += scrollTop - showsBottom;
+          });
         }
       }
 
@@ -445,11 +455,16 @@ export class FocusService {
         const showsLeft = scrollLeft + (left - prect.left);
 
         if (showsLeft < scrollLeft) {
-          animate(parent, showsLeft, scrollLeft, x => parent.scrollLeft = x);
-          left += scrollLeft - showsLeft;
+          animate(parent, showsLeft, scrollLeft, x => {
+            parent.scrollLeft = x;
+            left += scrollLeft - showsLeft;
+          });
+
         } else if (showsRight > scrollLeft) {
-          animate(parent, showsRight, scrollLeft, x => parent.scrollLeft = x);
-          left += scrollLeft - showsRight;
+          animate(parent, showsRight, scrollLeft, x => {
+            parent.scrollLeft = x;
+            left += scrollLeft - showsRight;
+          });
         }
       }
     }
