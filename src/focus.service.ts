@@ -27,6 +27,13 @@ interface IMutableClientRect {
   width: number;
 }
 
+interface IReducedClientRect {
+  top: number;
+  left: number;
+  height: number;
+  width: number;
+}
+
 // Default client rect to use. We set the top, left, bottom and right
 // properties of the referenceBoundingRectangle to '-1' (as opposed to '0')
 // because we want to make sure that even elements that are up to the edge
@@ -216,8 +223,21 @@ function isDirectional(ev: Direction) {
 /**
  * Linearly interpolates between two numbers.
  */
-function lerp(start: number, end: number, progress: number): number {
-  return start + (end - start) * progress;
+// function lerp(start: number, end: number, progress: number): number {
+//   return start + (end - start) * progress;
+// }
+
+/**
+ * Interpolation with quadratic speed up and slow down.
+ */
+function quad(start: number, end: number, progress: number): number {
+  let diff = end - start;
+  if (progress < 0.5) {
+    return diff * (2 * progress * progress) + start;
+  } else {
+    let displaced = progress - 1;
+    return diff * ((-2 * displaced * displaced) + 1) + start;
+  }
 }
 
 /**
@@ -399,7 +419,7 @@ export class FocusService {
       const duration = Math.abs(target - original) / scrollSpeed * 1000;
       const run = (now: number) => {
         const progress = Math.min((now - start) / duration, 1);
-        setter(lerp(original, target, progress));
+        setter(quad(original, target, progress));
 
         if (progress < 1) {
           requestAnimationFrame(run);
@@ -413,58 +433,51 @@ export class FocusService {
     // that the element (or the box where the element will be after scrolling
     // is applied) is visible in all containers.
     const rect = el.getBoundingClientRect();
-    const { width, height } = rect;
-    let { top, left } = rect;
+    const { width, height, top, left } = rect;
 
     for (let parent = el.parentElement; parent !== container.parentElement; parent = parent.parentElement) {
 
       // Special case: treat the body as the viewport as far as scrolling goes.
-      const prect = parent === container
-        ? {
-          top: Number(window.getComputedStyle(container, null).paddingTop.slice(0, -2)),
-          left: 0,
-          height: container.clientHeight - Number(window.getComputedStyle(container, null).paddingBottom.slice(0, -2)),
-          width: container.clientWidth
-        }
-        : parent.getBoundingClientRect();
+      let prect: IReducedClientRect;
+      if (parent === container) {
+        const containerStyle = window.getComputedStyle(container, null);
+        const paddingTop = Number(containerStyle.paddingTop.slice(0, -2));
+        const paddingBottom = Number(containerStyle.paddingBottom.slice(0, -2));
+        const paddingLeft = Number(containerStyle.paddingLeft.slice(0, -2));
+        const paddingRight = Number(containerStyle.paddingRight.slice(0, -2));
+        prect = {
+          top: paddingTop,
+          left: paddingLeft,
+          height: container.clientHeight - paddingTop - paddingBottom,
+          width: container.clientWidth - paddingLeft - paddingRight,
+        };
+      } else {
+        prect = parent.getBoundingClientRect();
+      }
 
       // Trigger if this element has a vertical scrollbar
       if (parent.scrollHeight > parent.clientHeight) {
         const scrollTop = parent.scrollTop;
-        const showsBottom = scrollTop + top + (height - prect.height);
         const showsTop = scrollTop + (top - prect.top);
+        const showsBottom = showsTop + (height - prect.height);
 
         if (showsTop < scrollTop) {
-          animate(parent, showsTop, scrollTop, x => {
-            parent.scrollTop = x;
-            top += scrollTop - showsTop;
-          });
-
+          animate(parent, showsTop, scrollTop, x => parent.scrollTop = x);
         } else if (showsBottom > scrollTop) {
-          animate(parent, showsBottom, scrollTop, x => {
-            parent.scrollTop = x;
-            top += scrollTop - showsBottom;
-          });
+          animate(parent, showsBottom, scrollTop, x => parent.scrollTop = x);
         }
       }
 
       // Trigger if this element has a horizontal scrollbar
       if (parent.scrollWidth > parent.clientWidth) {
         const scrollLeft = parent.scrollLeft;
-        const showsRight = scrollLeft + (left - prect.left + width) - prect.width;
         const showsLeft = scrollLeft + (left - prect.left);
+        const showsRight = showsLeft + (width - prect.width);
 
         if (showsLeft < scrollLeft) {
-          animate(parent, showsLeft, scrollLeft, x => {
-            parent.scrollLeft = x;
-            left += scrollLeft - showsLeft;
-          });
-
+          animate(parent, showsLeft, scrollLeft, x => parent.scrollLeft = x);
         } else if (showsRight > scrollLeft) {
-          animate(parent, showsRight, scrollLeft, x => {
-            parent.scrollLeft = x;
-            left += scrollLeft - showsRight;
-          });
+          animate(parent, showsRight, scrollLeft, x => parent.scrollLeft = x);
         }
       }
     }
