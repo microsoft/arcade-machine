@@ -221,13 +221,6 @@ function isDirectional(ev: Direction) {
 }
 
 /**
- * Linearly interpolates between two numbers.
- */
-// function lerp(start: number, end: number, progress: number): number {
-//   return start + (end - start) * progress;
-// }
-
-/**
  * Interpolation with quadratic speed up and slow down.
  */
 function quad(start: number, end: number, progress: number): number {
