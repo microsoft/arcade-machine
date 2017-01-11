@@ -374,17 +374,20 @@ export class InputService {
    * up the focuser rooted in the target element.
    */
   public bootstrap(root: HTMLElement = document.body) {
-    if (typeof navigator.getGamepads === 'function') {
-      // Poll connected gamepads and use that for input if possible.
-      this.watchForGamepad();
     // The gamepadInputEmulation is a string property that exists in
     // JavaScript UWAs and in WebViews in UWAs. It won't exist in
     // Win8.1 style apps or browsers.
-    } else if ('gamepadInputEmulation' in navigator) {
-      // We want the gamepad to provide gamepad VK keyboard events rather than moving a
-      // mouse like cursor. Set to "keyboard", the gamepad will provide such keyboard events
-      // and provide input to the DOM navigator.getGamepads API.
-      (<any>navigator).gamepadInputEmulation = 'keyboard';
+    if ('gamepadInputEmulation' in navigator) {
+      if (typeof navigator.getGamepads === 'function') {
+        // Poll connected gamepads and use that for input if possible.
+        (<any>navigator).gamepadInputEmulation = 'gamepad';
+        this.watchForGamepad();
+      } else {
+        // We want the gamepad to provide gamepad VK keyboard events rather than moving a
+        // mouse like cursor. Set to "keyboard", the gamepad will provide such keyboard events
+        // and provide input to the DOM navigator.getGamepads API.
+        (<any>navigator).gamepadInputEmulation = 'keyboard';
+      }
     }
 
     this.addKeyboardListeners();
