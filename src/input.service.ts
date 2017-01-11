@@ -376,6 +376,7 @@ export class InputService {
   public bootstrap(root: HTMLElement = document.body) {
     if (typeof navigator.getGamepads === 'function') {
       // Poll connected gamepads and use that for input if possible.
+      (<any>navigator).gamepadInputEmulation = 'gamepad';
       this.watchForGamepad();
     // The gamepadInputEmulation is a string property that exists in
     // JavaScript UWAs and in WebViews in UWAs. It won't exist in
