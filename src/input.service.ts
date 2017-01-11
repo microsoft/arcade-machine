@@ -1,7 +1,6 @@
 import { FocusService } from './focus.service';
 import { Direction } from './model';
 import { EventEmitter, Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { Subscription } from 'rxjs/Subscription';
@@ -268,7 +267,10 @@ export class InputService {
    * Inputpane and boolean to indicate whether it's visible
    */
   private inputPane = (<any>window).Windows ? Windows.UI.ViewManagement.InputPane.getForCurrentView() : null;
-  public keyboardVisible = new BehaviorSubject(false);
+
+  public get keyboardVisible(): boolean {
+    return (this.inputPane.occludedRect.y !== 0);
+  }
 
   /**
    * DirectionCodes is a map of directions to key code names.
@@ -397,19 +399,6 @@ export class InputService {
       Observable.fromEvent<FocusEvent>(document, 'focusin', { passive: true })
         .subscribe(ev => this.focus.onFocusChange(<Element>ev.target))
     );
-
-    if (this.inputPane) {
-      this.inputPane.onshowing = () => this.handleKeyboardShow;
-      this.inputPane.onhiding = () => this.handleKeyboardHide;
-    }
-  }
-
-  private handleKeyboardShow() {
-    this.keyboardVisible.next(true);
-  }
-
-  private handleKeyboardHide() {
-    this.keyboardVisible.next(false);
   }
 
   /**
@@ -496,7 +485,7 @@ export class InputService {
         continue;
       }
 
-      if (this.keyboardVisible.getValue()) {
+      if (this.keyboardVisible) {
         continue;
       }
 
