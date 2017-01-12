@@ -8,12 +8,12 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 @Injectable()
 export class RegistryService {
 
-  private static arcs = new Map<Element, IArcDirective>();
+  private static arcs = new Map<HTMLElement, IArcDirective>();
 
   /**
    * Subject on which observable can request focus.
    */
-  public readonly setFocus = new BehaviorSubject<Element>(null);
+  public readonly setFocus = new BehaviorSubject<HTMLElement>(null);
 
   /**
    * Stores a directive into the registry.
@@ -29,7 +29,7 @@ export class RegistryService {
    * Returns the ArcDirective associated with the element. Returns
    * undefined if the element has no associated arc.
    */
-  public find(el: Element) {
+  public find(el: HTMLElement) {
     if (!el.hasAttribute(directiveName)) {
       return undefined;
     }

@@ -14,7 +14,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/never';
 import 'rxjs/add/operator/startWith';
 
-function createDirectionCapture(direction: Direction, target: Element) {
+function createDirectionCapture(direction: Direction, target: HTMLElement) {
   if (!target) {
     throw new Error(
       `Cannot set [arc-${Direction[direction]}] to an undefined element!` +
@@ -41,7 +41,7 @@ export class ArcDirective implements OnInit, OnDestroy, IArcDirective {
   public arcCapture = new EventEmitter<IArcEvent>();
 
   @Output('arc-focus')
-  public arcFocus = new EventEmitter<Element>();
+  public arcFocus = new EventEmitter<HTMLElement>();
 
   @Input('arc-default-focus')
   public set arcDefaultFocus(_ignored: any) {
@@ -57,22 +57,22 @@ export class ArcDirective implements OnInit, OnDestroy, IArcDirective {
   public arcBack = new EventEmitter<IArcEvent>();
 
   @Input('arc-left')
-  public set arcLeft(target: Element) {
+  public set arcLeft(target: HTMLElement) {
     this.handlers.push(createDirectionCapture(Direction.LEFT, target));
   }
 
   @Input('arc-right')
-  public set arcRight(target: Element) {
+  public set arcRight(target: HTMLElement) {
     this.handlers.push(createDirectionCapture(Direction.RIGHT, target));
   }
 
   @Input('arc-up')
-  public set arcUp(target: Element) {
+  public set arcUp(target: HTMLElement) {
     this.handlers.push(createDirectionCapture(Direction.UP, target));
   }
 
   @Input('arc-down')
-  public set arcDown(target: Element) {
+  public set arcDown(target: HTMLElement) {
     this.handlers.push(createDirectionCapture(Direction.DOWN, target));
   }
 
@@ -115,7 +115,7 @@ export class ArcDirective implements OnInit, OnDestroy, IArcDirective {
     }
   }
 
-  public onFocus(el: Element) {
+  public onFocus(el: HTMLElement) {
     this.arcFocus.next(el);
   }
 }

@@ -65,8 +65,8 @@ const focusableRoles = Object.freeze([
   'treeitem',
 ]);
 
-function roundRect(rect: Element | ClientRect): ClientRect {
-  if (rect instanceof Element) {
+function roundRect(rect: HTMLElement | ClientRect): ClientRect {
+  if (rect instanceof HTMLElement) {
     rect = rect.getBoundingClientRect();
   }
 
@@ -200,7 +200,7 @@ function calculateScore(
  * Returns the common ancestor in the DOM of two nodes. From:
  * http://stackoverflow.com/a/7648545
  */
-function getCommonAncestor(a: Element, b: Element): Element {
+function getCommonAncestor(a: HTMLElement, b: HTMLElement): HTMLElement {
   const mask = 0x10;
   while (a = a.parentElement) {
     if ((a.compareDocumentPosition(b) & mask) === mask) { // tslint:disable-line
@@ -224,11 +224,11 @@ function isDirectional(ev: Direction) {
  * Interpolation with quadratic speed up and slow down.
  */
 function quad(start: number, end: number, progress: number): number {
-  let diff = end - start;
+  const diff = end - start;
   if (progress < 0.5) {
     return diff * (2 * progress * progress) + start;
   } else {
-    let displaced = progress - 1;
+    const displaced = progress - 1;
     return diff * ((-2 * displaced * displaced) + 1) + start;
   }
 }
@@ -236,7 +236,7 @@ function quad(start: number, end: number, progress: number): number {
 /**
  * Returns whether the target DOM node is a child of the root.
  */
-function isNodeAttached(node: Element, root: Element) {
+function isNodeAttached(node: HTMLElement, root: HTMLElement) {
   while (node && node !== root) {
     node = node.parentElement;
   }
@@ -254,9 +254,9 @@ export class FocusService {
   private registrySubscription: Subscription;
 
   // The currently selected element.
-  public selected: Element;
+  public selected: HTMLElement;
   // Parents of the selected element.
-  private parents: Element[] = [];
+  private parents: HTMLElement[] = [];
   // The client bounding rect when we first selected the element, cached
   // so that we can reuse it if the element gets detached.
   private referenceRect: ClientRect;
@@ -274,8 +274,8 @@ export class FocusService {
     this.root = root;
     this.registrySubscription = this.registry
       .setFocus
-      .filter((el: Element) => !!el)
-      .subscribe((el: Element) => this.selectNode(el));
+      .filter((el: HTMLElement) => !!el)
+      .subscribe((el: HTMLElement) => this.selectNode(el));
   }
 
   /**
@@ -283,14 +283,14 @@ export class FocusService {
    * this is handle adjustments if the user interacts with other input
    * devices, or if other application logic requests focus.
    */
-  public onFocusChange(focus: Element) {
+  public onFocusChange(focus: HTMLElement) {
     this.selectNode(focus);
   }
 
   /**
    * Updates the selected DOM node.
    */
-  public selectNode(next: Element) {
+  public selectNode(next: HTMLElement) {
     const { selected, parents } = this;
     if (selected === next) {
       return;
@@ -336,10 +336,10 @@ export class FocusService {
     this.referenceRect = next.getBoundingClientRect();
     this.selected = next;
     next.classList.add(cssClass.direct);
-    (<HTMLElement>next).focus(); // intentially done last in case onFocusChange fires
+    next.focus(); // intentially done last in case onFocusChange fires
   }
 
-  private triggerFocusChange(el: Element, next: Element) {
+  private triggerFocusChange(el: HTMLElement, next: HTMLElement) {
     const directive = this.registry.find(el);
     if (directive) {
       directive.onFocus(next);
@@ -381,7 +381,7 @@ export class FocusService {
       this.selectNode(ev.next);
       this.rescroll(<HTMLElement>ev.next, scrollSpeed, this.root);
     } else if (direction === Direction.SUBMIT) {
-      (<HTMLElement>this.selected).click();
+      this.selected.click();
     } else if (direction === Direction.BACK) {
       history.back();
     } else {
@@ -506,9 +506,9 @@ export class FocusService {
   /**
    * Returns if the element can receive focus.
    */
-  private isFocusable(el: Element) {
+  private isFocusable(el: HTMLElement) {
     const role = el.getAttribute('role');
-    const tabIndex = el.getAttribute('tabindex');
+    const tabIndex = el.tabIndex;
 
     return el.tagName === 'A'
       || el.tagName === 'BUTTON'
@@ -516,7 +516,7 @@ export class FocusService {
       || el.tagName === 'SELECT'
       || el.tagName === 'TEXTAREA'
       || (role && focusableRoles.indexOf(role) > -1)
-      || (tabIndex && Number(tabIndex) > -1)
+      || (tabIndex && tabIndex > -1)
       || this.registry.find(el) !== undefined;
   }
 
@@ -535,7 +535,7 @@ export class FocusService {
 
     // Calculate scores for each element in the root
     const bestPotential = {
-      element: <Element>null,
+      element: <HTMLElement>null,
       rect: <ClientRect>null,
       score: 0,
     };
@@ -546,7 +546,7 @@ export class FocusService {
     // to optimize it unless you have to.
     const allElements = root.querySelectorAll('*');
     for (let i = 0; i < allElements.length; i += 1) {
-      const potentialElement = allElements[i];
+      const potentialElement = <HTMLElement> allElements[i];
       if (selected === potentialElement || !this.isFocusable(potentialElement)) {
         continue;
       }
@@ -578,7 +578,7 @@ export class FocusService {
   }
 
   private updateHistoryRect(direction: Direction, result: {
-    element: Element,
+    element: HTMLElement,
     rect: ClientRect,
     referenceRect: ClientRect,
   }) {

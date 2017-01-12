@@ -31,10 +31,10 @@ export interface IArcEvent {
   // unless the element is cancelled. This *is* settable and you can use it
   // to modify the focus target. This will be set to `null` on non-directional
   // navigation or if we can't find a subsequent element to select.
-  next?: Element;
+  next?: HTMLElement;
 
   readonly event: Direction;
-  readonly target: Element;
+  readonly target: HTMLElement;
   readonly defaultPrevented: boolean;
 
   stopPropagation(): void;
@@ -46,7 +46,7 @@ export interface IArcDirective {
   /**
    * Returns the associated DOM element.
    */
-  getElement(): Element;
+  getElement(): HTMLElement;
 
   /**
    * Calls event handlers for the event.
@@ -56,5 +56,5 @@ export interface IArcDirective {
   /**
    * Triggers a focus change event.
    */
-  onFocus(el: Element): void;
+  onFocus(el: HTMLElement): void;
 }

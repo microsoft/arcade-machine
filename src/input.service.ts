@@ -362,12 +362,12 @@ export class InputService {
   private subscriptions: Subscription[] = [];
   private pollRaf: number = null;
 
-  public onYPressed = new EventEmitter<Element>();
-  public onXPressed = new EventEmitter<Element>();
-  public onLeftTab = new EventEmitter<Element>();
-  public onRightTab = new EventEmitter<Element>();
-  public onLeftTrigger = new EventEmitter<Element>();
-  public onRightTrigger = new EventEmitter<Element>();
+  public onYPressed = new EventEmitter<HTMLElement>();
+  public onXPressed = new EventEmitter<HTMLElement>();
+  public onLeftTab = new EventEmitter<HTMLElement>();
+  public onRightTab = new EventEmitter<HTMLElement>();
+  public onLeftTrigger = new EventEmitter<HTMLElement>();
+  public onRightTrigger = new EventEmitter<HTMLElement>();
 
   constructor(private focus: FocusService) { }
 
@@ -397,7 +397,7 @@ export class InputService {
 
     this.subscriptions.push(
       Observable.fromEvent<FocusEvent>(document, 'focusin', { passive: true })
-        .subscribe(ev => this.focus.onFocusChange(<Element>ev.target))
+        .subscribe(ev => this.focus.onFocusChange(<HTMLElement> ev.target))
     );
   }
 
