@@ -397,7 +397,7 @@ export class InputService {
 
     this.subscriptions.push(
       Observable.fromEvent<FocusEvent>(document, 'focusin', { passive: true })
-        .subscribe(ev => this.focus.onFocusChange(<HTMLElement> ev.target))
+        .subscribe(ev => this.focus.onFocusChange(<HTMLElement>ev.target))
     );
   }
 

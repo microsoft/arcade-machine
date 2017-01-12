@@ -546,7 +546,7 @@ export class FocusService {
     // to optimize it unless you have to.
     const allElements = root.querySelectorAll('*');
     for (let i = 0; i < allElements.length; i += 1) {
-      const potentialElement = <HTMLElement> allElements[i];
+      const potentialElement = <HTMLElement>allElements[i];
       if (selected === potentialElement || !this.isFocusable(potentialElement)) {
         continue;
       }
