@@ -508,7 +508,7 @@ export class FocusService {
    */
   private isFocusable(el: Element) {
     const role = el.getAttribute('role');
-    const tabIndex = el.getAttribute('tabIndex');
+    const tabIndex = el.getAttribute('tabindex');
 
     return el.tagName === 'A'
       || el.tagName === 'BUTTON'
