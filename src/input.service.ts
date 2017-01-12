@@ -356,7 +356,7 @@ export class InputService {
    * Animation speed in pixels per second for scrolling elements into view.
    * This can be Infinity to disable the animation, or null to disable scrolling.
    */
-  public scrollSpeed = 1000;
+  public scrollSpeed = Infinity;
 
   private gamepads: { [key: string]: IGamepadWrapper } = {};
   private subscriptions: Subscription[] = [];
@@ -386,7 +386,7 @@ export class InputService {
     // Win8.1 style apps or browsers.
     if ('gamepadInputEmulation' in navigator) {
       // We want the gamepad to provide gamepad VK keyboard events rather than moving a
-      // mouse like cursor. The gamepad will provide such keyboard events and provide 
+      // mouse like cursor. The gamepad will provide such keyboard events and provide
       // input to the DOM navigator.getGamepads API. Set to 'gamepad' to let arcade-machine
       // handle these events. Set to 'keyboard' to get some default handling
       (<any>navigator).gamepadInputEmulation = typeof navigator.getGamepads === 'function' ? 'gamepad' : 'keyboard';
