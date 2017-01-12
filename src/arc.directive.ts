@@ -14,8 +14,17 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/never';
 import 'rxjs/add/operator/startWith';
 
-function createDirectionCapture(direction: Direction, target: Element) {
-  if (!target) {
+export interface ContainsElement { element : Element }
+
+function createDirectionCapture(direction: Direction, target: Element | ContainsElement) {
+  let finalTarget : Element;
+  if (target instanceof Element) {
+    finalTarget = target;
+  }
+  else if (target.element instanceof Element) {
+    finalTarget = target.element;
+  }
+  else {
     throw new Error(
       `Cannot set [arc-${Direction[direction]}] to an undefined element!` +
       'Make sure the element you\'re passing is defined correctly.'
@@ -24,7 +33,7 @@ function createDirectionCapture(direction: Direction, target: Element) {
 
   return (ev: IArcEvent) => {
     if (ev.event === direction && !ev.defaultPrevented) {
-      ev.next = target;
+      ev.next = finalTarget;
     }
   };
 }
@@ -57,22 +66,22 @@ export class ArcDirective implements OnInit, OnDestroy, IArcDirective {
   public arcBack = new EventEmitter<IArcEvent>();
 
   @Input('arc-left')
-  public set arcLeft(target: Element) {
+  public set arcLeft(target: Element | ContainsElement) {
     this.handlers.push(createDirectionCapture(Direction.LEFT, target));
   }
 
   @Input('arc-right')
-  public set arcRight(target: Element) {
+  public set arcRight(target: Element | ContainsElement) {
     this.handlers.push(createDirectionCapture(Direction.RIGHT, target));
   }
 
   @Input('arc-up')
-  public set arcUp(target: Element) {
+  public set arcUp(target: Element | ContainsElement) {
     this.handlers.push(createDirectionCapture(Direction.UP, target));
   }
 
   @Input('arc-down')
-  public set arcDown(target: Element) {
+  public set arcDown(target: Element | ContainsElement) {
     this.handlers.push(createDirectionCapture(Direction.DOWN, target));
   }
 
