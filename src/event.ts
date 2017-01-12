@@ -3,19 +3,19 @@ import { Direction, IArcDirective, IArcEvent } from './model';
 export class ArcEvent implements IArcEvent {
 
   public readonly directive: IArcDirective;
-  public next: Element;
+  public next: HTMLElement;
 
   public readonly event: Direction;
-  public readonly target: Element;
+  public readonly target: HTMLElement;
 
   public defaultPrevented = false;
   public propagationStopped = false;
 
   constructor(opts: {
     directive: IArcDirective,
-    next: Element,
+    next: HTMLElement,
     event: Direction,
-    target: Element
+    target: HTMLElement
   }) { Object.assign(this, opts); }
 
   public stopPropagation() {
