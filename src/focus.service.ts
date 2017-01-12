@@ -509,6 +509,17 @@ export class FocusService {
   private isFocusable(el: HTMLElement) {
     const role = el.getAttribute('role');
     const tabIndex = el.tabIndex;
+    let visible = true;
+    for (let parent = el; parent !== this.root; parent = parent.parentElement) {
+      if (parent.classList.contains('hidden')) {
+        visible = false;
+        break;
+      }
+    }
+
+    if (!visible) {
+      return false;
+    }
 
     return el.tagName === 'A'
       || el.tagName === 'BUTTON'
