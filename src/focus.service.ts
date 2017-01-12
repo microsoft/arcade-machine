@@ -379,7 +379,7 @@ export class FocusService {
     // Otherwise see if we can handle it...
     if (directional && ev.next !== null) {
       this.selectNode(ev.next);
-      this.rescroll(<HTMLElement>ev.next, scrollSpeed, this.root);
+      this.rescroll(ev.next, scrollSpeed, this.root);
     } else if (direction === Direction.SUBMIT) {
       this.selected.click();
     } else if (direction === Direction.BACK) {
