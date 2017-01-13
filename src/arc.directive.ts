@@ -1,4 +1,4 @@
-import { Direction, IArcDirective, IArcEvent } from './model';
+import { Direction, IArcHandler, IArcEvent } from './model';
 import { RegistryService } from './registry.service';
 import {
   Directive,
@@ -30,7 +30,7 @@ function createDirectionCapture(direction: Direction, target: HTMLElement) {
 }
 
 @Directive({ selector: '[arc]' })
-export class ArcDirective implements OnInit, OnDestroy, IArcDirective {
+export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
 
   // 'Primitive' I/O handlers: ================================================
 
@@ -46,6 +46,11 @@ export class ArcDirective implements OnInit, OnDestroy, IArcDirective {
   @Input('arc-default-focus')
   public set arcDefaultFocus(_ignored: any) {
     this.arcSetFocus = this.arcSetFocus.startWith(undefined);
+  }
+
+  @Input('arc-exclude-this')
+  public set arcExcludeThis(exclude: any) {
+    this.excludeThis = exclude !== false;
   }
 
   // Directional/event shortcuts: =============================================
@@ -77,6 +82,7 @@ export class ArcDirective implements OnInit, OnDestroy, IArcDirective {
   }
 
   private handlers: ((ev: IArcEvent) => void)[] = [];
+  private excludeThis = false;
 
   constructor(
     private el: ElementRef,
@@ -96,7 +102,11 @@ export class ArcDirective implements OnInit, OnDestroy, IArcDirective {
     return this.el.nativeElement;
   }
 
-  public fireEvent(ev: IArcEvent) {
+  public exclude() {
+    return this.excludeThis;
+  }
+
+  public onOutgoing(ev: IArcEvent) {
     this.arcCapture.emit(ev);
 
     switch (ev.event) {
