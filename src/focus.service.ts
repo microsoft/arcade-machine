@@ -509,7 +509,11 @@ export class FocusService {
   private isFocusable(el: HTMLElement) {
     const role = el.getAttribute('role');
     const tabIndex = el.tabIndex;
-    const visible = window.getComputedStyle(el).display !== 'none';
+    let visible = el.offsetParent !== null;
+
+    if (visible) {
+      visible = window.getComputedStyle(el).display !== 'none';
+    }
 
     if (!visible) {
       return false;
