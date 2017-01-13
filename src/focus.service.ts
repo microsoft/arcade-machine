@@ -511,6 +511,13 @@ export class FocusService {
     const tabIndex = el.tabIndex;
     let visible = el.offsetParent !== null;
 
+    for (let parent = el; parent !== this.root; parent = parent.parentElement) {
+      if (parent.classList.contains('hidden')) {
+        visible = false;
+        break;
+      }
+    }
+
     if (visible) {
       visible = window.getComputedStyle(el).display !== 'none';
     }
