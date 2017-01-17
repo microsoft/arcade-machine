@@ -1,8 +1,8 @@
-import { Direction, IArcDirective, IArcEvent } from './model';
+import { Direction, IArcHandler, IArcEvent } from './model';
 
 export class ArcEvent implements IArcEvent {
 
-  public readonly directive: IArcDirective;
+  public readonly directive: IArcHandler;
   public next: HTMLElement;
 
   public readonly event: Direction;
@@ -12,7 +12,7 @@ export class ArcEvent implements IArcEvent {
   public propagationStopped = false;
 
   constructor(opts: {
-    directive: IArcDirective,
+    directive: IArcHandler,
     next: HTMLElement,
     event: Direction,
     target: HTMLElement

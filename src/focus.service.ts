@@ -368,12 +368,20 @@ export class FocusService {
     });
 
     if (isNodeAttached(this.selected, this.root)) {
-      this.bubbleEvent(ev);
+      this.bubbleEvent(ev, false);
     }
 
     // Abort if the user handled
     if (ev.defaultPrevented) {
       return true;
+    }
+
+    // Bubble once more on the target.
+    if (ev.next) {
+      this.bubbleEvent(ev, true, ev.next);
+      if (ev.defaultPrevented) {
+        return true;
+      }
     }
 
     // Otherwise see if we can handle it...
@@ -480,11 +488,8 @@ export class FocusService {
    * Bubbles the ArcEvent from the currently selected element
    * to all parent arc directives.
    */
-  private bubbleEvent(ev: ArcEvent): ArcEvent {
-    for (let el = this.selected;
-      !ev.propagationStopped && el !== this.root;
-      el = el.parentElement) {
-
+  private bubbleEvent(ev: ArcEvent, incoming: boolean, source: HTMLElement = this.selected): ArcEvent {
+    for (let el = source; !ev.propagationStopped && el !== this.root; el = el.parentElement) {
       if (el === undefined) {
         console.warn(
           `arcade-machine focusable element <${el.tagName}> was moved outside of` +
@@ -496,7 +501,11 @@ export class FocusService {
 
       const directive = this.registry.find(el);
       if (directive) {
-        directive.fireEvent(ev);
+        if (incoming && directive.onIncoming) {
+          directive.onIncoming(ev);
+        } else if (!incoming && directive.onOutgoing) {
+          directive.onOutgoing(ev);
+        }
       }
     }
 
@@ -506,9 +515,17 @@ export class FocusService {
   /**
    * Returns if the element can receive focus.
    */
-  private isFocusable(el: HTMLElement) {
+  private isFocusable(el: HTMLElement): boolean {
+    const record = this.registry.find(el);
+    if (record && record.exclude && record.exclude()) {
+      return false;
+    }
+
+    if (el.tabIndex > -1) {
+      return true;
+    }
+
     const role = el.getAttribute('role');
-    const tabIndex = el.tabIndex;
     const style = window.getComputedStyle(el);
     if (style.display === 'none' || style.visibility === 'hidden') {
       return false;
@@ -520,14 +537,11 @@ export class FocusService {
       }
     }
 
-    return el.tagName === 'A'
-      || el.tagName === 'BUTTON'
-      || el.tagName === 'INPUT'
-      || el.tagName === 'SELECT'
-      || el.tagName === 'TEXTAREA'
-      || (role && focusableRoles.indexOf(role) > -1)
-      || (tabIndex && tabIndex > -1)
-      || this.registry.find(el) !== undefined;
+    if (role && focusableRoles.indexOf(role) > -1) {
+      return true;
+    }
+
+    return !!record;
   }
 
   /**
