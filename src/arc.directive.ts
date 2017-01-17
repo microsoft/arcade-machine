@@ -37,8 +37,11 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
   @Input('arc-set-focus')
   public arcSetFocus: Observable<void> = Observable.never<void>();
 
-  @Output('arc-capture')
-  public arcCapture = new EventEmitter<IArcEvent>();
+  @Output('arc-capture-outgoing')
+  public arcCaptureOutgoing = new EventEmitter<IArcEvent>();
+
+  @Output('arc-capture-incoming')
+  public arcCaptureIncoming = new EventEmitter<IArcEvent>();
 
   @Output('arc-focus')
   public arcFocus = new EventEmitter<HTMLElement>();
@@ -107,7 +110,7 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
   }
 
   public onOutgoing(ev: IArcEvent): void {
-    this.arcCapture.emit(ev);
+    this.arcCaptureOutgoing.emit(ev);
 
     switch (ev.event) {
       case Direction.SUBMIT:
@@ -123,6 +126,10 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
     for (let i = 0; i < this.handlers.length; i += 1) {
       this.handlers[i](ev);
     }
+  }
+
+  public onIncoming(ev: IArcEvent) {
+    this.arcCaptureIncoming.emit(ev);
   }
 
   public onFocus(el: HTMLElement): void {
