@@ -515,7 +515,7 @@ export class FocusService {
   /**
    * Returns if the element can receive focus.
    */
-  private isFocusable(el: HTMLElement) {
+  private isFocusable(el: HTMLElement): boolean {
     const record = this.registry.find(el);
     if (record && record.exclude && record.exclude()) {
       return false;

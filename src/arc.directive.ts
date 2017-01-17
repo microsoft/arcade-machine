@@ -98,15 +98,15 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
     this.registry.remove(this);
   }
 
-  public getElement() {
+  public getElement(): HTMLElement {
     return this.el.nativeElement;
   }
 
-  public exclude() {
+  public exclude(): boolean {
     return this.excludeThis;
   }
 
-  public onOutgoing(ev: IArcEvent) {
+  public onOutgoing(ev: IArcEvent): void {
     this.arcCapture.emit(ev);
 
     switch (ev.event) {
@@ -125,7 +125,7 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
     }
   }
 
-  public onFocus(el: HTMLElement) {
+  public onFocus(el: HTMLElement): void {
     this.arcFocus.next(el);
   }
 }
