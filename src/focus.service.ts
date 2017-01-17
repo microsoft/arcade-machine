@@ -526,6 +526,17 @@ export class FocusService {
     }
 
     const role = el.getAttribute('role');
+    const style = window.getComputedStyle(el);
+    if (style.display === 'none' || style.visibility === 'hidden') {
+      return false;
+    }
+
+    for (let parent = el; parent !== this.root; parent = parent.parentElement) {
+      if (window.getComputedStyle(parent).opacity === '0') {
+        return false;
+      }
+    }
+
     if (role && focusableRoles.indexOf(role) > -1) {
       return true;
     }
