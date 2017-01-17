@@ -46,9 +46,13 @@ You can pass an Observable to `arc-set-focus` which, when fired, will forcefully
 
 When `arc-focus` is on an element, that element will steal the page focus when it's instantiated. Setting this is a shortcut to passing `Observable.of(undefined)` to `arc-set-focus` to immediately trigger a focus capture.
 
-##### (arc-capture)="onEvent(IArcEvent)"
+##### (arc-capture-outgoing)="onEvent(IArcEvent)"
 
-`arc-capture` can be set to handle, and possibly cancel, events sent while the element or one of its children are focused. See the `IArcEvent` type for more details:
+`arc-capture-outgoing` can be set to handle, and possibly cancel, events sent while the element or one of its children are focused. See the `IArcEvent` type for more details:
+
+##### (arc-capture-incoming)="onEvent(IArcEvent)"
+
+`arc-capture-incoming` can be set to handle, and possibly cancel, events sent while the element is the next target of navigation. See the `IArcEvent` type for more details:
 
 ```typescript
 /**
@@ -78,16 +82,20 @@ export interface IArcEvent {
  * Direction is an enum of possible gamepad events which can fire.
  */
 export enum Direction {
-  LEFT,
-  RIGHT,
-  UP,
-  DOWN,
-  SUBMIT,
-  BACK,
+  SUBMIT = 0,
+  BACK = 1,
+  X = 2,
+  Y = 3,
+  TABLEFT = 4, // Left Bumper
+  TABRIGHT = 5, // Right Bumper
+  TABUP = 6, // Left Trigger
+  TABDOWN = 7, // Right Trigger
+  UP = 12,
+  DOWN = 13,
+  LEFT = 14,
+  RIGHT = 15,
 }
 ```
-
-
 
 ##### (arc-focus)="onFocusChange(Element?)"
 
@@ -95,15 +103,15 @@ export enum Direction {
 
 ##### (arc-submit)="onSubmit(IArcEvent)"
 
-`arc-submit` is a shortcut to create a handler via `arc-capture` that fires when a "submit" event is fired.
+`arc-submit` is a shortcut to create a handler via `arc-capture-outgoing` that fires when a "submit" event is fired.
 
 ##### (arc-back)="onBack(IArcEvent)"
 
-`arc-back` is a shortcut to create a handler via `arc-capture` that fires when a "back" event is fired.
+`arc-back` is a shortcut to create a handler via `arc-capture-outgoing` that fires when a "back" event is fired.
 
 ##### [arc-[left|right|up|down]]="Element"
 
-Allows you to explicitly tell the directive which element to focus when off the element in the provided direction. Again, this is a shortcut to a `arc-capture` handler which sets the `next` element if it matches the target direction.
+Allows you to explicitly tell the directive which element to focus when off the element in the provided direction. Again, this is a shortcut to a `arc-capture-outgoing` handler which sets the `next` element if it matches the target direction.
 
 ### Classes
 
