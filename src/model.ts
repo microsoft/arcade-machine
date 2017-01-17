@@ -26,7 +26,7 @@ export enum Direction {
 export interface IArcEvent {
   // The 'arc' directive reference, may not be filled for elements which
   // are focusable without the directive, like form controls.
-  readonly directive?: IArcDirective;
+  readonly directive?: IArcHandler;
   // `next` is the element that we'll select next, on directional navigation,
   // unless the element is cancelled. This *is* settable and you can use it
   // to modify the focus target. This will be set to `null` on non-directional
@@ -41,7 +41,7 @@ export interface IArcEvent {
   preventDefault(): void;
 }
 
-export interface IArcDirective {
+export interface IArcHandler {
 
   /**
    * Returns the associated DOM element.
@@ -49,12 +49,25 @@ export interface IArcDirective {
   getElement(): HTMLElement;
 
   /**
-   * Calls event handlers for the event.
+   * A method which can return "false" if this handler should not be
+   * included as focusable.
    */
-  fireEvent(ev: IArcEvent): void;
+  exclude?(): boolean;
+
+  /**
+   * Called with an IArcEvent focus is about
+   * to leave this element or one of its children.
+   */
+  onOutgoing?(ev: IArcEvent): void;
+
+  /**
+   * Called with an IArcEvent focus is about
+   * to enter this element or one of its children.
+   */
+  onIncoming?(ev: IArcEvent): void;
 
   /**
    * Triggers a focus change event.
    */
-  onFocus(el: HTMLElement): void;
+  onFocus?(el: HTMLElement): void;
 }
