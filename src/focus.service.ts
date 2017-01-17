@@ -510,19 +510,14 @@ export class FocusService {
     const role = el.getAttribute('role');
     const tabIndex = el.tabIndex;
     const style = window.getComputedStyle(el);
-    let visible = style.display !== 'none' && style.visibility !== 'hidden';
-
-    if (visible) {
-      for (let parent = el; parent !== this.root; parent = parent.parentElement) {
-        if (window.getComputedStyle(parent).opacity === '0') {
-          visible = false;
-          break;
-        }
-      }
+    if (style.display === 'none' || style.visibility === 'hidden') {
+      return false;
     }
 
-    if (!visible) {
-      return false;
+    for (let parent = el; parent !== this.root; parent = parent.parentElement) {
+      if (window.getComputedStyle(parent).opacity === '0') {
+        return false;
+      }
     }
 
     return el.tagName === 'A'
