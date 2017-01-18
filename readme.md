@@ -1,6 +1,6 @@
 # arcade-machine
 
-arcade-machine is an Angular plugin to provide navigation and interactive semantics using the GamePad API. This allows the application to be navigated using a controller connected to a PC, the PC's keyboard, or on Univsersal Windows Platform (UWP) web applications running on the Xbox.
+arcade-machine is an Angular plugin to provide navigation and interactive semantics using the GamePad API. This allows the application to be navigated using a controller connected to a PC, the PC's keyboard, or on Universal Windows Platform (UWP) web applications running on the Xbox.
 
 > See the [reference controller](https://i-msdn.sec.s-msft.com/en-us/windows/uwp/input-and-devices/images/designing-for-tv/hardware-buttons-gamepad-remote.png) for mappings with buttons.
 
