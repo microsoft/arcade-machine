@@ -1,4 +1,4 @@
-import { Direction, IArcHandler, IArcEvent } from './model';
+import { Direction, IArcEvent, IArcHandler } from './model';
 import { RegistryService } from './registry.service';
 import {
   Directive,

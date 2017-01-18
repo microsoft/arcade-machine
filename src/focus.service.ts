@@ -521,11 +521,10 @@ export class FocusService {
       return false;
     }
 
-    if (el.tabIndex > -1) {
-      return true;
+    if (el.tabIndex < 0) {
+      return false;
     }
 
-    const role = el.getAttribute('role');
     const style = window.getComputedStyle(el);
     if (style.display === 'none' || style.visibility === 'hidden') {
       return false;
@@ -537,6 +536,7 @@ export class FocusService {
       }
     }
 
+    const role = el.getAttribute('role');
     if (role && focusableRoles.indexOf(role) > -1) {
       return true;
     }
