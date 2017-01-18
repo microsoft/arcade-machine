@@ -541,11 +541,14 @@ export class FocusService {
       return true;
     }
 
+    const tabIndex = el.getAttribute('tabIndex');
+
     return el.tagName === 'A'
       || el.tagName === 'BUTTON'
       || el.tagName === 'INPUT'
       || el.tagName === 'SELECT'
       || el.tagName === 'TEXTAREA'
+      || (!!tabIndex && Number(tabIndex) >= 0)
       || !!record;
   }
 
