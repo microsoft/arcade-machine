@@ -541,7 +541,12 @@ export class FocusService {
       return true;
     }
 
-    return !!record;
+    return el.tagName === 'A'
+      || el.tagName === 'BUTTON'
+      || el.tagName === 'INPUT'
+      || el.tagName === 'SELECT'
+      || el.tagName === 'TEXTAREA'
+      || !!record;
   }
 
   /**
