@@ -38,7 +38,6 @@ module.exports = {
           {
             loader: 'awesome-typescript-loader',
             query: {
-              useForkChecker: true,
               tsconfig: paths.tsconfig
             }
           },
@@ -52,8 +51,6 @@ module.exports = {
       hash: true,
       chunksSortMode: (a, b) => chunkOrder.indexOf(a.names[0]) > chunkOrder.indexOf(b.names[0]),
     }),
-
-    new atl.ForkCheckerPlugin(),
 
     // Fix for critical dependency warning due to System.import in angular.
     // See https://github.com/angular/angular/issues/11580
