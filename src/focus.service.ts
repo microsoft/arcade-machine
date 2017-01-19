@@ -1,10 +1,11 @@
-import { ArcEvent } from './event';
-import { Direction } from './model';
-import { RegistryService } from './registry.service';
 import { Injectable } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 
 import 'rxjs/add/operator/filter';
+
+import { ArcEvent } from './event';
+import { Direction } from './model';
+import { RegistryService } from './registry.service';
 
 // These factors can be tweaked to adjust which elements are favored by the focus algorithm
 const scoringConstants = Object.freeze({
@@ -102,7 +103,7 @@ function calculateScore(
   maxDistance: number,
   historyRect: ClientRect,
   referenceRect: ClientRect,
-  potentialRect: ClientRect
+  potentialRect: ClientRect,
 ): number {
   let percentInShadow: number;
   let primaryAxisDistance: number;
@@ -494,7 +495,7 @@ export class FocusService {
         console.warn(
           `arcade-machine focusable element <${el.tagName}> was moved outside of` +
           'the focus root. We may not be able to handle focus correctly.',
-          el
+          el,
         );
         break;
       }
@@ -633,12 +634,12 @@ export class FocusService {
       newHistoryRect.top = Math.max(
         result.rect.top,
         result.referenceRect.top,
-        this.historyRect ? this.historyRect.top : Number.MIN_VALUE
+        this.historyRect ? this.historyRect.top : Number.MIN_VALUE,
       );
       newHistoryRect.bottom = Math.min(
         result.rect.bottom,
         result.referenceRect.bottom,
-        this.historyRect ? this.historyRect.bottom : Number.MAX_VALUE
+        this.historyRect ? this.historyRect.bottom : Number.MAX_VALUE,
       );
 
       if (newHistoryRect.bottom <= newHistoryRect.top) {
@@ -653,12 +654,12 @@ export class FocusService {
       newHistoryRect.left = Math.max(
         result.rect.left,
         result.referenceRect.left,
-        this.historyRect ? this.historyRect.left : Number.MIN_VALUE
+        this.historyRect ? this.historyRect.left : Number.MIN_VALUE,
       );
       newHistoryRect.right = Math.min(
         result.rect.right,
         result.referenceRect.right,
-        this.historyRect ? this.historyRect.right : Number.MAX_VALUE
+        this.historyRect ? this.historyRect.right : Number.MAX_VALUE,
       );
 
       if (newHistoryRect.right <= newHistoryRect.left) {

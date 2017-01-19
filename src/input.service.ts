@@ -1,5 +1,3 @@
-import { FocusService } from './focus.service';
-import { Direction } from './model';
 import { EventEmitter, Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
@@ -7,6 +5,9 @@ import { Subscription } from 'rxjs/Subscription';
 
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/observable/merge';
+
+import { FocusService } from './focus.service';
+import { Direction } from './model';
 
 interface IGamepadWrapper {
   // Directional returns from the gamepad. They debounce themselves and
@@ -386,7 +387,7 @@ export class InputService {
     // Win8.1 style apps or browsers.
     if ('gamepadInputEmulation' in navigator) {
       // We want the gamepad to provide gamepad VK keyboard events rather than moving a
-      // mouse like cursor. The gamepad will provide such keyboard events and provide 
+      // mouse like cursor. The gamepad will provide such keyboard events and provide
       // input to the DOM navigator.getGamepads API. Set to 'gamepad' to let arcade-machine
       // handle these events. Set to 'keyboard' to get some default handling
       (<any>navigator).gamepadInputEmulation = typeof navigator.getGamepads === 'function' ? 'gamepad' : 'keyboard';
@@ -396,8 +397,9 @@ export class InputService {
     this.focus.setRoot(root);
 
     this.subscriptions.push(
-      Observable.fromEvent<FocusEvent>(document, 'focusin', { passive: true })
-        .subscribe(ev => this.focus.onFocusChange(<HTMLElement>ev.target))
+      Observable.fromEvent<FocusEvent>(
+        document, 'focusin', { passive: true })
+        .subscribe(ev => this.focus.onFocusChange(<HTMLElement>ev.target)),
     );
   }
 
@@ -447,12 +449,12 @@ export class InputService {
     this.subscriptions.push(
       Observable.merge(
         this.gamepadSrc,
-        Observable.fromEvent(window, 'gamepadconnected')
+        Observable.fromEvent(window, 'gamepadconnected'),
       ).subscribe(ev => {
         addGamepad((<any>ev).gamepad);
         cancelAnimationFrame(this.pollRaf);
         this.scheduleGamepadPoll();
-      })
+      }),
     );
   }
 
@@ -565,12 +567,12 @@ export class InputService {
     this.subscriptions.push(
       Observable.merge(
         this.keyboardSrc,
-        Observable.fromEvent<KeyboardEvent>(window, 'keydown')
+        Observable.fromEvent<KeyboardEvent>(window, 'keydown'),
       ).subscribe(ev => {
         if (!ev.defaultPrevented && this.handleKeyDown(ev.keyCode)) {
           ev.preventDefault();
         }
-      })
+      }),
     );
   }
 }

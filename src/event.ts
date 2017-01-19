@@ -1,4 +1,4 @@
-import { Direction, IArcHandler, IArcEvent } from './model';
+import { Direction, IArcEvent, IArcHandler } from './model';
 
 export class ArcEvent implements IArcEvent {
 
@@ -15,7 +15,7 @@ export class ArcEvent implements IArcEvent {
     directive: IArcHandler,
     next: HTMLElement,
     event: Direction,
-    target: HTMLElement
+    target: HTMLElement,
   }) { Object.assign(this, opts); }
 
   public stopPropagation() {
