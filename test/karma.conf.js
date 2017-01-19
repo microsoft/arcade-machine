@@ -1,6 +1,6 @@
-import path = require('path');
+const path = require('path');
 
-export function config(config: any) {
+module.exports = function config(config) {
 
   config.set({
 
