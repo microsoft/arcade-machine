@@ -521,7 +521,9 @@ export class FocusService {
       return false;
     }
 
-    if (el.tabIndex < 0) {
+    const tabIndex = el.getAttribute('tabIndex');
+
+    if (!!tabIndex && Number(tabIndex) < 0) {
       return false;
     }
 
@@ -540,8 +542,6 @@ export class FocusService {
     if (role && focusableRoles.indexOf(role) > -1) {
       return true;
     }
-
-    const tabIndex = el.getAttribute('tabIndex');
 
     return el.tagName === 'A'
       || el.tagName === 'BUTTON'
