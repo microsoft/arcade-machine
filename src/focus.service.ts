@@ -266,7 +266,7 @@ export class FocusService {
   /**
    * Sets the root element to use for focusing.
    */
-  public setRoot(root: HTMLElement) {
+  public setRoot(root: HTMLElement, scrollSpeed: number) {
     if (this.registrySubscription) {
       this.registrySubscription.unsubscribe();
     }
@@ -275,7 +275,10 @@ export class FocusService {
     this.registrySubscription = this.registry
       .setFocus
       .filter((el: HTMLElement) => !!el)
-      .subscribe((el: HTMLElement) => this.selectNode(el));
+      .subscribe((el: HTMLElement) => {
+        this.rescroll(el, scrollSpeed, this.root);
+        this.selectNode(el);
+      });
   }
 
   /**
@@ -283,7 +286,8 @@ export class FocusService {
    * this is handle adjustments if the user interacts with other input
    * devices, or if other application logic requests focus.
    */
-  public onFocusChange(focus: HTMLElement) {
+  public onFocusChange(focus: HTMLElement, scrollSpeed: number) {
+    this.rescroll(focus, scrollSpeed, this.root);
     this.selectNode(focus);
   }
 
