@@ -266,7 +266,7 @@ export class FocusService {
   /**
    * Sets the root element to use for focusing.
    */
-  public setRoot(root: HTMLElement) {
+  public setRoot(root: HTMLElement, scrollSpeed: number) {
     if (this.registrySubscription) {
       this.registrySubscription.unsubscribe();
     }
@@ -275,7 +275,7 @@ export class FocusService {
     this.registrySubscription = this.registry
       .setFocus
       .filter((el: HTMLElement) => !!el)
-      .subscribe((el: HTMLElement) => this.selectNode(el));
+      .subscribe((el: HTMLElement) => this.selectNode(el, scrollSpeed));
   }
 
   /**
@@ -283,18 +283,20 @@ export class FocusService {
    * this is handle adjustments if the user interacts with other input
    * devices, or if other application logic requests focus.
    */
-  public onFocusChange(focus: HTMLElement) {
-    this.selectNode(focus);
+  public onFocusChange(focus: HTMLElement, scrollSpeed: number) {
+    this.selectNode(focus, scrollSpeed);
   }
 
   /**
    * Updates the selected DOM node.
    */
-  public selectNode(next: HTMLElement) {
+  public selectNode(next: HTMLElement, scrollSpeed: number) {
     const { selected, parents } = this;
     if (selected === next) {
       return;
     }
+
+    this.rescroll(next, scrollSpeed, this.root);
 
     const attached = selected && isNodeAttached(selected, this.root);
     if (!attached && parents) {
@@ -386,8 +388,7 @@ export class FocusService {
 
     // Otherwise see if we can handle it...
     if (directional && ev.next !== null) {
-      this.selectNode(ev.next);
-      this.rescroll(ev.next, scrollSpeed, this.root);
+      this.selectNode(ev.next, scrollSpeed);
     } else if (direction === Direction.SUBMIT) {
       this.selected.click();
     } else if (direction === Direction.BACK) {

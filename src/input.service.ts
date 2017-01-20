@@ -393,11 +393,11 @@ export class InputService {
     }
 
     this.addKeyboardListeners();
-    this.focus.setRoot(root);
+    this.focus.setRoot(root, this.scrollSpeed);
 
     this.subscriptions.push(
       Observable.fromEvent<FocusEvent>(document, 'focusin', { passive: true })
-        .subscribe(ev => this.focus.onFocusChange(<HTMLElement>ev.target))
+        .subscribe(ev => this.focus.onFocusChange(<HTMLElement>ev.target, this.scrollSpeed))
     );
   }
 
