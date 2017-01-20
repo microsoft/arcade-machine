@@ -530,12 +530,6 @@ export class FocusService {
       return false;
     }
 
-    for (let parent = el; parent !== this.root; parent = parent.parentElement) {
-      if (window.getComputedStyle(parent).opacity === '0') {
-        return false;
-      }
-    }
-
     const role = el.getAttribute('role');
     if (role && focusableRoles.indexOf(role) > -1) {
       return true;
