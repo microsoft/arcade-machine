@@ -275,10 +275,7 @@ export class FocusService {
     this.registrySubscription = this.registry
       .setFocus
       .filter((el: HTMLElement) => !!el)
-      .subscribe((el: HTMLElement) => {
-        this.rescroll(el, scrollSpeed, this.root);
-        this.selectNode(el);
-      });
+      .subscribe((el: HTMLElement) => this.selectNode(el, scrollSpeed));
   }
 
   /**
@@ -287,18 +284,19 @@ export class FocusService {
    * devices, or if other application logic requests focus.
    */
   public onFocusChange(focus: HTMLElement, scrollSpeed: number) {
-    this.rescroll(focus, scrollSpeed, this.root);
-    this.selectNode(focus);
+    this.selectNode(focus, scrollSpeed);
   }
 
   /**
    * Updates the selected DOM node.
    */
-  public selectNode(next: HTMLElement) {
+  public selectNode(next: HTMLElement, scrollSpeed: number) {
     const { selected, parents } = this;
     if (selected === next) {
       return;
     }
+
+    this.rescroll(next, scrollSpeed, this.root);
 
     const attached = selected && isNodeAttached(selected, this.root);
     if (!attached && parents) {
@@ -390,8 +388,7 @@ export class FocusService {
 
     // Otherwise see if we can handle it...
     if (directional && ev.next !== null) {
-      this.selectNode(ev.next);
-      this.rescroll(ev.next, scrollSpeed, this.root);
+      this.selectNode(ev.next, scrollSpeed);
     } else if (direction === Direction.SUBMIT) {
       this.selected.click();
     } else if (direction === Direction.BACK) {
