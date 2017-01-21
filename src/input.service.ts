@@ -246,6 +246,11 @@ function isForForm(direction: Direction, selected: Element): boolean {
   // Deal with the output ourselves, allowing arcade-machine to handle it only
   // if the key press would not have any effect in the context of the input.
   const input = <HTMLInputElement | HTMLTextAreaElement>selected;
+
+  if (input.type !== 'text' && input.type !== 'search' && input.type !== 'url' && input.type !== 'tel' && input.type !== 'password') {
+    return false;
+  }
+
   const cursor = input.selectionStart;
   if (cursor !== input.selectionEnd) { // key input on any range selection will be effectual.
     return true;
