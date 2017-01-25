@@ -1,4 +1,4 @@
-import { Direction, IArcHandler, IArcEvent } from './model';
+import { Direction, IArcEvent, IArcHandler } from './model';
 
 export class ArcEvent implements IArcEvent {
 
