@@ -356,19 +356,21 @@ export class FocusService {
     this.registrySubscription = null;
   }
 
-  /**
-   * Attempts to effect the focus command, returning a
-   * boolean if it was handled.
-   */
-  public fire(direction: Direction, scrollSpeed: number = Infinity): boolean {
+  public createArcEvent(direction: Direction): ArcEvent {
     const directional = isDirectional(direction);
-    const ev = new ArcEvent({
+    return new ArcEvent({
       directive: this.registry.find(this.selected),
       event: direction,
       next: directional ? this.findNextFocus(direction) : null,
       target: this.selected,
     });
+  }
 
+  /**
+   * Attempts to effect the focus command, returning a
+   * boolean if it was handled.
+   */
+  public fire(ev: ArcEvent, scrollSpeed: number = Infinity): boolean {
     if (isNodeAttached(this.selected, this.root)) {
       this.bubbleEvent(ev, false);
     }
@@ -387,11 +389,12 @@ export class FocusService {
     }
 
     // Otherwise see if we can handle it...
+    const directional = isDirectional(ev.event);
     if (directional && ev.next !== null) {
       this.selectNode(ev.next, scrollSpeed);
-    } else if (direction === Direction.SUBMIT) {
+    } else if (ev.event === Direction.SUBMIT) {
       this.selected.click();
-    } else if (direction === Direction.BACK) {
+    } else if (ev.event === Direction.BACK) {
       history.back();
     } else {
       return false;

@@ -1,3 +1,4 @@
+import { ArcEvent } from './event';
 import { FocusService } from './focus.service';
 import { Direction } from './model';
 import { EventEmitter, Injectable } from '@angular/core';
@@ -367,12 +368,14 @@ export class InputService {
   private subscriptions: Subscription[] = [];
   private pollRaf: number = null;
 
-  public onYPressed = new EventEmitter<HTMLElement>();
-  public onXPressed = new EventEmitter<HTMLElement>();
-  public onLeftTab = new EventEmitter<HTMLElement>();
-  public onRightTab = new EventEmitter<HTMLElement>();
-  public onLeftTrigger = new EventEmitter<HTMLElement>();
-  public onRightTrigger = new EventEmitter<HTMLElement>();
+  public onYPressed = new EventEmitter<ArcEvent>();
+  public onXPressed = new EventEmitter<ArcEvent>();
+  public onAPressed = new EventEmitter<ArcEvent>();
+  public onBPressed = new EventEmitter<ArcEvent>();
+  public onLeftTab = new EventEmitter<ArcEvent>();
+  public onRightTab = new EventEmitter<ArcEvent>();
+  public onLeftTrigger = new EventEmitter<ArcEvent>();
+  public onRightTrigger = new EventEmitter<ArcEvent>();
 
   constructor(private focus: FocusService) { }
 
@@ -495,40 +498,54 @@ export class InputService {
       }
 
       if (gamepad.left(now)) {
-        this.handleDirection(Direction.LEFT);
+        const ev = this.focus.createArcEvent(Direction.LEFT);
+        this.handleDirection(ev);
       }
       if (gamepad.right(now)) {
-        this.handleDirection(Direction.RIGHT);
+        const ev = this.focus.createArcEvent(Direction.RIGHT);
+        this.handleDirection(ev);
       }
       if (gamepad.down(now)) {
-        this.handleDirection(Direction.DOWN);
+        const ev = this.focus.createArcEvent(Direction.DOWN);
+        this.handleDirection(ev);
       }
       if (gamepad.up(now)) {
-        this.handleDirection(Direction.UP);
+        const ev = this.focus.createArcEvent(Direction.UP);
+        this.handleDirection(ev);
       }
       if (gamepad.tabLeft(now)) {
-        this.onLeftTab.emit(this.focus.selected);
+        const ev = this.focus.createArcEvent(Direction.TABLEFT);
+        this.onLeftTab.emit(ev);
       }
       if (gamepad.tabRight(now)) {
-        this.onRightTab.emit(this.focus.selected);
+        const ev = this.focus.createArcEvent(Direction.TABRIGHT);
+        this.onRightTab.emit(ev);
       }
       if (gamepad.tabDown(now)) {
-        this.onRightTrigger.emit(this.focus.selected);
+        const ev = this.focus.createArcEvent(Direction.TABDOWN);
+        this.onRightTrigger.emit(ev);
       }
       if (gamepad.tabUp(now)) {
-        this.onLeftTrigger.emit(this.focus.selected);
+        const ev = this.focus.createArcEvent(Direction.TABUP);
+        this.onLeftTrigger.emit(ev);
       }
       if (gamepad.submit(now)) {
-        this.handleDirection(Direction.SUBMIT);
+        const ev = this.focus.createArcEvent(Direction.SUBMIT);
+        this.onAPressed.emit(ev);
+        this.handleDirection(ev);
       }
       if (gamepad.back(now)) {
-        this.handleDirection(Direction.BACK);
+        const ev = this.focus.createArcEvent(Direction.BACK);
+        this.onBPressed.emit(ev);
+        this.handleDirection(ev);
       }
       if (gamepad.x(now)) {
-        this.onXPressed.emit(this.focus.selected);
+        const ev = this.focus.createArcEvent(Direction.X);
+        this.onXPressed.emit(ev);
       }
       if (gamepad.y(now)) {
-        this.onYPressed.emit(this.focus.selected);
+        const ev = this.focus.createArcEvent(Direction.Y);
+        this.onYPressed.emit(ev);
       }
     }
 
@@ -539,8 +556,8 @@ export class InputService {
     }
   }
 
-  private handleDirection(direction: Direction): boolean {
-    return this.focus.fire(direction, this.scrollSpeed);
+  private handleDirection(ev: ArcEvent): boolean {
+    return this.focus.fire(ev, this.scrollSpeed);
   }
 
   /**
@@ -556,8 +573,9 @@ export class InputService {
         return;
       }
 
+      const ev = this.focus.createArcEvent(direction);
       result = !isForForm(direction, this.focus.selected)
-        && this.handleDirection(direction);
+        && this.handleDirection(ev);
     });
 
     return result;
