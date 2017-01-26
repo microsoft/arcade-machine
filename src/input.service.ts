@@ -376,6 +376,10 @@ export class InputService {
   public onRightTab = new EventEmitter<ArcEvent>();
   public onLeftTrigger = new EventEmitter<ArcEvent>();
   public onRightTrigger = new EventEmitter<ArcEvent>();
+  public onLeft = new EventEmitter<ArcEvent>();
+  public onRight = new EventEmitter<ArcEvent>();
+  public onUp = new EventEmitter<ArcEvent>();
+  public onDown = new EventEmitter<ArcEvent>();
 
   constructor(private focus: FocusService) { }
 
@@ -500,18 +504,22 @@ export class InputService {
       if (gamepad.left(now)) {
         const ev = this.focus.createArcEvent(Direction.LEFT);
         this.handleDirection(ev);
+        this.onLeft.emit(ev);
       }
       if (gamepad.right(now)) {
         const ev = this.focus.createArcEvent(Direction.RIGHT);
         this.handleDirection(ev);
+        this.onRight.emit(ev);
       }
       if (gamepad.down(now)) {
         const ev = this.focus.createArcEvent(Direction.DOWN);
         this.handleDirection(ev);
+        this.onDown.emit(ev);
       }
       if (gamepad.up(now)) {
         const ev = this.focus.createArcEvent(Direction.UP);
         this.handleDirection(ev);
+        this.onUp.emit(ev);
       }
       if (gamepad.tabLeft(now)) {
         const ev = this.focus.createArcEvent(Direction.TABLEFT);
@@ -531,13 +539,13 @@ export class InputService {
       }
       if (gamepad.submit(now)) {
         const ev = this.focus.createArcEvent(Direction.SUBMIT);
-        this.onAPressed.emit(ev);
         this.handleDirection(ev);
+        this.onAPressed.emit(ev);
       }
       if (gamepad.back(now)) {
         const ev = this.focus.createArcEvent(Direction.BACK);
-        this.onBPressed.emit(ev);
         this.handleDirection(ev);
+        this.onBPressed.emit(ev);
       }
       if (gamepad.x(now)) {
         const ev = this.focus.createArcEvent(Direction.X);
