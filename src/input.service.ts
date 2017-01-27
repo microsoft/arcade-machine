@@ -272,7 +272,7 @@ export class InputService {
   /**
    * Inputpane and boolean to indicate whether it's visible
    */
-  private inputPane = (<any>window).Windows ? Windows.UI.ViewManagement.InputPane.getForCurrentView() : null;
+  public inputPane = (<any>window).Windows ? Windows.UI.ViewManagement.InputPane.getForCurrentView() : null;
 
   public get keyboardVisible(): boolean {
     return !!this.inputPane && this.inputPane.occludedRect.y !== 0;
