@@ -310,6 +310,8 @@ export class FocusService {
       // Remove selected classes in the current subtree, and add selected
       // classes in the other subtree. Trigger focus changes on every
       // element that we touch.
+      selected.blur();
+
       const common = getCommonAncestor(next, selected);
       selected.classList.remove(cssClass.direct);
       for (let el = selected; el !== common; el = el.parentElement) {
