@@ -219,13 +219,14 @@ function isForForm(direction: Direction, selected: Element): boolean {
 
   // Always allow the browser to handle enter key presses in a form or text area.
   const tag = selected.tagName;
+
   if (direction === Direction.SUBMIT) {
     if (tag === 'TEXTAREA') {
       return true;
     }
 
     for (let parent = selected; parent; parent = parent.parentElement) {
-      if (parent.tagName === 'FORM') {
+      if (parent.tagName === 'FORM' || parent.tagName === 'INPUT') {
         return true;
       }
     }
@@ -398,7 +399,7 @@ export class InputService {
     // Win8.1 style apps or browsers.
     if ('gamepadInputEmulation' in navigator) {
       // We want the gamepad to provide gamepad VK keyboard events rather than moving a
-      // mouse like cursor. The gamepad will provide such keyboard events and provide 
+      // mouse like cursor. The gamepad will provide such keyboard events and provide
       // input to the DOM navigator.getGamepads API. Set to 'gamepad' to let arcade-machine
       // handle these events. Set to 'keyboard' to get some default handling
       (<any>navigator).gamepadInputEmulation = typeof navigator.getGamepads === 'function' ? 'gamepad' : 'keyboard';
