@@ -276,6 +276,17 @@ export class FocusService {
       .setFocus
       .filter((el: HTMLElement) => !!el)
       .subscribe((el: HTMLElement) => this.selectNode(el, scrollSpeed));
+
+    if (!this.selected) {
+      return;
+    }
+
+    for (let el = this.selected; el !== root; el = el.parentElement) {
+      if (el === undefined) {
+        this.setDefaultFocus(scrollSpeed);
+        return;
+      }
+    }
   }
 
   /**
@@ -550,6 +561,28 @@ export class FocusService {
       || el.tagName === 'TEXTAREA'
       || (!!tabIndex && Number(tabIndex) >= 0)
       || !!record;
+  }
+
+  /**
+   * Reset the focus if arcade-machine wanders out of root
+   */
+  private setDefaultFocus(scrollSpeed: number) {
+    const { root, selected } = this;
+    const allElements = root.querySelectorAll('*');
+    for (let i = 0; i < allElements.length; i += 1) {
+      const potentialElement = <HTMLElement>allElements[i];
+      if (selected === potentialElement || !this.isFocusable(potentialElement)) {
+        continue;
+      }
+      const potentialRect = roundRect(potentialElement.getBoundingClientRect());
+      // Skip elements that have either a width of zero or a height of zero
+      if (potentialRect.width === 0 || potentialRect.height === 0) {
+        continue;
+      }
+
+      this.selectNode(potentialElement, scrollSpeed);
+      return;
+    }
   }
 
   /**
