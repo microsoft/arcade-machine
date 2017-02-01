@@ -429,6 +429,10 @@ export class InputService {
     }
   }
 
+  public setRoot(root: HTMLElement) {
+    this.focus.setRoot(root, this.scrollSpeed);
+  }
+
   /**
    * Detects any connected gamepads and watches for new ones to start
    * polling them. This is the entry point for gamepad input handling.
