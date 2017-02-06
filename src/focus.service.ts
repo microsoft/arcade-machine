@@ -267,7 +267,7 @@ export class FocusService {
   /**
    * Sets the root element to use for focusing.
    */
-  public setRoot(root: HTMLElement) {
+  public setRoot(root: HTMLElement, scrollSpeed: number) {
     if (this.registrySubscription) {
       this.registrySubscription.unsubscribe();
     }
@@ -276,7 +276,18 @@ export class FocusService {
     this.registrySubscription = this.registry
       .setFocus
       .filter((el: HTMLElement) => !!el)
-      .subscribe((el: HTMLElement) => this.selectNode(el));
+      .subscribe((el: HTMLElement) => this.selectNode(el, scrollSpeed));
+
+    if (!this.selected) {
+      return;
+    }
+
+    for (let el = this.selected; el !== root; el = el.parentElement) {
+      if (el === undefined) {
+        this.setDefaultFocus(scrollSpeed);
+        return;
+      }
+    }
   }
 
   /**
@@ -284,18 +295,20 @@ export class FocusService {
    * this is handle adjustments if the user interacts with other input
    * devices, or if other application logic requests focus.
    */
-  public onFocusChange(focus: HTMLElement) {
-    this.selectNode(focus);
+  public onFocusChange(focus: HTMLElement, scrollSpeed: number) {
+    this.selectNode(focus, scrollSpeed);
   }
 
   /**
    * Updates the selected DOM node.
    */
-  public selectNode(next: HTMLElement) {
+  public selectNode(next: HTMLElement, scrollSpeed: number) {
     const { selected, parents } = this;
     if (selected === next) {
       return;
     }
+
+    this.rescroll(next, scrollSpeed, this.root);
 
     const attached = selected && isNodeAttached(selected, this.root);
     if (!attached && parents) {
@@ -309,6 +322,8 @@ export class FocusService {
       // Remove selected classes in the current subtree, and add selected
       // classes in the other subtree. Trigger focus changes on every
       // element that we touch.
+      selected.blur();
+
       const common = getCommonAncestor(next, selected);
       selected.classList.remove(cssClass.direct);
       for (let el = selected; el !== common; el = el.parentElement) {
@@ -355,19 +370,21 @@ export class FocusService {
     this.registrySubscription = null;
   }
 
-  /**
-   * Attempts to effect the focus command, returning a
-   * boolean if it was handled.
-   */
-  public fire(direction: Direction, scrollSpeed: number = Infinity): boolean {
+  public createArcEvent(direction: Direction): ArcEvent {
     const directional = isDirectional(direction);
-    const ev = new ArcEvent({
+    return new ArcEvent({
       directive: this.registry.find(this.selected),
       event: direction,
       next: directional ? this.findNextFocus(direction) : null,
       target: this.selected,
     });
+  }
 
+  /**
+   * Attempts to effect the focus command, returning a
+   * boolean if it was handled.
+   */
+  public fire(ev: ArcEvent, scrollSpeed: number = Infinity): boolean {
     if (isNodeAttached(this.selected, this.root)) {
       this.bubbleEvent(ev, false);
     }
@@ -386,12 +403,12 @@ export class FocusService {
     }
 
     // Otherwise see if we can handle it...
+    const directional = isDirectional(ev.event);
     if (directional && ev.next !== null) {
-      this.selectNode(ev.next);
-      this.rescroll(ev.next, scrollSpeed, this.root);
-    } else if (direction === Direction.SUBMIT) {
+      this.selectNode(ev.next, scrollSpeed);
+    } else if (ev.event === Direction.SUBMIT) {
       this.selected.click();
-    } else if (direction === Direction.BACK) {
+    } else if (ev.event === Direction.BACK) {
       history.back();
     } else {
       return false;
@@ -522,7 +539,9 @@ export class FocusService {
       return false;
     }
 
-    if (el.tabIndex < 0) {
+    const tabIndex = el.getAttribute('tabIndex');
+
+    if (!!tabIndex && Number(tabIndex) < 0) {
       return false;
     }
 
@@ -531,18 +550,10 @@ export class FocusService {
       return false;
     }
 
-    for (let parent = el; parent !== this.root; parent = parent.parentElement) {
-      if (window.getComputedStyle(parent).opacity === '0') {
-        return false;
-      }
-    }
-
     const role = el.getAttribute('role');
     if (role && focusableRoles.indexOf(role) > -1) {
       return true;
     }
-
-    const tabIndex = el.getAttribute('tabIndex');
 
     return el.tagName === 'A'
       || el.tagName === 'BUTTON'
@@ -551,6 +562,28 @@ export class FocusService {
       || el.tagName === 'TEXTAREA'
       || (!!tabIndex && Number(tabIndex) >= 0)
       || !!record;
+  }
+
+  /**
+   * Reset the focus if arcade-machine wanders out of root
+   */
+  private setDefaultFocus(scrollSpeed: number) {
+    const { root, selected } = this;
+    const allElements = root.querySelectorAll('*');
+    for (let i = 0; i < allElements.length; i += 1) {
+      const potentialElement = <HTMLElement>allElements[i];
+      if (selected === potentialElement || !this.isFocusable(potentialElement)) {
+        continue;
+      }
+      const potentialRect = roundRect(potentialElement.getBoundingClientRect());
+      // Skip elements that have either a width of zero or a height of zero
+      if (potentialRect.width === 0 || potentialRect.height === 0) {
+        continue;
+      }
+
+      this.selectNode(potentialElement, scrollSpeed);
+      return;
+    }
   }
 
   /**

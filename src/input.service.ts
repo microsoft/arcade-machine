@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/observable/merge';
 
+import { ArcEvent } from './event';
 import { FocusService } from './focus.service';
 import { Direction } from './model';
 
@@ -219,13 +220,14 @@ function isForForm(direction: Direction, selected: Element): boolean {
 
   // Always allow the browser to handle enter key presses in a form or text area.
   const tag = selected.tagName;
+
   if (direction === Direction.SUBMIT) {
     if (tag === 'TEXTAREA') {
       return true;
     }
 
     for (let parent = selected; parent; parent = parent.parentElement) {
-      if (parent.tagName === 'FORM') {
+      if (parent.tagName === 'FORM' || parent.tagName === 'INPUT') {
         return true;
       }
     }
@@ -247,6 +249,11 @@ function isForForm(direction: Direction, selected: Element): boolean {
   // Deal with the output ourselves, allowing arcade-machine to handle it only
   // if the key press would not have any effect in the context of the input.
   const input = <HTMLInputElement | HTMLTextAreaElement>selected;
+
+  if (input.type !== 'text' && input.type !== 'search' && input.type !== 'url' && input.type !== 'tel' && input.type !== 'password') {
+    return false;
+  }
+
   const cursor = input.selectionStart;
   if (cursor !== input.selectionEnd) { // key input on any range selection will be effectual.
     return true;
@@ -267,7 +274,7 @@ export class InputService {
   /**
    * Inputpane and boolean to indicate whether it's visible
    */
-  private inputPane = (<any>window).Windows ? Windows.UI.ViewManagement.InputPane.getForCurrentView() : null;
+  public inputPane = (<any>window).Windows ? Windows.UI.ViewManagement.InputPane.getForCurrentView() : null;
 
   public get keyboardVisible(): boolean {
     return !!this.inputPane && this.inputPane.occludedRect.y !== 0;
@@ -363,12 +370,18 @@ export class InputService {
   private subscriptions: Subscription[] = [];
   private pollRaf: number = null;
 
-  public onYPressed = new EventEmitter<HTMLElement>();
-  public onXPressed = new EventEmitter<HTMLElement>();
-  public onLeftTab = new EventEmitter<HTMLElement>();
-  public onRightTab = new EventEmitter<HTMLElement>();
-  public onLeftTrigger = new EventEmitter<HTMLElement>();
-  public onRightTrigger = new EventEmitter<HTMLElement>();
+  public onYPressed = new EventEmitter<ArcEvent>();
+  public onXPressed = new EventEmitter<ArcEvent>();
+  public onAPressed = new EventEmitter<ArcEvent>();
+  public onBPressed = new EventEmitter<ArcEvent>();
+  public onLeftTab = new EventEmitter<ArcEvent>();
+  public onRightTab = new EventEmitter<ArcEvent>();
+  public onLeftTrigger = new EventEmitter<ArcEvent>();
+  public onRightTrigger = new EventEmitter<ArcEvent>();
+  public onLeft = new EventEmitter<ArcEvent>();
+  public onRight = new EventEmitter<ArcEvent>();
+  public onUp = new EventEmitter<ArcEvent>();
+  public onDown = new EventEmitter<ArcEvent>();
 
   constructor(private focus: FocusService) { }
 
@@ -394,11 +407,15 @@ export class InputService {
     }
 
     this.addKeyboardListeners();
-    this.focus.setRoot(root);
+    this.focus.setRoot(root, this.scrollSpeed);
 
     this.subscriptions.push(
       Observable.fromEvent<FocusEvent>(document, 'focusin', { passive: true })
+<<<<<<< HEAD
         .subscribe(ev => this.focus.onFocusChange(<HTMLElement>ev.target)),
+=======
+        .subscribe(ev => this.focus.onFocusChange(<HTMLElement>ev.target, this.scrollSpeed))
+>>>>>>> master
     );
   }
 
@@ -416,6 +433,10 @@ export class InputService {
     if ('gamepadInputEmulation' in navigator) {
       (<any>navigator).gamepadInputEmulation = 'mouse';
     }
+  }
+
+  public setRoot(root: HTMLElement) {
+    this.focus.setRoot(root, this.scrollSpeed);
   }
 
   /**
@@ -491,40 +512,58 @@ export class InputService {
       }
 
       if (gamepad.left(now)) {
-        this.handleDirection(Direction.LEFT);
+        const ev = this.focus.createArcEvent(Direction.LEFT);
+        this.handleDirection(ev);
+        this.onLeft.emit(ev);
       }
       if (gamepad.right(now)) {
-        this.handleDirection(Direction.RIGHT);
+        const ev = this.focus.createArcEvent(Direction.RIGHT);
+        this.handleDirection(ev);
+        this.onRight.emit(ev);
       }
       if (gamepad.down(now)) {
-        this.handleDirection(Direction.DOWN);
+        const ev = this.focus.createArcEvent(Direction.DOWN);
+        this.handleDirection(ev);
+        this.onDown.emit(ev);
       }
       if (gamepad.up(now)) {
-        this.handleDirection(Direction.UP);
+        const ev = this.focus.createArcEvent(Direction.UP);
+        this.handleDirection(ev);
+        this.onUp.emit(ev);
       }
       if (gamepad.tabLeft(now)) {
-        this.onLeftTab.emit(this.focus.selected);
+        const ev = this.focus.createArcEvent(Direction.TABLEFT);
+        this.onLeftTab.emit(ev);
       }
       if (gamepad.tabRight(now)) {
-        this.onRightTab.emit(this.focus.selected);
+        const ev = this.focus.createArcEvent(Direction.TABRIGHT);
+        this.onRightTab.emit(ev);
       }
       if (gamepad.tabDown(now)) {
-        this.onRightTrigger.emit(this.focus.selected);
+        const ev = this.focus.createArcEvent(Direction.TABDOWN);
+        this.onRightTrigger.emit(ev);
       }
       if (gamepad.tabUp(now)) {
-        this.onLeftTrigger.emit(this.focus.selected);
+        const ev = this.focus.createArcEvent(Direction.TABUP);
+        this.onLeftTrigger.emit(ev);
       }
       if (gamepad.submit(now)) {
-        this.handleDirection(Direction.SUBMIT);
+        const ev = this.focus.createArcEvent(Direction.SUBMIT);
+        this.handleDirection(ev);
+        this.onAPressed.emit(ev);
       }
       if (gamepad.back(now)) {
-        this.handleDirection(Direction.BACK);
+        const ev = this.focus.createArcEvent(Direction.BACK);
+        this.handleDirection(ev);
+        this.onBPressed.emit(ev);
       }
       if (gamepad.x(now)) {
-        this.onXPressed.emit(this.focus.selected);
+        const ev = this.focus.createArcEvent(Direction.X);
+        this.onXPressed.emit(ev);
       }
       if (gamepad.y(now)) {
-        this.onYPressed.emit(this.focus.selected);
+        const ev = this.focus.createArcEvent(Direction.Y);
+        this.onYPressed.emit(ev);
       }
     }
 
@@ -535,8 +574,8 @@ export class InputService {
     }
   }
 
-  private handleDirection(direction: Direction): boolean {
-    return this.focus.fire(direction, this.scrollSpeed);
+  private handleDirection(ev: ArcEvent): boolean {
+    return this.focus.fire(ev, this.scrollSpeed);
   }
 
   /**
@@ -552,8 +591,9 @@ export class InputService {
         return;
       }
 
+      const ev = this.focus.createArcEvent(direction);
       result = !isForForm(direction, this.focus.selected)
-        && this.handleDirection(direction);
+        && this.handleDirection(ev);
     });
 
     return result;

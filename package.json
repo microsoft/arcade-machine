@@ -1,6 +1,6 @@
 {
   "name": "arcade-machine",
-  "version": "0.5.2",
+  "version": "0.5.11",
   "scripts": {
     "gulp": "gulp",
     "build": "gulp build",
@@ -21,20 +21,20 @@
     "url": "git://github.com/WatchBeam/arcade-machine.git"
   },
   "dependencies": {
-    "@angular/core": "2.4.4",
+    "@angular/core": "~2.4.6",
     "rxjs": "~5.0.3"
   },
   "devDependencies": {
-    "@angular/common": "~2.4.4",
-    "@angular/compiler": "~2.4.4",
-    "@angular/compiler-cli": "~2.4.4",
-    "@angular/platform-browser": "~2.4.4",
-    "@angular/platform-browser-dynamic": "~2.4.4",
+    "@angular/common": "~2.4.6",
+    "@angular/compiler": "~2.4.6",
+    "@angular/compiler-cli": "~2.4.6",
+    "@angular/platform-browser": "~2.4.6",
+    "@angular/platform-browser-dynamic": "~2.4.6",
     "@types/core-js": "^0.9.34",
     "@types/jasmine": "^2.5.35",
     "@types/node": "^6.0.45",
     "@types/winrt-uwp": "0.0.16",
-    "awesome-typescript-loader": "^3.0.0-beta.18",
+    "awesome-typescript-loader": "^3.0.3",
     "clean-webpack-plugin": "^0.1.10",
     "codelyzer": "^2.0.0-beta.4",
     "core-js": "^2.4.1",
@@ -61,9 +61,9 @@
     "ts-helpers": "^1.1.1",
     "tslint": "^4.3.1",
     "tslint-microsoft-contrib": "^4.0.0",
-    "typescript": "~2.0.8",
-    "webpack": "^2.2.0",
-    "webpack-dev-server": "^2.2.0",
+    "typescript": "~2.1.5",
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.3.0",
     "zone.js": "^0.7.6"
   }
 }
