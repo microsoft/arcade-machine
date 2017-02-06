@@ -411,11 +411,7 @@ export class InputService {
 
     this.subscriptions.push(
       Observable.fromEvent<FocusEvent>(document, 'focusin', { passive: true })
-<<<<<<< HEAD
-        .subscribe(ev => this.focus.onFocusChange(<HTMLElement>ev.target)),
-=======
-        .subscribe(ev => this.focus.onFocusChange(<HTMLElement>ev.target, this.scrollSpeed))
->>>>>>> master
+        .subscribe(ev => this.focus.onFocusChange(<HTMLElement>ev.target, this.scrollSpeed)),
     );
   }
 
