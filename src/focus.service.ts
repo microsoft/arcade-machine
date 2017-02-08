@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
 import { Location } from '@angular/common';
+import { Injectable } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 
 import 'rxjs/add/operator/filter';
