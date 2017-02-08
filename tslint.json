@@ -10,7 +10,7 @@
     "mocha-no-side-effect-code": false,
     "no-any": false,
     "no-conditional-assignment": false,
-    "no-constructor-vars": false,
+    "no-parameter-properties": false,
     "no-multiline-string": false,
     "no-relative-imports": false,
     "no-stateless-class": false,
@@ -25,31 +25,17 @@
     }],
     "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
 
+    "import-blacklist": [
+        true,
+        "lodash",
+        "rxjs/Rx",
+        "rxjs"
+    ],
+
     // Angular
-    "directive-selector-name": [
-      true,
-      "camelCase"
-    ],
-    "component-selector-name": [
-      true,
-      "kebab-case"
-    ],
-    "directive-selector-type": [
-      true,
-      "attribute"
-    ],
-    "component-selector-type": [
-      true,
-      "element"
-    ],
-    "directive-selector-prefix": [
-      true,
-      "arc"
-    ],
-    "component-selector-prefix": [
-      true,
-      "arc"
-    ],
+    "directive-selector": [true, "attribute", "arc", "camelCase"],
+    "component-selector": [true, "element", "arc", "kebab-case"],
+
     "use-input-property-decorator": true,
     "use-output-property-decorator": true,
     "use-host-property-decorator": true,

@@ -158,6 +158,6 @@ gulp.task(':test:deps', (cb) => {
  */
 gulp.task('test', [':test:deps'], (done) => {
     new karma.Server({
-        configFile: path.join(process.cwd(), 'test/karma.confloader.js')
+        configFile: path.join(process.cwd(), 'test/karma.conf.js')
     }, done).start();
 });

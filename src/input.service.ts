@@ -1,6 +1,3 @@
-import { ArcEvent } from './event';
-import { FocusService } from './focus.service';
-import { Direction } from './model';
 import { EventEmitter, Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
@@ -8,6 +5,10 @@ import { Subscription } from 'rxjs/Subscription';
 
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/observable/merge';
+
+import { ArcEvent } from './event';
+import { FocusService } from './focus.service';
+import { Direction } from './model';
 
 interface IGamepadWrapper {
   // Directional returns from the gamepad. They debounce themselves and
@@ -410,7 +411,7 @@ export class InputService {
 
     this.subscriptions.push(
       Observable.fromEvent<FocusEvent>(document, 'focusin', { passive: true })
-        .subscribe(ev => this.focus.onFocusChange(<HTMLElement>ev.target, this.scrollSpeed))
+        .subscribe(ev => this.focus.onFocusChange(<HTMLElement>ev.target, this.scrollSpeed)),
     );
   }
 
@@ -464,12 +465,12 @@ export class InputService {
     this.subscriptions.push(
       Observable.merge(
         this.gamepadSrc,
-        Observable.fromEvent(window, 'gamepadconnected')
+        Observable.fromEvent(window, 'gamepadconnected'),
       ).subscribe(ev => {
         addGamepad((<any>ev).gamepad);
         cancelAnimationFrame(this.pollRaf);
         this.scheduleGamepadPoll();
-      })
+      }),
     );
   }
 
@@ -601,12 +602,12 @@ export class InputService {
     this.subscriptions.push(
       Observable.merge(
         this.keyboardSrc,
-        Observable.fromEvent<KeyboardEvent>(window, 'keydown')
+        Observable.fromEvent<KeyboardEvent>(window, 'keydown'),
       ).subscribe(ev => {
         if (!ev.defaultPrevented && this.handleKeyDown(ev.keyCode)) {
           ev.preventDefault();
         }
-      })
+      }),
     );
   }
 }
