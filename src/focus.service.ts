@@ -2,6 +2,7 @@ import { ArcEvent } from './event';
 import { Direction } from './model';
 import { RegistryService } from './registry.service';
 import { Injectable } from '@angular/core';
+import { Location } from '@angular/common';
 import { Subscription } from 'rxjs/Subscription';
 
 import 'rxjs/add/operator/filter';
@@ -261,7 +262,10 @@ export class FocusService {
   // so that we can reuse it if the element gets detached.
   private referenceRect: ClientRect;
 
-  constructor(private registry: RegistryService) { }
+  constructor(
+    private registry: RegistryService,
+    private location: Location,
+  ) { }
 
   /**
    * Sets the root element to use for focusing.
@@ -408,7 +412,7 @@ export class FocusService {
     } else if (ev.event === Direction.SUBMIT) {
       this.selected.click();
     } else if (ev.event === Direction.BACK) {
-      history.back();
+      this.location.back();
     } else {
       return false;
     }
