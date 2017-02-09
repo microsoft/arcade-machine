@@ -227,7 +227,7 @@ function isForForm(direction: Direction, selected: Element): boolean {
     }
 
     for (let parent = selected; parent; parent = parent.parentElement) {
-      if (parent.tagName === 'FORM' || parent.tagName === 'INPUT') {
+      if (parent.tagName === 'FORM' || parent.tagName === 'INPUT' || parent.tagName === 'TEXTAREA') {
         return true;
       }
     }
