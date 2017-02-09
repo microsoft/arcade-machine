@@ -1,10 +1,12 @@
-import { ArcEvent } from './event';
-import { Direction } from './model';
-import { RegistryService } from './registry.service';
+import { Location } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 
 import 'rxjs/add/operator/filter';
+
+import { ArcEvent } from './event';
+import { Direction } from './model';
+import { RegistryService } from './registry.service';
 
 // These factors can be tweaked to adjust which elements are favored by the focus algorithm
 const scoringConstants = Object.freeze({
@@ -102,7 +104,7 @@ function calculateScore(
   maxDistance: number,
   historyRect: ClientRect,
   referenceRect: ClientRect,
-  potentialRect: ClientRect
+  potentialRect: ClientRect,
 ): number {
   let percentInShadow: number;
   let primaryAxisDistance: number;
@@ -261,7 +263,10 @@ export class FocusService {
   // so that we can reuse it if the element gets detached.
   private referenceRect: ClientRect;
 
-  constructor(private registry: RegistryService) { }
+  constructor(
+    private registry: RegistryService,
+    private location: Location,
+  ) { }
 
   /**
    * Sets the root element to use for focusing.
@@ -276,6 +281,17 @@ export class FocusService {
       .setFocus
       .filter((el: HTMLElement) => !!el)
       .subscribe((el: HTMLElement) => this.selectNode(el, scrollSpeed));
+
+    if (!this.selected) {
+      return;
+    }
+
+    for (let el = this.selected; el !== root; el = el.parentElement) {
+      if (el === undefined) {
+        this.setDefaultFocus(scrollSpeed);
+        return;
+      }
+    }
   }
 
   /**
@@ -397,7 +413,7 @@ export class FocusService {
     } else if (ev.event === Direction.SUBMIT) {
       this.selected.click();
     } else if (ev.event === Direction.BACK) {
-      history.back();
+      this.location.back();
     } else {
       return false;
     }
@@ -500,7 +516,7 @@ export class FocusService {
         console.warn(
           `arcade-machine focusable element <${el.tagName}> was moved outside of` +
           'the focus root. We may not be able to handle focus correctly.',
-          el
+          el,
         );
         break;
       }
@@ -550,6 +566,28 @@ export class FocusService {
       || el.tagName === 'TEXTAREA'
       || (!!tabIndex && Number(tabIndex) >= 0)
       || !!record;
+  }
+
+  /**
+   * Reset the focus if arcade-machine wanders out of root
+   */
+  private setDefaultFocus(scrollSpeed: number) {
+    const { root, selected } = this;
+    const allElements = root.querySelectorAll('*');
+    for (let i = 0; i < allElements.length; i += 1) {
+      const potentialElement = <HTMLElement>allElements[i];
+      if (selected === potentialElement || !this.isFocusable(potentialElement)) {
+        continue;
+      }
+      const potentialRect = roundRect(potentialElement.getBoundingClientRect());
+      // Skip elements that have either a width of zero or a height of zero
+      if (potentialRect.width === 0 || potentialRect.height === 0) {
+        continue;
+      }
+
+      this.selectNode(potentialElement, scrollSpeed);
+      return;
+    }
   }
 
   /**
@@ -633,12 +671,12 @@ export class FocusService {
       newHistoryRect.top = Math.max(
         result.rect.top,
         result.referenceRect.top,
-        this.historyRect ? this.historyRect.top : Number.MIN_VALUE
+        this.historyRect ? this.historyRect.top : Number.MIN_VALUE,
       );
       newHistoryRect.bottom = Math.min(
         result.rect.bottom,
         result.referenceRect.bottom,
-        this.historyRect ? this.historyRect.bottom : Number.MAX_VALUE
+        this.historyRect ? this.historyRect.bottom : Number.MAX_VALUE,
       );
 
       if (newHistoryRect.bottom <= newHistoryRect.top) {
@@ -653,12 +691,12 @@ export class FocusService {
       newHistoryRect.left = Math.max(
         result.rect.left,
         result.referenceRect.left,
-        this.historyRect ? this.historyRect.left : Number.MIN_VALUE
+        this.historyRect ? this.historyRect.left : Number.MIN_VALUE,
       );
       newHistoryRect.right = Math.min(
         result.rect.right,
         result.referenceRect.right,
-        this.historyRect ? this.historyRect.right : Number.MAX_VALUE
+        this.historyRect ? this.historyRect.right : Number.MAX_VALUE,
       );
 
       if (newHistoryRect.right <= newHistoryRect.left) {

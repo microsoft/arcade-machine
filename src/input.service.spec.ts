@@ -106,7 +106,7 @@ describe('input service', () => {
           expect(fire.calls.count()).toEqual(4);
           done();
         },
-        850
+        850,
       );
     });
 

@@ -1,5 +1,3 @@
-import { Direction, IArcEvent, IArcHandler } from './model';
-import { RegistryService } from './registry.service';
 import {
   Directive,
   ElementRef,
@@ -14,11 +12,14 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/never';
 import 'rxjs/add/operator/startWith';
 
+import { Direction, IArcEvent, IArcHandler } from './model';
+import { RegistryService } from './registry.service';
+
 function createDirectionCapture(direction: Direction, target: HTMLElement) {
   if (!target) {
     throw new Error(
       `Cannot set [arc-${Direction[direction]}] to an undefined element!` +
-      'Make sure the element you\'re passing is defined correctly.'
+      'Make sure the element you\'re passing is defined correctly.',
     );
   }
 
@@ -89,7 +90,7 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
 
   constructor(
     private el: ElementRef,
-    private registry: RegistryService
+    private registry: RegistryService,
   ) { }
 
   public ngOnInit() {

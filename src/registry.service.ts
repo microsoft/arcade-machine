@@ -1,6 +1,7 @@
-import { IArcHandler } from './model';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+
+import { IArcHandler } from './model';
 
 /**
  * The Registry keeps track of services of `arc` directives present in the DOM.
