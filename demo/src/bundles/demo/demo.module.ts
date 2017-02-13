@@ -1,7 +1,10 @@
-import { ArcModule, InputService, FocusService, RegistryService } from '../../../../src';
+import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { AfterContentInit, Component, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+
 import { Observable } from 'rxjs/Observable';
+
+import { ArcModule, FocusService, InputService, RegistryService } from '../../../../src';
 
 import 'rxjs/add/observable/interval';
 
@@ -190,9 +193,15 @@ export class DemoComponent implements AfterContentInit {
     ArcModule,
   ],
   providers: [
+    Location,
+    {
+      provide: LocationStrategy,
+      useClass: PathLocationStrategy,
+    },
     FocusService,
     InputService,
     RegistryService,
+
   ],
   declarations: [
     DemoComponent,
