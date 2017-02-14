@@ -232,8 +232,6 @@ function isForForm(direction: Direction, selected: Element): boolean {
   }
 
   // Always allow the browser to handle enter key presses in a form or text area.
-  const tag = selected.tagName;
-
   if (direction === Direction.SUBMIT) {
     for (let parent = selected; parent; parent = parent.parentElement) {
       if (parent.tagName === 'FORM' || parent.tagName === 'INPUT' || parent.tagName === 'TEXTAREA') {
@@ -246,6 +244,7 @@ function isForForm(direction: Direction, selected: Element): boolean {
 
   // Okay, not a submission? Well, if we aren't inside a text input, go ahead
   // and let arcade-machine try to deal with the output.
+  const tag = selected.tagName;
   if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
     return false;
   }
