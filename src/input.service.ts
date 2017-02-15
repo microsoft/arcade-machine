@@ -41,6 +41,12 @@ interface IGamepadWrapper {
   y(now: number): boolean;
 
   /**
+   * Returns if the user is pressing the "view" or "menu" button.
+   */
+  view(now: number): boolean;
+  menu(now: number): boolean;
+
+  /**
    * Returns whether the gamepad is still connected;
    */
   isConnected(): boolean;
@@ -157,6 +163,8 @@ class XboxGamepadWrapper implements IGamepadWrapper {
   public tabRight: (now: number) => boolean;
   public tabUp: (now: number) => boolean;
   public tabDown: (now: number) => boolean;
+  public view: (now: number) => boolean;
+  public menu: (now: number) => boolean;
   public back: (now: number) => boolean;
   public submit: (now: number) => boolean;
   public x: (now: number) => boolean;
@@ -185,6 +193,9 @@ class XboxGamepadWrapper implements IGamepadWrapper {
     const tabUp = new FiredDebouncer(() => this.pad.buttons[Direction.TABUP].pressed);
     const tabDown = new FiredDebouncer(() => this.pad.buttons[Direction.TABDOWN].pressed);
 
+    const view = new FiredDebouncer(() => this.pad.buttons[Direction.VIEW].pressed);
+    const menu = new FiredDebouncer(() => this.pad.buttons[Direction.MENU].pressed);
+
     const back = new FiredDebouncer(() => this.pad.buttons[Direction.BACK].pressed);
     const submit = new FiredDebouncer(() => this.pad.buttons[Direction.SUBMIT].pressed);
     const x = new FiredDebouncer(() => this.pad.buttons[Direction.X].pressed);
@@ -198,6 +209,8 @@ class XboxGamepadWrapper implements IGamepadWrapper {
     this.tabRight = () => tabRight.attempt();
     this.tabUp = () => tabUp.attempt();
     this.tabDown = () => tabDown.attempt();
+    this.view = () => view.attempt();
+    this.menu = () => menu.attempt();
     this.back = () => back.attempt();
     this.submit = () => submit.attempt();
     this.x = () => x.attempt();
@@ -219,13 +232,7 @@ function isForForm(direction: Direction, selected: Element): boolean {
   }
 
   // Always allow the browser to handle enter key presses in a form or text area.
-  const tag = selected.tagName;
-
   if (direction === Direction.SUBMIT) {
-    if (tag === 'TEXTAREA') {
-      return true;
-    }
-
     for (let parent = selected; parent; parent = parent.parentElement) {
       if (parent.tagName === 'FORM' || parent.tagName === 'INPUT' || parent.tagName === 'TEXTAREA') {
         return true;
@@ -237,6 +244,7 @@ function isForForm(direction: Direction, selected: Element): boolean {
 
   // Okay, not a submission? Well, if we aren't inside a text input, go ahead
   // and let arcade-machine try to deal with the output.
+  const tag = selected.tagName;
   if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
     return false;
   }
@@ -277,7 +285,7 @@ export class InputService {
   public inputPane = (<any>window).Windows ? Windows.UI.ViewManagement.InputPane.getForCurrentView() : null;
 
   public get keyboardVisible(): boolean {
-    return !!this.inputPane && this.inputPane.occludedRect.y !== 0;
+    return !!this.inputPane && (this.inputPane.occludedRect.y !== 0 || this.inputPane.visible);
   }
 
   /**
@@ -342,6 +350,14 @@ export class InputService {
       98, // Numpad Down
       202, // Right Trigger
     ]],
+    [Direction.VIEW, [
+      111, // Numpad Divide
+      208, // View Button
+    ]],
+    [Direction.MENU, [
+      106, // Numpad Multiply
+      207, // Menu Button
+    ]],
   ]);
 
   /**
@@ -378,6 +394,8 @@ export class InputService {
   public onRightTab = new EventEmitter<ArcEvent>();
   public onLeftTrigger = new EventEmitter<ArcEvent>();
   public onRightTrigger = new EventEmitter<ArcEvent>();
+  public onView = new EventEmitter<ArcEvent>();
+  public onMenu = new EventEmitter<ArcEvent>();
   public onLeft = new EventEmitter<ArcEvent>();
   public onRight = new EventEmitter<ArcEvent>();
   public onUp = new EventEmitter<ArcEvent>();
@@ -542,6 +560,14 @@ export class InputService {
       if (gamepad.tabUp(now)) {
         const ev = this.focus.createArcEvent(Direction.TABUP);
         this.onLeftTrigger.emit(ev);
+      }
+      if (gamepad.view(now)) {
+        const ev = this.focus.createArcEvent(Direction.VIEW);
+        this.onView.emit(ev);
+      }
+      if (gamepad.menu(now)) {
+        const ev = this.focus.createArcEvent(Direction.MENU);
+        this.onMenu.emit(ev);
       }
       if (gamepad.submit(now)) {
         const ev = this.focus.createArcEvent(Direction.SUBMIT);

@@ -12,6 +12,8 @@ export enum Direction {
   TABRIGHT = 5, // Right Bumper
   TABUP = 6, // Left Trigger
   TABDOWN = 7, // Right Trigger
+  VIEW = 8, // Left small button aka start
+  MENU = 9, // Right small button
   UP = 12,
   DOWN = 13,
   LEFT = 14,
