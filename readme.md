@@ -38,6 +38,10 @@ You must define `arc` directive on element which you want to be focusable that a
 - `select`
 - `textarea`
 
+##### arc-exclude-this
+
+When added to an element, makes the element and all its children unfocusable.
+
 ##### [arc-set-focus]="Observable\<boolean\>"
 
 You can pass an Observable to `arc-set-focus` which, when fired, will forcefully cause the element to be focused.
