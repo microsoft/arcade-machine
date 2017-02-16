@@ -538,9 +538,11 @@ export class FocusService {
    * Returns if the element can receive focus.
    */
   private isFocusable(el: HTMLElement): boolean {
-    const record = this.registry.find(el);
-    if (record && record.exclude && record.exclude()) {
-      return false;
+    for (let parent = el; parent; parent = parent.parentElement) {
+      const record = this.registry.find(parent);
+      if (record && record.exclude && record.exclude()) {
+        return false;
+      }
     }
 
     const tabIndex = el.getAttribute('tabIndex');
