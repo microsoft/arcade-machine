@@ -555,8 +555,8 @@ export class FocusService {
     }
 
     for (let parent = el; parent; parent = parent.parentElement) {
-      const record2 = this.registry.find(parent);
-      if (record2 && record2.exclude && record2.exclude()) {
+      const parentRecord = this.registry.find(parent);
+      if (parentRecord && parentRecord.exclude && parentRecord.exclude()) {
         return false;
       }
     }
