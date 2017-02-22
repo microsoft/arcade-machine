@@ -54,6 +54,12 @@ export interface IArcHandler {
    * A method which can return "false" if this handler should not be
    * included as focusable.
    */
+  excludeThis?(): boolean;
+
+  /**
+   * A method which can return "false" if this handler and all its children
+   * should not be included as focusable.
+   */
   exclude?(): boolean;
 
   /**
