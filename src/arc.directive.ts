@@ -52,9 +52,14 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
     this.arcSetFocus = this.arcSetFocus.startWith(undefined);
   }
 
+  @Input('arc-exclude')
+  public set arcExclude(exclude: any) {
+    this.innerExclude = exclude !== false;
+  }
+
   @Input('arc-exclude-this')
   public set arcExcludeThis(exclude: any) {
-    this.excludeThis = exclude !== false;
+    this.innerExcludeThis = exclude !== false;
   }
 
   // Directional/event shortcuts: =============================================
@@ -86,7 +91,8 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
   }
 
   private handlers: ((ev: IArcEvent) => void)[] = [];
-  private excludeThis = false;
+  private innerExcludeThis = false;
+  private innerExclude = false;
 
   constructor(
     private el: ElementRef,
@@ -106,8 +112,12 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
     return this.el.nativeElement;
   }
 
+  public excludeThis(): boolean {
+    return this.innerExcludeThis;
+  }
+
   public exclude(): boolean {
-    return this.excludeThis;
+    return this.innerExclude;
   }
 
   public onOutgoing(ev: IArcEvent): void {

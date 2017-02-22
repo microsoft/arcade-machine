@@ -38,6 +38,15 @@ You must define `arc` directive on element which you want to be focusable that a
 - `select`
 - `textarea`
 
+##### [arc-exclude-this]="value"
+
+You can pass a value to `arc-exclude-this` which, if not `false`, exclude this element from arcade-machine's focus.
+
+##### [arc-exclude]="value"
+
+You can pass a value to `arc-exclude-this` which, if not `false`, exclude this element and all its children from arcade-machine's focus.
+
+
 ##### [arc-set-focus]="Observable\<boolean\>"
 
 You can pass an Observable to `arc-set-focus` which, when fired, will forcefully cause the element to be focused.

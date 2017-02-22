@@ -539,7 +539,7 @@ export class FocusService {
    */
   private isFocusable(el: HTMLElement): boolean {
     const record = this.registry.find(el);
-    if (record && record.exclude && record.exclude()) {
+    if (record && record.excludeThis && record.excludeThis()) {
       return false;
     }
 
@@ -552,6 +552,13 @@ export class FocusService {
     const style = window.getComputedStyle(el);
     if (style.display === 'none' || style.visibility === 'hidden') {
       return false;
+    }
+
+    for (let parent = el; parent; parent = parent.parentElement) {
+      const parentRecord = this.registry.find(parent);
+      if (parentRecord && parentRecord.exclude && parentRecord.exclude()) {
+        return false;
+      }
     }
 
     const role = el.getAttribute('role');
