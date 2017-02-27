@@ -330,23 +330,23 @@ export class FocusService {
 
       const common = getCommonAncestor(next, selected);
       selected.classList.remove(cssClass.direct);
-      for (let el = selected; el !== common; el = el.parentElement) {
+      for (let el = selected; el !== common && el; el = el.parentElement) {
         el.classList.remove(cssClass.selected);
         this.triggerFocusChange(el, null);
       }
-      for (let el = next; el !== common; el = el.parentElement) {
+      for (let el = next; el !== common && el; el = el.parentElement) {
         el.classList.add(cssClass.selected);
         this.triggerFocusChange(el, next);
         this.parents.push(el);
       }
-      for (let el = common; el !== this.root; el = el.parentElement) {
+      for (let el = common; el !== this.root && el; el = el.parentElement) {
         this.triggerFocusChange(el, next);
         this.parents.push(el);
       }
     } else {
       // Trigger focus changes and add selected classes everywhere
       // from the target element to the root.
-      for (let el = next; el !== this.root; el = el.parentElement) {
+      for (let el = next; el !== this.root && el; el = el.parentElement) {
         el.classList.add(cssClass.selected);
         this.triggerFocusChange(el, next);
         this.parents.push(el);
@@ -458,7 +458,7 @@ export class FocusService {
     const rect = el.getBoundingClientRect();
     const { width, height, top, left } = rect;
 
-    for (let parent = el.parentElement; parent !== container.parentElement; parent = parent.parentElement) {
+    for (let parent = el.parentElement; parent !== container.parentElement && parent; parent = parent.parentElement) {
 
       // Special case: treat the body as the viewport as far as scrolling goes.
       let prect: IReducedClientRect;
@@ -511,7 +511,7 @@ export class FocusService {
    * to all parent arc directives.
    */
   private bubbleEvent(ev: ArcEvent, incoming: boolean, source: HTMLElement = this.selected): ArcEvent {
-    for (let el = source; !ev.propagationStopped && el !== this.root; el = el.parentElement) {
+    for (let el = source; !ev.propagationStopped && el !== this.root && el; el = el.parentElement) {
       if (el === undefined) {
         console.warn(
           `arcade-machine focusable element <${el.tagName}> was moved outside of` +
