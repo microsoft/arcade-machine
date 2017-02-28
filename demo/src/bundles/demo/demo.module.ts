@@ -1,5 +1,14 @@
 import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
-import { AfterContentInit, Component, NgModule } from '@angular/core';
+import {
+    AfterContentInit,
+    AfterViewInit,
+    Component,
+    ElementRef,
+    EventEmitter,
+    NgModule,
+    OnDestroy,
+    Output
+} from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { Observable } from 'rxjs/Observable';
@@ -81,7 +90,7 @@ import 'rxjs/add/observable/interval';
       height: 100px;
     }
   `],
-  template:   `
+  template: `
     <h1>Special Handlers</h1>
     <div class="area">
       <div class="box-wrapper" style="width:200px">
@@ -160,12 +169,23 @@ import 'rxjs/add/observable/interval';
         <div class="box" arc *ngIf="(i + (ticker | async)) % 2 === 0">{{ box }}</div>
       </div>
     </div>
+
+    <div class="area">
+      <h1>Focus Child Elements Only</h1>
+      <button (click)="isDialogVisible=true">Open Dialog</button>
+    </div>
+
+    <test-dialog class="area"
+      *ngIf="isDialogVisible"
+      (onClose)="closeDialog()">
+    <test-dialog>
   `,
 })
 export class DemoComponent implements AfterContentInit {
   public boxes: string[] = [];
   public ticker = Observable.interval(2500);
   public defaultBox = true;
+  public isDialogVisible = false;
 
   constructor(private input: InputService) {
     for (let i = 0; i < 50; i++) {
@@ -184,6 +204,56 @@ export class DemoComponent implements AfterContentInit {
 
   public onClick(el: HTMLElement) {
     el.style.background = '#0f0';
+  }
+
+  public openDialog() {
+    this.isDialogVisible = true;
+  }
+
+  public closeDialog() {
+    this.isDialogVisible = false;
+  }
+}
+
+@Component({
+  selector: 'test-dialog',
+  template: `
+  <div>
+    <button>Button 1</button>
+    <button>Button 2</button>
+  </div>
+  <div>
+    <button>Button 3</button>
+    <button>Button 4</button>
+  </div>
+  <div>
+    <button (click)="onClose.emit()">Close</button>
+  </div>
+  `,
+  styles: [`
+    :host{
+      position: fixed;
+      top: 45vh;
+      left: 45vw;
+      border: 2px solid blue;
+      padding: 50px;
+      background: white;
+    }
+  `],
+})
+export class DialogComponent implements AfterViewInit, OnDestroy{
+  @Output() public onClose = new EventEmitter();
+
+  constructor(
+    private focusService: FocusService,
+    private hostElem: ElementRef,
+  ) { }
+
+  public ngAfterViewInit() {
+    this.focusService.setRoot(this.hostElem.nativeElement, Infinity);
+  }
+  public ngOnDestroy() {
+    this.focusService.setRoot(document.body, Infinity);
   }
 }
 
@@ -205,6 +275,7 @@ export class DemoComponent implements AfterContentInit {
   ],
   declarations: [
     DemoComponent,
+    DialogComponent,
   ],
   bootstrap: [
     DemoComponent,
