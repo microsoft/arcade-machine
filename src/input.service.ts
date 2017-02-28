@@ -529,21 +529,25 @@ export class InputService {
         const ev = this.focus.createArcEvent(Direction.LEFT);
         this.handleDirection(ev);
         this.onLeft.emit(ev);
+        this.focus.defaultFires(ev, this.scrollSpeed);
       }
       if (gamepad.right(now)) {
         const ev = this.focus.createArcEvent(Direction.RIGHT);
         this.handleDirection(ev);
         this.onRight.emit(ev);
+        this.focus.defaultFires(ev, this.scrollSpeed);
       }
       if (gamepad.down(now)) {
         const ev = this.focus.createArcEvent(Direction.DOWN);
         this.handleDirection(ev);
         this.onDown.emit(ev);
+        this.focus.defaultFires(ev, this.scrollSpeed);
       }
       if (gamepad.up(now)) {
         const ev = this.focus.createArcEvent(Direction.UP);
         this.handleDirection(ev);
         this.onUp.emit(ev);
+        this.focus.defaultFires(ev, this.scrollSpeed);
       }
       if (gamepad.tabLeft(now)) {
         const ev = this.focus.createArcEvent(Direction.TABLEFT);
@@ -573,11 +577,13 @@ export class InputService {
         const ev = this.focus.createArcEvent(Direction.SUBMIT);
         this.handleDirection(ev);
         this.onAPressed.emit(ev);
+        this.focus.defaultFires(ev, this.scrollSpeed);
       }
       if (gamepad.back(now)) {
         const ev = this.focus.createArcEvent(Direction.BACK);
         this.handleDirection(ev);
         this.onBPressed.emit(ev);
+        this.focus.defaultFires(ev, this.scrollSpeed);
       }
       if (gamepad.x(now)) {
         const ev = this.focus.createArcEvent(Direction.X);
@@ -597,7 +603,7 @@ export class InputService {
   }
 
   private handleDirection(ev: ArcEvent): boolean {
-    return this.focus.fire(ev, this.scrollSpeed);
+    return this.focus.fire(ev);
   }
 
   /**
