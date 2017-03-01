@@ -26,6 +26,7 @@ module.exports = {
     extensions: ['.js', '.ts'],
   },
   devServer: {
+    host: '0.0.0.0',
     port: 8080,
     historyApiFallback: true,
     contentBase: 'demo/dist'

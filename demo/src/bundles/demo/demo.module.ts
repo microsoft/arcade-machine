@@ -1,6 +1,7 @@
 import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
-import { AfterContentInit, Component, NgModule } from '@angular/core';
+import { Component, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule } from '@angular/router';
 
 import { Observable } from 'rxjs/Observable';
 
@@ -10,6 +11,32 @@ import 'rxjs/add/observable/interval';
 
 @Component({
   selector: 'demo-app',
+  template: `
+    <h1>Arcade Machine Demo</h1>
+    <router-outlet></router-outlet>
+    `
+})
+export class DemoAppComponent {
+  constructor(private inputService: InputService){
+    const nav: any = navigator;
+    nav.gamepadInputEmulation = "keyboard";
+
+    window.addEventListener('keydown', (ev)=>{
+      if(ev.keyCode == 196){
+        console.log(ev);
+        ev.preventDefault();
+        ev.stopPropagation();
+      }
+      console.log(ev.key);
+    });
+  }
+  public ngAfterViewInit() {
+    this.inputService.bootstrap();
+  }
+}
+
+@Component({
+  selector: 'page-1',
   styles: [`
     :host {
       font-family: monospace;
@@ -81,7 +108,14 @@ import 'rxjs/add/observable/interval';
       height: 100px;
     }
   `],
-  template:   `
+  template: `
+    <h1>Page 1</h1>
+    <h1>Back Button Binding</h1>
+    <div class="area">
+      <a [routerLink]="['/page2']">Goto Page 2</a>
+      <router-outlet></router-outlet>
+    </div>
+
     <h1>Special Handlers</h1>
     <div class="area">
       <div class="box-wrapper" style="width:200px">
@@ -162,19 +196,15 @@ import 'rxjs/add/observable/interval';
     </div>
   `,
 })
-export class DemoComponent implements AfterContentInit {
+export class Page1Component {
   public boxes: string[] = [];
   public ticker = Observable.interval(2500);
   public defaultBox = true;
 
-  constructor(private input: InputService) {
+  constructor() {
     for (let i = 0; i < 50; i++) {
       this.boxes.push(String(`Box ${i}`));
     }
-  }
-
-  public ngAfterContentInit() {
-    setTimeout(() => this.input.bootstrap(), 200);
   }
 
   public toggleDefaultBox() {
@@ -187,8 +217,33 @@ export class DemoComponent implements AfterContentInit {
   }
 }
 
+@Component({
+  selector: 'page-2',
+  template: `
+  <h1>Page 2</h1>
+  <h3>Try navigating with gamepad-B</h3>
+  <button (click)="goBack()">Go Back</button>
+  `,
+})
+export class Page2Component {
+  constructor(
+    private location: Location,
+  ) {}
+
+  public goBack() {
+    this.location.back();
+  }
+}
+
+const routes = [
+  { path: '', pathMatch: 'full', redirectTo: 'page1' },
+  { path: 'page1', component: Page1Component },
+  { path: 'page2', component: Page2Component },
+];
+
 @NgModule({
   imports: [
+    RouterModule.forRoot(routes),
     BrowserModule,
     ArcModule,
   ],
@@ -201,13 +256,14 @@ export class DemoComponent implements AfterContentInit {
     FocusService,
     InputService,
     RegistryService,
-
   ],
   declarations: [
-    DemoComponent,
+    DemoAppComponent,
+    Page1Component,
+    Page2Component,
   ],
   bootstrap: [
-    DemoComponent,
+    DemoAppComponent,
   ],
 })
 export class AppModule {
