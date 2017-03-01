@@ -380,7 +380,7 @@ export class InputService {
    * Animation speed in pixels per second for scrolling elements into view.
    * This can be Infinity to disable the animation, or null to disable scrolling.
    */
-  public scrollSpeed = 1000;
+  public scrollSpeed = Infinity;
 
   private gamepads: { [key: string]: IGamepadWrapper } = {};
   private subscriptions: Subscription[] = [];
