@@ -409,19 +409,24 @@ export class FocusService {
     return false;
   }
 
-  public defaultFires(ev: ArcEvent, scrollSpeed: number = Infinity) {
+  public defaultFires(ev: ArcEvent, scrollSpeed: number = Infinity): boolean {
     if (ev.defaultPrevented) {
-      return;
+      return true;
     }
 
     const directional = isDirectional(ev.event);
     if (directional && ev.next !== null) {
       this.selectNode(ev.next, scrollSpeed);
+      return true;
     } else if (ev.event === Direction.SUBMIT) {
       this.selected.click();
+      return true;
     } else if (ev.event === Direction.BACK) {
       this.location.back();
+      return true;
     }
+
+    return false;
   }
 
   /**

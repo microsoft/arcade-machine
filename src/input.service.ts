@@ -360,6 +360,41 @@ export class InputService {
     ]],
   ]);
 
+  public onYPressed = new EventEmitter<ArcEvent>();
+  public onXPressed = new EventEmitter<ArcEvent>();
+  public onAPressed = new EventEmitter<ArcEvent>();
+  public onBPressed = new EventEmitter<ArcEvent>();
+  public onLeftTab = new EventEmitter<ArcEvent>();
+  public onRightTab = new EventEmitter<ArcEvent>();
+  public onLeftTrigger = new EventEmitter<ArcEvent>();
+  public onRightTrigger = new EventEmitter<ArcEvent>();
+  public onView = new EventEmitter<ArcEvent>();
+  public onMenu = new EventEmitter<ArcEvent>();
+  public onLeft = new EventEmitter<ArcEvent>();
+  public onRight = new EventEmitter<ArcEvent>();
+  public onUp = new EventEmitter<ArcEvent>();
+  public onDown = new EventEmitter<ArcEvent>();
+
+  /**
+   * DirectionCodes is a map of directions to key code names.
+   */
+  public directionEmitters = new Map<Direction, EventEmitter<ArcEvent>>([
+    [Direction.LEFT, this.onLeft],
+    [Direction.RIGHT, this.onRight],
+    [Direction.UP, this.onUp],
+    [Direction.DOWN, this.onDown],
+    [Direction.SUBMIT, this.onAPressed],
+    [Direction.BACK, this.onBPressed],
+    [Direction.X, this.onXPressed],
+    [Direction.Y, this.onYPressed],
+    [Direction.TABLEFT, this.onLeftTab],
+    [Direction.TABRIGHT, this.onRightTab],
+    [Direction.TABDOWN, this.onRightTrigger],
+    [Direction.TABUP, this.onLeftTrigger],
+    [Direction.VIEW, this.onView],
+    [Direction.MENU, this.onMenu],
+  ]);
+
   /**
    * Mock source for gamepad connections. You can provide gamepads manually
    * here, but this is mostly for testing purposes.
@@ -382,25 +417,7 @@ export class InputService {
    */
   public scrollSpeed = 1000;
 
-  private gamepads: { [key: string]: IGamepadWrapper } = {};
   private subscriptions: Subscription[] = [];
-  private pollRaf: number = null;
-
-  public onYPressed = new EventEmitter<ArcEvent>();
-  public onXPressed = new EventEmitter<ArcEvent>();
-  public onAPressed = new EventEmitter<ArcEvent>();
-  public onBPressed = new EventEmitter<ArcEvent>();
-  public onLeftTab = new EventEmitter<ArcEvent>();
-  public onRightTab = new EventEmitter<ArcEvent>();
-  public onLeftTrigger = new EventEmitter<ArcEvent>();
-  public onRightTrigger = new EventEmitter<ArcEvent>();
-  public onView = new EventEmitter<ArcEvent>();
-  public onMenu = new EventEmitter<ArcEvent>();
-  public onLeft = new EventEmitter<ArcEvent>();
-  public onRight = new EventEmitter<ArcEvent>();
-  public onUp = new EventEmitter<ArcEvent>();
-  public onDown = new EventEmitter<ArcEvent>();
-
   constructor(private focus: FocusService) { }
 
   /**
@@ -408,20 +425,14 @@ export class InputService {
    * up the focuser rooted in the target element.
    */
   public bootstrap(root: HTMLElement = document.body) {
-    if (typeof navigator.getGamepads === 'function') {
-      // Poll connected gamepads and use that for input if possible.
-      this.watchForGamepad();
-    }
-
     // The gamepadInputEmulation is a string property that exists in
     // JavaScript UWAs and in WebViews in UWAs. It won't exist in
     // Win8.1 style apps or browsers.
     if ('gamepadInputEmulation' in navigator) {
       // We want the gamepad to provide gamepad VK keyboard events rather than moving a
       // mouse like cursor. The gamepad will provide such keyboard events and provide
-      // input to the DOM navigator.getGamepads API. Set to 'gamepad' to let arcade-machine
-      // handle these events. Set to 'keyboard' to get some default handling
-      (<any>navigator).gamepadInputEmulation = typeof navigator.getGamepads === 'function' ? 'gamepad' : 'keyboard';
+      // input to the DOM
+      (<any>navigator).gamepadInputEmulation = 'keyboard';
     }
 
     this.addKeyboardListeners();
@@ -438,11 +449,7 @@ export class InputService {
    */
   public teardown() {
     this.focus.teardown();
-    this.gamepads = {};
-    cancelAnimationFrame(this.pollRaf);
-    while (this.subscriptions.length) {
-      this.subscriptions.pop().unsubscribe();
-    }
+    this.subscriptions.forEach(sub => sub.unsubscribe());
 
     if ('gamepadInputEmulation' in navigator) {
       (<any>navigator).gamepadInputEmulation = 'mouse';
@@ -453,157 +460,14 @@ export class InputService {
     this.focus.setRoot(root, this.scrollSpeed);
   }
 
-  /**
-   * Detects any connected gamepads and watches for new ones to start
-   * polling them. This is the entry point for gamepad input handling.
-   */
-  private watchForGamepad() {
-    const addGamepad = (pad: Gamepad) => {
-      let gamepad: IGamepadWrapper;
-      if (/xbox/i.test(pad.id)) {
-        gamepad = new XboxGamepadWrapper(pad);
-      }
-      if (!gamepad) {
-        // We can try, at least ¯\_(ツ)_/¯ and this should
-        // usually be OK due to remapping.
-        gamepad = new XboxGamepadWrapper(pad);
-      }
-
-      this.gamepads[pad.id] = gamepad;
-    };
-
-    Array.from(navigator.getGamepads())
-      .filter(pad => !!pad)
-      .forEach(addGamepad);
-
-    if (Object.keys(this.gamepads).length > 0) {
-      this.scheduleGamepadPoll();
-    }
-
-    this.subscriptions.push(
-      Observable.merge(
-        this.gamepadSrc,
-        Observable.fromEvent(window, 'gamepadconnected'),
-      ).subscribe(ev => {
-        addGamepad((<any>ev).gamepad);
-        cancelAnimationFrame(this.pollRaf);
-        this.scheduleGamepadPoll();
-      }),
-    );
-  }
-
-  /**
-   * Schedules a new gamepad poll at the next animation frame.
-   */
-  private scheduleGamepadPoll() {
-    this.pollRaf = requestAnimationFrame(now => {
-      this.pollGamepad(now);
-    });
-  }
-
-  /**
-   * Checks for input provided by the gamepad and fires off events as
-   * necessary. It schedules itself again provided that there's still
-   * a connected gamepad somewhere.
-   */
-  private pollGamepad(now: number) {
-    const rawpads = Array.from(navigator.getGamepads()).filter(pad => !!pad); // refreshes all checked-out gamepads
-
-    for (let i = 0; i < rawpads.length; i += 1) {
-      const gamepad = this.gamepads[rawpads[i].id];
-      if (!gamepad) {
-        continue;
-      }
-      gamepad.pad = rawpads[i];
-
-      if (!gamepad.isConnected()) {
-        delete this.gamepads[rawpads[i].id];
-        continue;
-      }
-
-      if (this.keyboardVisible) {
-        continue;
-      }
-
-      if (gamepad.left(now)) {
-        const ev = this.focus.createArcEvent(Direction.LEFT);
-        this.handleDirection(ev);
-        this.onLeft.emit(ev);
-        this.focus.defaultFires(ev, this.scrollSpeed);
-      }
-      if (gamepad.right(now)) {
-        const ev = this.focus.createArcEvent(Direction.RIGHT);
-        this.handleDirection(ev);
-        this.onRight.emit(ev);
-        this.focus.defaultFires(ev, this.scrollSpeed);
-      }
-      if (gamepad.down(now)) {
-        const ev = this.focus.createArcEvent(Direction.DOWN);
-        this.handleDirection(ev);
-        this.onDown.emit(ev);
-        this.focus.defaultFires(ev, this.scrollSpeed);
-      }
-      if (gamepad.up(now)) {
-        const ev = this.focus.createArcEvent(Direction.UP);
-        this.handleDirection(ev);
-        this.onUp.emit(ev);
-        this.focus.defaultFires(ev, this.scrollSpeed);
-      }
-      if (gamepad.tabLeft(now)) {
-        const ev = this.focus.createArcEvent(Direction.TABLEFT);
-        this.onLeftTab.emit(ev);
-      }
-      if (gamepad.tabRight(now)) {
-        const ev = this.focus.createArcEvent(Direction.TABRIGHT);
-        this.onRightTab.emit(ev);
-      }
-      if (gamepad.tabDown(now)) {
-        const ev = this.focus.createArcEvent(Direction.TABDOWN);
-        this.onRightTrigger.emit(ev);
-      }
-      if (gamepad.tabUp(now)) {
-        const ev = this.focus.createArcEvent(Direction.TABUP);
-        this.onLeftTrigger.emit(ev);
-      }
-      if (gamepad.view(now)) {
-        const ev = this.focus.createArcEvent(Direction.VIEW);
-        this.onView.emit(ev);
-      }
-      if (gamepad.menu(now)) {
-        const ev = this.focus.createArcEvent(Direction.MENU);
-        this.onMenu.emit(ev);
-      }
-      if (gamepad.submit(now)) {
-        const ev = this.focus.createArcEvent(Direction.SUBMIT);
-        this.handleDirection(ev);
-        this.onAPressed.emit(ev);
-        this.focus.defaultFires(ev, this.scrollSpeed);
-      }
-      if (gamepad.back(now)) {
-        const ev = this.focus.createArcEvent(Direction.BACK);
-        this.handleDirection(ev);
-        this.onBPressed.emit(ev);
-        this.focus.defaultFires(ev, this.scrollSpeed);
-      }
-      if (gamepad.x(now)) {
-        const ev = this.focus.createArcEvent(Direction.X);
-        this.onXPressed.emit(ev);
-      }
-      if (gamepad.y(now)) {
-        const ev = this.focus.createArcEvent(Direction.Y);
-        this.onYPressed.emit(ev);
-      }
-    }
-
-    if (Object.keys(this.gamepads).length > 0) {
-      this.scheduleGamepadPoll();
-    } else {
-      this.pollRaf = null;
-    }
-  }
-
   private handleDirection(ev: ArcEvent): boolean {
-    return this.focus.fire(ev);
+    const event = ev.event;
+    if (event === Direction.UP || event === Direction.RIGHT ||
+      event === Direction.DOWN || event === Direction.LEFT ||
+      event === Direction.SUBMIT || event === Direction.BACK) {
+      return this.focus.fire(ev);
+    }
+    return false;
   }
 
   /**
@@ -620,8 +484,12 @@ export class InputService {
       }
 
       const ev = this.focus.createArcEvent(direction);
-      result = !isForForm(direction, this.focus.selected)
-        && this.handleDirection(ev);
+      const forForm = isForForm(direction, this.focus.selected);
+      result = !forForm && this.handleDirection(ev);
+      this.directionEmitters.get(direction).emit(ev);
+      if (!forForm) {
+        result = result || this.focus.defaultFires(ev);
+      }
     });
 
     return result;
