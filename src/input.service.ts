@@ -366,7 +366,7 @@ export class InputService {
   public onDown = new EventEmitter<ArcEvent>();
 
   /**
-   * DirectionCodes is a map of directions to key code names.
+   * directionEmitters is a map of directions to their global emitters.
    */
   public directionEmitters = new Map<Direction, EventEmitter<ArcEvent>>([
     [Direction.LEFT, this.onLeft],
