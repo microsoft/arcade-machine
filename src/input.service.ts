@@ -289,76 +289,66 @@ export class InputService {
   }
 
   /**
-   * DirectionCodes is a map of directions to key code names.
+   * directionFromCode returns a direction from keyCode
    */
-  public static directionCodes = new Map<Direction, number[]>([
-    [Direction.LEFT, [
-      37,  // LeftArrow
-      214, // GamepadLeftThumbstickLeft
-      205, // GamepadDPadLeft
-      140, // NavigationLeft
-    ]],
-    [Direction.RIGHT, [
-      39,  // RightArrow
-      213, // GamepadLeftThumbstickRight
-      206, // GamepadDPadRight
-      141, // NavigationRight
-    ]],
-    [Direction.UP, [
-      38,  // UpArrow
-      211, // GamepadLeftThumbstickUp
-      203, // GamepadDPadUp
-      138, // NavigationUp
-    ]],
-    [Direction.DOWN, [
-      40,  // UpArrow
-      212, // GamepadLeftThumbstickDown
-      204, // GamepadDPadDown
-      139, // NavigationDown
-    ]],
-    [Direction.SUBMIT, [
-      13,  // Enter
-      32,  // Space
-      142, // NavigationAccept
-      195, // GamepadA
-    ]],
-    [Direction.BACK, [
-      8,   // Backspace
-      196, // GamepadB
-    ]],
-    [Direction.X, [
-      103, // Numpad 7
-      197, // GamepadX
-    ]],
-    [Direction.Y, [
-      105,   // Numpad 9
-      198, // GamepadY
-    ]],
-    [Direction.TABLEFT, [
-      100, // Numbpad Left
-      200, // Left Bumper
-    ]],
-    [Direction.TABRIGHT, [
-      102, // Numpad Right
-      199, // Right Bumper
-    ]],
-    [Direction.TABUP, [
-      104, // Numpad Up
-      201, // Left Trigger
-    ]],
-    [Direction.TABDOWN, [
-      98, // Numpad Down
-      202, // Right Trigger
-    ]],
-    [Direction.VIEW, [
-      111, // Numpad Divide
-      208, // View Button
-    ]],
-    [Direction.MENU, [
-      106, // Numpad Multiply
-      207, // Menu Button
-    ]],
-  ]);
+  public directionFromCode(keyCode: number): Direction {
+    switch (keyCode) {
+      case 37:  // LeftArrow
+      case 214: // GamepadLeftThumbstickLeft
+      case 205: // GamepadDPadLeft
+      case 140: // NavigationLeft
+        return Direction.LEFT;
+      case 39:  // RightArrow
+      case 213: // GamepadLeftThumbstickRight
+      case 206: // GamepadDPadRight
+      case 141: // NavigationRight
+        return Direction.RIGHT;
+      case 38:  // UpArrow
+      case 211: // GamepadLeftThumbstickUp
+      case 203: // GamepadDPadUp
+      case 138: // NavigationUp
+        return Direction.UP;
+      case 40:  // DownArrow
+      case 212: // GamepadLeftThumbstickDown
+      case 204: // GamepadDPadDown
+      case 139: // NavigationDown
+        return Direction.DOWN;
+      case 13:  // Enter
+      case 32:  // Space
+      case 142: // NavigationAccept
+      case 195: // GamepadA
+        return Direction.SUBMIT;
+      case 8:   // Backspace
+      case 196: // GamepadB
+        return Direction.BACK;
+      case 103: // Numpad 7
+      case 197: // GamepadX
+        return Direction.X;
+      case 105: // Numpad 9
+      case 198: // GamepadY
+        return Direction.Y;
+      case 100: // Numbpad Left
+      case 200: // Left Bumper
+        return Direction.TABLEFT;
+      case 102: // Numpad Right
+      case 199: // Right Bumper
+        return Direction.TABRIGHT;
+      case 104: // Numpad Up
+      case 201: // Left Trigger
+        return Direction.TABUP;
+      case 98:  // Numpad Down
+      case 202: // Right Trigger
+        return Direction.TABDOWN;
+      case 111: // Numpad Divide
+      case 208: // View Button
+        return Direction.VIEW;
+      case 106: // Numpad Multiply
+      case 207: // Menu Button
+        return Direction.MENU;
+      default:
+        return null;
+    }
+  }
 
   public onYPressed = new EventEmitter<ArcEvent>();
   public onXPressed = new EventEmitter<ArcEvent>();
@@ -475,22 +465,19 @@ export class InputService {
    * in a navigation and should be cancelled.
    */
   private handleKeyDown(keyCode: number): boolean {
-    let result: boolean;
-    InputService.directionCodes.forEach((codes, direction) => {
-      // Abort if we already handled the event (can't abort a forEach!)
-      // or if we don't have the right code.
-      if (result !== undefined || codes.indexOf(keyCode) === -1) {
-        return;
-      }
+    const direction = this.directionFromCode(keyCode);
+    if (!direction) {
+      return false;
+    }
 
-      const ev = this.focus.createArcEvent(direction);
-      const forForm = isForForm(direction, this.focus.selected);
-      result = !forForm && this.handleDirection(ev);
-      this.directionEmitters.get(direction).emit(ev);
-      if (!forForm) {
-        result = result || this.focus.defaultFires(ev);
-      }
-    });
+    let result: boolean;
+    const ev = this.focus.createArcEvent(direction);
+    const forForm = isForForm(direction, this.focus.selected);
+    result = !forForm && this.handleDirection(ev);
+    this.directionEmitters.get(direction).emit(ev);
+    if (!forForm) {
+      result = result || this.focus.defaultFires(ev);
+    }
 
     return result;
   }
