@@ -277,14 +277,9 @@ export class InputService {
   ]);
 
   /**
-   * Map from a direction to its (global) ArcEvent emitter
+   * Gets the (global) ArcEvent emitter for a direction
    */
-  public emitters = new Map<Direction, EventEmitter<ArcEvent>>();
-
-  /**
-   * Shortcut to get an event emitter
-   */
-  public on(direction: Direction): EventEmitter<ArcEvent> {
+  public getDirectionEmitter(direction: Direction): EventEmitter<ArcEvent> {
     return this.emitters.get(direction);
   }
 
@@ -313,6 +308,8 @@ export class InputService {
   private gamepads: { [key: string]: IGamepadWrapper } = {};
   private subscriptions: Subscription[] = [];
   private pollRaf: number = null;
+  private emitters = new Map<Direction, EventEmitter<ArcEvent>>();
+
 
   constructor(private focus: FocusService) { }
 
