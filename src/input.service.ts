@@ -282,6 +282,13 @@ export class InputService {
   public emitters = new Map<Direction, EventEmitter<ArcEvent>>();
 
   /**
+   * Shortcut to get an event emitter
+   */
+  public on(direction: Direction): EventEmitter<ArcEvent> {
+    return this.emitters.get(direction);
+  }
+
+  /**
    * Mock source for gamepad connections. You can provide gamepads manually
    * here, but this is mostly for testing purposes.
    */
@@ -459,11 +466,7 @@ export class InputService {
    */
   private handleKeyDown(keyCode: number): boolean {
     const direction = this.codeDirectionMap.get(keyCode);
-    if (direction === undefined) {
-      return false;
-    }
-
-    return this.handleDirection(direction);
+    return direction === undefined ? false : this.handleDirection(direction);
   }
 
   /**
