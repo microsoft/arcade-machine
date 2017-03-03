@@ -431,6 +431,7 @@ export class InputService {
             const ev = this.focus.createArcEvent(dir);
             this.handleDirection(ev);
             this.emitters.get(dir).emit(ev);
+            this.focus.defaultFires(ev);
           }
         });
     }
