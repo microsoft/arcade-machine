@@ -388,7 +388,7 @@ export class FocusService {
    * Attempts to effect the focus command, returning a
    * boolean if it was handled.
    */
-  public fire(ev: ArcEvent, scrollSpeed: number = Infinity): boolean {
+  public bubble(ev: ArcEvent): boolean {
     if (isNodeAttached(this.selected, this.root)) {
       this.bubbleEvent(ev, false);
     }
@@ -406,19 +406,27 @@ export class FocusService {
       }
     }
 
-    // Otherwise see if we can handle it...
+    return false;
+  }
+
+  public defaultFires(ev: ArcEvent, scrollSpeed: number = Infinity): boolean {
+    if (ev.defaultPrevented) {
+      return true;
+    }
+
     const directional = isDirectional(ev.event);
     if (directional && ev.next !== null) {
       this.selectNode(ev.next, scrollSpeed);
+      return true;
     } else if (ev.event === Direction.SUBMIT) {
       this.selected.click();
+      return true;
     } else if (ev.event === Direction.BACK) {
       this.location.back();
-    } else {
-      return false;
+      return true;
     }
 
-    return true;
+    return false;
   }
 
   /**
