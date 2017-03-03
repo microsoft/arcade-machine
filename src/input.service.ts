@@ -431,10 +431,7 @@ export class InputService {
       directionNumsList
         .forEach(dir => {
           if (gamepad.events.get(dir)(now)) {
-            const ev = this.focus.createArcEvent(dir);
-            this.handleDirection(ev);
-            this.emitters.get(dir).emit(ev);
-            this.focus.defaultFires(ev);
+            this.handleDirection(dir);
           }
         });
     }
@@ -446,12 +443,12 @@ export class InputService {
     }
   }
 
-  private handleDirection(ev: ArcEvent): boolean {
+  private bubbleDirection(ev: ArcEvent): boolean {
     const event = ev.event;
     if (event === Direction.UP || event === Direction.RIGHT ||
       event === Direction.DOWN || event === Direction.LEFT ||
       event === Direction.SUBMIT || event === Direction.BACK) {
-      return this.focus.fire(ev);
+      return this.focus.bubble(ev);
     }
     return false;
   }
@@ -462,20 +459,27 @@ export class InputService {
    */
   private handleKeyDown(keyCode: number): boolean {
     const direction = this.codeDirectionMap.get(keyCode);
-    if (!direction) {
+    if (direction === undefined) {
       return false;
     }
 
-    let result: boolean;
+    return this.handleDirection(direction);
+  }
+
+  /**
+   * Handles a direction event, returns whether the event has been handled
+   */
+  private handleDirection(direction: Direction): boolean {
+    let dirHandled: boolean;
     const ev = this.focus.createArcEvent(direction);
     const forForm = isForForm(direction, this.focus.selected);
-    result = !forForm && this.handleDirection(ev);
+    dirHandled = !forForm && this.bubbleDirection(ev);
     this.emitters.get(direction).emit(ev);
-    if (!forForm) {
-      result = result || this.focus.defaultFires(ev);
+    if (!forForm && !dirHandled) {
+      return this.focus.defaultFires(ev);
     }
 
-    return result;
+    return false;
   }
 
   /**

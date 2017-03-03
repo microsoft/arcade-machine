@@ -388,7 +388,7 @@ export class FocusService {
    * Attempts to effect the focus command, returning a
    * boolean if it was handled.
    */
-  public fire(ev: ArcEvent): boolean {
+  public bubble(ev: ArcEvent): boolean {
     if (isNodeAttached(this.selected, this.root)) {
       this.bubbleEvent(ev, false);
     }
