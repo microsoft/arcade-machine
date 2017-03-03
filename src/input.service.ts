@@ -273,6 +273,9 @@ export class InputService {
     [207, Direction.MENU],     // Menu Button
   ]);
 
+  /**
+   * Map from a direction to its (global) ArcEvent emitter
+   */
   public emitters = new Map<Direction, EventEmitter<ArcEvent>>();
 
   /**
