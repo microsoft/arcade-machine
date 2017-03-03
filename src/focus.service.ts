@@ -286,7 +286,7 @@ export class FocusService {
       return;
     }
 
-    for (let el = this.selected; el !== root; el = el.parentElement) {
+    for (let el = this.selected; el && el !== root; el = el.parentElement) {
       if (!el) {
         this.setDefaultFocus(scrollSpeed);
         return;
