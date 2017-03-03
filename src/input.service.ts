@@ -13,7 +13,10 @@ import { Direction } from './model';
 const directionNumsList: number[] = Object.keys(Direction).map(dir => Number(dir)).filter(n => !isNaN(n));
 
 interface IGamepadWrapper {
-  // Buttons from the gamepad are triggered here
+  /**
+   * Map from a direction to a function that takes in a time (now)
+   * and returns whether that direction fired
+   */
   events: Map<Direction, (now: number) => boolean>;
 
   /**
