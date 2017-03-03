@@ -10,41 +10,11 @@ import { ArcEvent } from './event';
 import { FocusService } from './focus.service';
 import { Direction } from './model';
 
+const directionNumsList: number[] = Object.keys(Direction).map(dir => Number(dir)).filter(n => !isNaN(n));
+
 interface IGamepadWrapper {
-  // Directional returns from the gamepad. They debounce themselves and
-  // trigger again after debounce times.
-  left(now: number): boolean;
-  right(now: number): boolean;
-  up(now: number): boolean;
-  down(now: number): boolean;
-
-  // Navigational directions
-  tabLeft(now: number): boolean;
-  tabRight(now: number): boolean;
-  tabUp(now: number): boolean;
-  tabDown(now: number): boolean;
-
-  /**
-   * Returns if the user is pressing the "back" button.
-   */
-  back(now: number): boolean;
-
-  /**
-   * Returns if the user is pressing the "submit" button.
-   */
-  submit(now: number): boolean;
-
-  /**
-   * Returns if the user is pressing the "X" or "Y" button.
-   */
-  x(now: number): boolean;
-  y(now: number): boolean;
-
-  /**
-   * Returns if the user is pressing the "view" or "menu" button.
-   */
-  view(now: number): boolean;
-  menu(now: number): boolean;
+  // Buttons from the gamepad are triggered here
+  events: Map<Direction, (now: number) => boolean>;
 
   /**
    * Returns whether the gamepad is still connected;
@@ -148,27 +118,17 @@ class FiredDebouncer {
 }
 
 class XboxGamepadWrapper implements IGamepadWrapper {
-
   /**
-   * Mangitude that joysticks have to go in one direction to be translated
+   * Magnitude that joysticks have to go in one direction to be translated
    * into a direction key press.
    */
   public static joystickThreshold = 0.5;
 
-  public left: (now: number) => boolean;
-  public right: (now: number) => boolean;
-  public up: (now: number) => boolean;
-  public down: (now: number) => boolean;
-  public tabLeft: (now: number) => boolean;
-  public tabRight: (now: number) => boolean;
-  public tabUp: (now: number) => boolean;
-  public tabDown: (now: number) => boolean;
-  public view: (now: number) => boolean;
-  public menu: (now: number) => boolean;
-  public back: (now: number) => boolean;
-  public submit: (now: number) => boolean;
-  public x: (now: number) => boolean;
-  public y: (now: number) => boolean;
+  /**
+   * Map from Direction to a function that takes a time (now) and returns
+   * whether that direction fired
+   */
+  public events = new Map<Direction, (now: number) => boolean>();
 
   constructor(public pad: Gamepad) {
     const left = new DirectionalDebouncer(() => {
@@ -188,33 +148,14 @@ class XboxGamepadWrapper implements IGamepadWrapper {
       return this.pad.axes[1] > XboxGamepadWrapper.joystickThreshold || this.pad.buttons[Direction.DOWN].pressed;
     });
 
-    const tabLeft = new FiredDebouncer(() => this.pad.buttons[Direction.TABLEFT].pressed);
-    const tabRight = new FiredDebouncer(() => this.pad.buttons[Direction.TABRIGHT].pressed);
-    const tabUp = new FiredDebouncer(() => this.pad.buttons[Direction.TABUP].pressed);
-    const tabDown = new FiredDebouncer(() => this.pad.buttons[Direction.TABDOWN].pressed);
+    this.events.set(Direction.LEFT, now => left.attempt(now));
+    this.events.set(Direction.RIGHT, now => right.attempt(now));
+    this.events.set(Direction.UP, now => up.attempt(now));
+    this.events.set(Direction.DOWN, now => down.attempt(now));
 
-    const view = new FiredDebouncer(() => this.pad.buttons[Direction.VIEW].pressed);
-    const menu = new FiredDebouncer(() => this.pad.buttons[Direction.MENU].pressed);
-
-    const back = new FiredDebouncer(() => this.pad.buttons[Direction.BACK].pressed);
-    const submit = new FiredDebouncer(() => this.pad.buttons[Direction.SUBMIT].pressed);
-    const x = new FiredDebouncer(() => this.pad.buttons[Direction.X].pressed);
-    const y = new FiredDebouncer(() => this.pad.buttons[Direction.Y].pressed);
-
-    this.left = now => left.attempt(now);
-    this.right = now => right.attempt(now);
-    this.up = now => up.attempt(now);
-    this.down = now => down.attempt(now);
-    this.tabLeft = () => tabLeft.attempt();
-    this.tabRight = () => tabRight.attempt();
-    this.tabUp = () => tabUp.attempt();
-    this.tabDown = () => tabDown.attempt();
-    this.view = () => view.attempt();
-    this.menu = () => menu.attempt();
-    this.back = () => back.attempt();
-    this.submit = () => submit.attempt();
-    this.x = () => x.attempt();
-    this.y = () => y.attempt();
+    directionNumsList
+      .filter(dir => dir !== Direction.LEFT && dir !== Direction.RIGHT && dir !== Direction.UP && dir !== Direction.DOWN)
+      .forEach(dir => this.events.set(dir, () => (new FiredDebouncer(() => this.pad.buttons[dir].pressed).attempt())));
   }
 
   public isConnected() {
@@ -289,101 +230,50 @@ export class InputService {
   }
 
   /**
-   * directionFromCode returns a direction from keyCode
+   * codeToDirection returns a direction from keyCode
    */
-  public directionFromCode(keyCode: number): Direction {
-    switch (keyCode) {
-      case 37:  // LeftArrow
-      case 214: // GamepadLeftThumbstickLeft
-      case 205: // GamepadDPadLeft
-      case 140: // NavigationLeft
-        return Direction.LEFT;
-      case 39:  // RightArrow
-      case 213: // GamepadLeftThumbstickRight
-      case 206: // GamepadDPadRight
-      case 141: // NavigationRight
-        return Direction.RIGHT;
-      case 38:  // UpArrow
-      case 211: // GamepadLeftThumbstickUp
-      case 203: // GamepadDPadUp
-      case 138: // NavigationUp
-        return Direction.UP;
-      case 40:  // DownArrow
-      case 212: // GamepadLeftThumbstickDown
-      case 204: // GamepadDPadDown
-      case 139: // NavigationDown
-        return Direction.DOWN;
-      case 13:  // Enter
-      case 32:  // Space
-      case 142: // NavigationAccept
-      case 195: // GamepadA
-        return Direction.SUBMIT;
-      case 8:   // Backspace
-      case 196: // GamepadB
-        return Direction.BACK;
-      case 103: // Numpad 7
-      case 197: // GamepadX
-        return Direction.X;
-      case 105: // Numpad 9
-      case 198: // GamepadY
-        return Direction.Y;
-      case 100: // Numbpad Left
-      case 200: // Left Bumper
-        return Direction.TABLEFT;
-      case 102: // Numpad Right
-      case 199: // Right Bumper
-        return Direction.TABRIGHT;
-      case 104: // Numpad Up
-      case 201: // Left Trigger
-        return Direction.TABUP;
-      case 98:  // Numpad Down
-      case 202: // Right Trigger
-        return Direction.TABDOWN;
-      case 111: // Numpad Divide
-      case 208: // View Button
-        return Direction.VIEW;
-      case 106: // Numpad Multiply
-      case 207: // Menu Button
-        return Direction.MENU;
-      default:
-        return null;
-    }
-  }
-
-  public onYPressed = new EventEmitter<ArcEvent>();
-  public onXPressed = new EventEmitter<ArcEvent>();
-  public onAPressed = new EventEmitter<ArcEvent>();
-  public onBPressed = new EventEmitter<ArcEvent>();
-  public onLeftTab = new EventEmitter<ArcEvent>();
-  public onRightTab = new EventEmitter<ArcEvent>();
-  public onLeftTrigger = new EventEmitter<ArcEvent>();
-  public onRightTrigger = new EventEmitter<ArcEvent>();
-  public onView = new EventEmitter<ArcEvent>();
-  public onMenu = new EventEmitter<ArcEvent>();
-  public onLeft = new EventEmitter<ArcEvent>();
-  public onRight = new EventEmitter<ArcEvent>();
-  public onUp = new EventEmitter<ArcEvent>();
-  public onDown = new EventEmitter<ArcEvent>();
-
-  /**
-   * directionEmitters is a map of directions to their global emitters.
-   */
-  public directionEmitters = new Map<Direction, EventEmitter<ArcEvent>>([
-    [Direction.LEFT, this.onLeft],
-    [Direction.RIGHT, this.onRight],
-    [Direction.UP, this.onUp],
-    [Direction.DOWN, this.onDown],
-    [Direction.SUBMIT, this.onAPressed],
-    [Direction.BACK, this.onBPressed],
-    [Direction.X, this.onXPressed],
-    [Direction.Y, this.onYPressed],
-    [Direction.TABLEFT, this.onLeftTab],
-    [Direction.TABRIGHT, this.onRightTab],
-    [Direction.TABDOWN, this.onRightTrigger],
-    [Direction.TABUP, this.onLeftTrigger],
-    [Direction.VIEW, this.onView],
-    [Direction.MENU, this.onMenu],
+  public codeDirectionMap = new Map<number, Direction>([
+    [37, Direction.LEFT],      // LeftArrow
+    [214, Direction.LEFT],     // GamepadLeftThumbstickLeft
+    [205, Direction.LEFT],     // GamepadDPadLeft
+    [140, Direction.LEFT],     // NavigationLeft
+    [39, Direction.RIGHT],     // RightArrow
+    [213, Direction.RIGHT],    // GamepadLeftThumbstickRight
+    [206, Direction.RIGHT],    // GamepadDPadRight
+    [141, Direction.RIGHT],    // NavigationRight
+    [38, Direction.UP],        // UpArrow
+    [211, Direction.UP],       // GamepadLeftThumbstickUp
+    [203, Direction.UP],       // GamepadDPadUp
+    [138, Direction.UP],       // NavigationUp
+    [40, Direction.DOWN],      // DownArrow
+    [212, Direction.DOWN],     // GamepadLeftThumbstickDown
+    [204, Direction.DOWN],     // GamepadDPadDown
+    [139, Direction.DOWN],     // NavigationDown
+    [13, Direction.SUBMIT],    // Enter
+    [32, Direction.SUBMIT],    // Space
+    [142, Direction.SUBMIT],   // NavigationAccept
+    [195, Direction.SUBMIT],   // GamepadA
+    [8, Direction.BACK],       // Backspace
+    [196, Direction.BACK],     // GamepadB
+    [103, Direction.X],        // Numpad 7
+    [197, Direction.X],        // GamepadX
+    [105, Direction.Y],        // Numpad 9
+    [198, Direction.Y],        // GamepadY
+    [100, Direction.TABLEFT],  // Numbpad Left
+    [200, Direction.TABLEFT],  // Left Bumper
+    [102, Direction.TABRIGHT], // Numpad Right
+    [199, Direction.TABRIGHT], // Right Bumper
+    [104, Direction.TABUP],    // Numpad Up
+    [201, Direction.TABUP],    // Left Trigger
+    [98, Direction.TABDOWN],   // Numpad Down
+    [202, Direction.TABDOWN],  // Right Trigger
+    [111, Direction.VIEW],     // Numpad Divide
+    [208, Direction.VIEW],     // View Button
+    [106, Direction.MENU],     // Numpad Multiply
+    [207, Direction.MENU],     // Menu Button
   ]);
+
+  public emitters = new Map<Direction, EventEmitter<ArcEvent>>();
 
   /**
    * Mock source for gamepad connections. You can provide gamepads manually
@@ -407,7 +297,10 @@ export class InputService {
    */
   public scrollSpeed = 1000;
 
+  private gamepads: { [key: string]: IGamepadWrapper } = {};
   private subscriptions: Subscription[] = [];
+  private pollRaf: number = null;
+
   constructor(private focus: FocusService) { }
 
   /**
@@ -415,6 +308,8 @@ export class InputService {
    * up the focuser rooted in the target element.
    */
   public bootstrap(root: HTMLElement = document.body) {
+    directionNumsList.forEach(num => this.emitters.set(num, new EventEmitter<ArcEvent>()));
+
     // The gamepadInputEmulation is a string property that exists in
     // JavaScript UWAs and in WebViews in UWAs. It won't exist in
     // Win8.1 style apps or browsers.
@@ -423,6 +318,9 @@ export class InputService {
       // mouse like cursor. The gamepad will provide such keyboard events and provide
       // input to the DOM
       (<any>navigator).gamepadInputEmulation = 'keyboard';
+    } else if (typeof navigator.getGamepads === 'function') {
+      // Poll connected gamepads and use that for input if keyboard emulation isn't available
+      this.watchForGamepad();
     }
 
     this.addKeyboardListeners();
@@ -439,6 +337,8 @@ export class InputService {
    */
   public teardown() {
     this.focus.teardown();
+    this.gamepads = {};
+    if (this.pollRaf) { cancelAnimationFrame(this.pollRaf); }
     this.subscriptions.forEach(sub => sub.unsubscribe());
 
     if ('gamepadInputEmulation' in navigator) {
@@ -461,11 +361,101 @@ export class InputService {
   }
 
   /**
+   * Detects any connected gamepads and watches for new ones to start
+   * polling them. This is the entry point for gamepad input handling.
+   */
+  private watchForGamepad() {
+    const addGamepad = (pad: Gamepad) => {
+      let gamepad: IGamepadWrapper;
+      if (/xbox/i.test(pad.id)) {
+        gamepad = new XboxGamepadWrapper(pad);
+      }
+      if (!gamepad) {
+        // We can try, at least ¯\_(ツ)_/¯ and this should
+        // usually be OK due to remapping.
+        gamepad = new XboxGamepadWrapper(pad);
+      }
+
+      this.gamepads[pad.id] = gamepad;
+    };
+
+    Array.from(navigator.getGamepads())
+      .filter(pad => !!pad)
+      .forEach(addGamepad);
+
+    if (Object.keys(this.gamepads).length > 0) {
+      this.scheduleGamepadPoll();
+    }
+
+    this.subscriptions.push(
+      Observable.merge(
+        this.gamepadSrc,
+        Observable.fromEvent(window, 'gamepadconnected'),
+      ).subscribe(ev => {
+        addGamepad((<any>ev).gamepad);
+        cancelAnimationFrame(this.pollRaf);
+        this.scheduleGamepadPoll();
+      }),
+    );
+  }
+
+  /**
+   * Schedules a new gamepad poll at the next animation frame.
+   */
+  private scheduleGamepadPoll() {
+    this.pollRaf = requestAnimationFrame(now => {
+      this.pollGamepad(now);
+    });
+  }
+
+  /**
+   * Checks for input provided by the gamepad and fires off events as
+   * necessary. It schedules itself again provided that there's still
+   * a connected gamepad somewhere.
+   */
+  private pollGamepad(now: number) {
+    const rawpads = Array.from(navigator.getGamepads()).filter(pad => !!pad); // refreshes all checked-out gamepads
+
+    for (let i = 0; i < rawpads.length; i += 1) {
+      const gamepad = this.gamepads[rawpads[i].id];
+      if (!gamepad) {
+        continue;
+      }
+      gamepad.pad = rawpads[i];
+
+      if (!gamepad.isConnected()) {
+        delete this.gamepads[rawpads[i].id];
+        continue;
+      }
+
+      if (this.keyboardVisible) {
+        continue;
+      }
+
+      directionNumsList
+        .forEach(dir => {
+          if (gamepad.events.get(dir)(now)) {
+            const ev = this.focus.createArcEvent(dir);
+            this.handleDirection(ev);
+            this.emitters.get(dir).emit(ev);
+          }
+        });
+    }
+
+    if (Object.keys(this.gamepads).length > 0) {
+      this.scheduleGamepadPoll();
+    } else {
+      this.pollRaf = null;
+    }
+  }
+
+
+  /**
    * Handles a key down event, returns whether the event has resulted
    * in a navigation and should be cancelled.
    */
   private handleKeyDown(keyCode: number): boolean {
-    const direction = this.directionFromCode(keyCode);
+    const direction = this.codeDirectionMap.get(keyCode);
     if (!direction) {
       return false;
     }
@@ -474,7 +464,7 @@ export class InputService {
     const ev = this.focus.createArcEvent(direction);
     const forForm = isForForm(direction, this.focus.selected);
     result = !forForm && this.handleDirection(ev);
-    this.directionEmitters.get(direction).emit(ev);
+    this.emitters.get(direction).emit(ev);
     if (!forForm) {
       result = result || this.focus.defaultFires(ev);
     }
