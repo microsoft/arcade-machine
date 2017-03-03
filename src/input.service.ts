@@ -350,16 +350,6 @@ export class InputService {
     this.focus.setRoot(root, this.scrollSpeed);
   }
 
-  private handleDirection(ev: ArcEvent): boolean {
-    const event = ev.event;
-    if (event === Direction.UP || event === Direction.RIGHT ||
-      event === Direction.DOWN || event === Direction.LEFT ||
-      event === Direction.SUBMIT || event === Direction.BACK) {
-      return this.focus.fire(ev);
-    }
-    return false;
-  }
-
   /**
    * Detects any connected gamepads and watches for new ones to start
    * polling them. This is the entry point for gamepad input handling.
@@ -449,6 +439,15 @@ export class InputService {
     }
   }
 
+  private handleDirection(ev: ArcEvent): boolean {
+    const event = ev.event;
+    if (event === Direction.UP || event === Direction.RIGHT ||
+      event === Direction.DOWN || event === Direction.LEFT ||
+      event === Direction.SUBMIT || event === Direction.BACK) {
+      return this.focus.fire(ev);
+    }
+    return false;
+  }
 
   /**
    * Handles a key down event, returns whether the event has resulted
