@@ -310,7 +310,6 @@ export class InputService {
   private pollRaf: number = null;
   private emitters = new Map<Direction, EventEmitter<ArcEvent>>();
 
-
   constructor(private focus: FocusService) { }
 
   /**
