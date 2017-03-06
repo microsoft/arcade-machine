@@ -1,19 +1,20 @@
 import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import {
-    AfterViewInit,
-    Component,
-    ElementRef,
-    EventEmitter,
-    NgModule,
-    OnDestroy,
-    Output
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  NgModule,
+  OnDestroy,
+  Output
 } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/take';
 
-import { ArcModule, FocusService, InputService, RegistryService } from '../../../../src';
+import { ArcModule, FocusService, InputService, RegistryService, Direction } from '../../../../src';
 
 import 'rxjs/add/observable/interval';
 
@@ -25,12 +26,12 @@ import 'rxjs/add/observable/interval';
     `
 })
 export class DemoAppComponent implements AfterViewInit {
-  constructor(private inputService: InputService){
+  constructor(private inputService: InputService) {
     const nav: any = navigator;
     nav.gamepadInputEmulation = "keyboard";
 
-    window.addEventListener('keydown', (ev)=>{
-      if(ev.keyCode === 196){
+    window.addEventListener('keydown', (ev) => {
+      if (ev.keyCode === 196) {
         ev.preventDefault();
         ev.stopPropagation();
       }
@@ -208,10 +209,27 @@ export class DemoAppComponent implements AfterViewInit {
       <button (click)="isDialogVisible=true">Open Dialog</button>
     </div>
 
-    <test-dialog class="area"
+    <dialog class="area"
       *ngIf="isDialogVisible"
-      (onClose)="closeDialog()">
-    <test-dialog>
+      (onClose)="isDialogVisible=false">
+      <div>
+        <button>Button 1</button>
+        <button>Button 2</button>
+      </div>
+      <div>
+        <button>Button 3</button>
+        <button>Button 4</button>
+      </div>
+      <div>
+        <button (click)="isChildDialogVisible=true">Open Sub Dialog</button>
+      </div>
+      <dialog *ngIf="isChildDialogVisible" (onClose)="isChildDialogVisible=false">
+        <div>
+          <button>Button 5</button>
+          <button>Button 6</button>
+        </div>
+      </dialog>
+    </dialog>
   `,
 })
 export class Page1Component {
@@ -234,33 +252,19 @@ export class Page1Component {
   public onClick(el: HTMLElement) {
     el.style.background = '#0f0';
   }
-
-  public openDialog() {
-    this.isDialogVisible = true;
-  }
-
-  public closeDialog() {
-    this.isDialogVisible = false;
-  }
 }
 
 @Component({
-  selector: 'test-dialog',
+  selector: 'dialog',
   template: `
-  <div>
-    <button>Button 1</button>
-    <button>Button 2</button>
-  </div>
-  <div>
-    <button>Button 3</button>
-    <button>Button 4</button>
-  </div>
+  <ng-content></ng-content>
   <div>
     <button (click)="onClose.emit()">Close</button>
   </div>
   `,
   styles: [`
     :host{
+      display: block;
       position: fixed;
       top: 45vh;
       left: 45vw;
@@ -270,19 +274,28 @@ export class Page1Component {
     }
   `],
 })
-export class DialogComponent implements AfterViewInit, OnDestroy{
+export class DialogComponent implements AfterViewInit, OnDestroy {
   @Output() public onClose = new EventEmitter();
 
   constructor(
     private focusService: FocusService,
+    private inputService: InputService,
     private hostElem: ElementRef,
   ) { }
 
   public ngAfterViewInit() {
-    this.focusService.setRoot(this.hostElem.nativeElement, Infinity);
+    Observable.fromEvent<KeyboardEvent>(this.hostElem.nativeElement, 'keydown')
+      .filter(ev => this.inputService.codeDirectionMap.get(ev.keyCode) === Direction.BACK)
+      .take(1)
+      .subscribe((ev: KeyboardEvent) => {
+        ev.preventDefault();
+        this.onClose.emit();
+      });
+
+    this.focusService.trapFocus(this.hostElem.nativeElement);
   }
   public ngOnDestroy() {
-    this.focusService.setRoot(document.body, Infinity);
+    this.focusService.releaseFocus();
   }
 }
 
@@ -297,7 +310,7 @@ export class DialogComponent implements AfterViewInit, OnDestroy{
 export class Page2Component {
   constructor(
     private location: Location,
-  ) {}
+  ) { }
 
   public goBack() {
     this.location.back();
