@@ -284,7 +284,7 @@ export class FocusService {
     this.focusRoot = newRootElem;
   }
 
-  public releaseFocus(scrollSpeed = Infinity) {
+  public releaseFocus(scrollSpeed: number = Infinity) {
     const lastFocusState = this.focusStack.pop();
     if (lastFocusState) {
       this.focusRoot = lastFocusState.root;
