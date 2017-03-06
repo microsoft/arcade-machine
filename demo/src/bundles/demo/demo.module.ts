@@ -1,5 +1,5 @@
 import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
-import { Component, NgModule } from '@angular/core';
+import { AfterViewInit, Component, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 
@@ -16,20 +16,19 @@ import 'rxjs/add/observable/interval';
     <router-outlet></router-outlet>
     `
 })
-export class DemoAppComponent {
+export class DemoAppComponent implements AfterViewInit {
   constructor(private inputService: InputService){
     const nav: any = navigator;
     nav.gamepadInputEmulation = "keyboard";
 
     window.addEventListener('keydown', (ev)=>{
-      if(ev.keyCode == 196){
-        console.log(ev);
+      if(ev.keyCode === 196){
         ev.preventDefault();
         ev.stopPropagation();
       }
-      console.log(ev.key);
     });
   }
+
   public ngAfterViewInit() {
     this.inputService.bootstrap();
   }
