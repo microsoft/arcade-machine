@@ -28,12 +28,12 @@ export class DemoAppComponent implements AfterViewInit {
     const nav: any = navigator;
     nav.gamepadInputEmulation = 'keyboard';
 
-    window.addEventListener('keydown', (ev) => {
-      if (ev.keyCode === 196) {
+    Observable.fromEvent<KeyboardEvent>(window, 'keydown')
+      .filter(ev => this.inputService.codeDirectionMap.get(ev.keyCode) === Direction.BACK)
+      .subscribe((ev: KeyboardEvent) => {
         ev.preventDefault();
         ev.stopPropagation();
-      }
-    });
+      });
   }
 
   public ngAfterViewInit() {
@@ -301,7 +301,7 @@ export class DialogComponent implements AfterViewInit, OnDestroy {
   selector: 'page-2',
   template: `
   <h1>Page 2</h1>
-  <h3>Try navigating with gamepad-B</h3>
+  <p>Try navigating with gamepad-B. Back buttons will not work here</p>
   <button (click)="goBack()">Go Back</button>
   `,
 })
