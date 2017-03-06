@@ -10,13 +10,11 @@ import {
 } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
-
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/take';
-
-import { ArcModule, FocusService, InputService, RegistryService, Direction } from '../../../../src';
-
 import 'rxjs/add/observable/interval';
+import 'rxjs/add/operator/take';
+import { Observable } from 'rxjs/Observable';
+
+import { ArcModule, Direction, FocusService, InputService, RegistryService } from '../../../../src';
 
 @Component({
   selector: 'demo-app',
@@ -28,7 +26,7 @@ import 'rxjs/add/observable/interval';
 export class DemoAppComponent implements AfterViewInit {
   constructor(private inputService: InputService) {
     const nav: any = navigator;
-    nav.gamepadInputEmulation = "keyboard";
+    nav.gamepadInputEmulation = 'keyboard';
 
     window.addEventListener('keydown', (ev) => {
       if (ev.keyCode === 196) {
