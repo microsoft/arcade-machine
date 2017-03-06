@@ -1,6 +1,5 @@
 import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
 import {
-    AfterContentInit,
     AfterViewInit,
     Component,
     ElementRef,
