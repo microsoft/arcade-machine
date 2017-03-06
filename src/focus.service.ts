@@ -284,10 +284,23 @@ export class FocusService {
     this.focusRoot = newRootElem;
   }
 
-  public releaseFocus() {
+  public releaseFocus(scrollSpeed = Infinity) {
     const lastFocusState = this.focusStack.pop();
-    this.focusRoot = lastFocusState.root;
-    this.selectNode(lastFocusState.focusedElem, 1000);
+    if (lastFocusState) {
+      this.focusRoot = lastFocusState.root;
+      this.selectNode(lastFocusState.focusedElem, scrollSpeed);
+    } else {
+      console.warn('No more focus traps to release. Make sure you call trapFocus before using releaseFocus');
+      this.clearAllTraps();
+    }
+  }
+
+  /**
+   * Useful for resetting all focus traps e.g. on page navigation
+   */
+  public clearAllTraps() {
+    this.focusStack.length = 0;
+    this.focusRoot = defaultFocusRoot;
   }
 
   /**
