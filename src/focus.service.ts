@@ -8,6 +8,7 @@ import { ArcEvent } from './event';
 import { Direction } from './model';
 import { RegistryService } from './registry.service';
 
+const defaultFocusRoot = document.body;
 // These factors can be tweaked to adjust which elements are favored by the focus algorithm
 const scoringConstants = Object.freeze({
   primaryAxisDistanceWeight: 30,
@@ -19,6 +20,11 @@ const cssClass = Object.freeze({
   selected: 'arc--selected',
   direct: 'arc--selected-direct',
 });
+
+interface IFocusState {
+  root: HTMLElement;
+  focusedElem: HTMLElement;
+}
 
 interface IMutableClientRect {
   top: number;
@@ -262,11 +268,40 @@ export class FocusService {
   // The client bounding rect when we first selected the element, cached
   // so that we can reuse it if the element gets detached.
   private referenceRect: ClientRect;
+  private focusStack: IFocusState[] = [];
+  private focusRoot: HTMLElement = defaultFocusRoot;
 
   constructor(
     private registry: RegistryService,
     private location: Location,
   ) { }
+
+  public trapFocus(newRootElem: HTMLElement) {
+    this.focusStack.push({
+      root: this.focusRoot,
+      focusedElem: this.selected,
+    });
+    this.focusRoot = newRootElem;
+  }
+
+  public releaseFocus(scrollSpeed: number = Infinity) {
+    const lastFocusState = this.focusStack.pop();
+    if (lastFocusState) {
+      this.focusRoot = lastFocusState.root;
+      this.selectNode(lastFocusState.focusedElem, scrollSpeed);
+    } else {
+      console.warn('No more focus traps to release. Make sure you call trapFocus before using releaseFocus');
+      this.clearAllTraps();
+    }
+  }
+
+  /**
+   * Useful for resetting all focus traps e.g. on page navigation
+   */
+  public clearAllTraps() {
+    this.focusStack.length = 0;
+    this.focusRoot = defaultFocusRoot;
+  }
 
   /**
    * Sets the root element to use for focusing.
@@ -587,10 +622,10 @@ export class FocusService {
    * Reset the focus if arcade-machine wanders out of root
    */
   private setDefaultFocus(scrollSpeed: number) {
-    const { root, selected } = this;
-    const allElements = root.querySelectorAll('*');
-    for (let i = 0; i < allElements.length; i += 1) {
-      const potentialElement = <HTMLElement>allElements[i];
+    const { selected } = this;
+    const focusableElems = this.focusRoot.querySelectorAll('*');
+    for (let i = 0; i < focusableElems.length; i += 1) {
+      const potentialElement = <HTMLElement>focusableElems[i];
       if (selected === potentialElement || !this.isFocusable(potentialElement)) {
         continue;
       }
@@ -629,9 +664,9 @@ export class FocusService {
     // method of transversal would be slow, but it's actually really freaking
     // fast. Like, 6 million op/sec on complex pages. So don't bother trying
     // to optimize it unless you have to.
-    const allElements = root.querySelectorAll('*');
-    for (let i = 0; i < allElements.length; i += 1) {
-      const potentialElement = <HTMLElement>allElements[i];
+    const focusableElems = this.focusRoot.querySelectorAll('*');
+    for (let i = 0; i < focusableElems.length; i += 1) {
+      const potentialElement = <HTMLElement>focusableElems[i];
       if (selected === potentialElement || !this.isFocusable(potentialElement)) {
         continue;
       }
