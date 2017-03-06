@@ -279,7 +279,7 @@ export class FocusService {
   public trapFocus(newRootElem: HTMLElement) {
     this.focusStack.push({
       root: this.focusRoot,
-      focusedElem: <HTMLElement>document.activeElement,
+      focusedElem: this.selected,
     });
     this.focusRoot = newRootElem;
   }
