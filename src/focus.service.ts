@@ -256,6 +256,7 @@ export class FocusService {
 
   // Focus root, the service operates below here.
   private root: HTMLElement;
+  public focusRoot: HTMLElement = defaultFocusRoot;
   // The previous rectange that the user had selected.
   private historyRect = defaultRect;
   // Subscription to focus update events.
@@ -269,7 +270,6 @@ export class FocusService {
   // so that we can reuse it if the element gets detached.
   private referenceRect: ClientRect;
   private focusStack: IFocusState[] = [];
-  private focusRoot: HTMLElement = defaultFocusRoot;
 
   constructor(
     private registry: RegistryService,
