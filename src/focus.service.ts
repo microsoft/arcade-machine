@@ -284,7 +284,14 @@ export class FocusService {
     this.focusRoot = newRootElem;
   }
 
-  public releaseFocus(scrollSpeed: number = Infinity) {
+  public releaseFocus(releaseElem?: HTMLElement, scrollSpeed: number = Infinity) {
+    if (releaseElem) {
+      if (releaseElem === this.focusRoot) {
+        this.releaseFocus(null, scrollSpeed);
+      }
+      return;
+    }
+
     const lastFocusState = this.focusStack.pop();
     if (lastFocusState) {
       this.focusRoot = lastFocusState.root;
