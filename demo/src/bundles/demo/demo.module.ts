@@ -270,6 +270,8 @@ export class Page1Component {
       padding: 50px;
       background: white;
     }
+
+    button { margin: 10px; }
   `],
 })
 export class DialogComponent implements AfterViewInit, OnDestroy {
@@ -293,7 +295,7 @@ export class DialogComponent implements AfterViewInit, OnDestroy {
     this.focusService.trapFocus(this.hostElem.nativeElement);
   }
   public ngOnDestroy() {
-    this.focusService.releaseFocus();
+    this.focusService.releaseFocus(this.hostElem.nativeElement);
   }
 }
 
