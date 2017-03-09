@@ -122,6 +122,28 @@ export enum Direction {
 
 Allows you to explicitly tell the directive which element to focus when off the element in the provided direction. Again, this is a shortcut to a `arc-capture-outgoing` handler which sets the `next` element if it matches the target direction.
 
+### Focus Service
+
+#### trapFocus
+```typescript
+/**
+* To trap the focus inside newRootElem.
+* To release the focus, call releaseFocus
+*/
+trapFocus(newRootElem: HTMLElement)
+```
+
+#### releaseFocus
+```typescript
+/**
+* To trap the release the previously trapped focus.
+* Multiple call to this method will precedurally remove focus traps all the way up to body.
+* Further calls without releaseElem param will throw a warning on console while keeping the focus at body.
+* If releaseElem is provided, this method will release focus only if the last trapped focus element was releaseElem.
+*/
+releaseFocus(releaseElem?: HTMLElement, scrollSpeed: number = Infinity)
+```
+
 ### Classes
 
 By default, the `arc--selected` class is added to any element which is selected or who has a child element selected. An `arc--selected-direct` class is additionally added to the lowermost node in the tree which is selected.
