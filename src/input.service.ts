@@ -2,6 +2,7 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { Subscription } from 'rxjs/Subscription';
+import { keys } from 'uwp-keycodes';
 
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/observable/merge';
@@ -236,44 +237,51 @@ export class InputService {
    * codeToDirection returns a direction from keyCode
    */
   public codeDirectionMap = new Map<number, Direction>([
-    [37, Direction.LEFT],      // LeftArrow
-    [214, Direction.LEFT],     // GamepadLeftThumbstickLeft
-    [205, Direction.LEFT],     // GamepadDPadLeft
-    [140, Direction.LEFT],     // NavigationLeft
-    [39, Direction.RIGHT],     // RightArrow
-    [213, Direction.RIGHT],    // GamepadLeftThumbstickRight
-    [206, Direction.RIGHT],    // GamepadDPadRight
-    [141, Direction.RIGHT],    // NavigationRight
-    [38, Direction.UP],        // UpArrow
-    [211, Direction.UP],       // GamepadLeftThumbstickUp
-    [203, Direction.UP],       // GamepadDPadUp
-    [138, Direction.UP],       // NavigationUp
-    [40, Direction.DOWN],      // DownArrow
-    [212, Direction.DOWN],     // GamepadLeftThumbstickDown
-    [204, Direction.DOWN],     // GamepadDPadDown
-    [139, Direction.DOWN],     // NavigationDown
-    [13, Direction.SUBMIT],    // Enter
-    [32, Direction.SUBMIT],    // Space
-    [142, Direction.SUBMIT],   // NavigationAccept
-    [195, Direction.SUBMIT],   // GamepadA
-    [8, Direction.BACK],       // Backspace
-    [196, Direction.BACK],     // GamepadB
-    [103, Direction.X],        // Numpad 7
-    [197, Direction.X],        // GamepadX
-    [105, Direction.Y],        // Numpad 9
-    [198, Direction.Y],        // GamepadY
-    [100, Direction.TABLEFT],  // Numbpad Left
-    [200, Direction.TABLEFT],  // Left Bumper
-    [102, Direction.TABRIGHT], // Numpad Right
-    [199, Direction.TABRIGHT], // Right Bumper
-    [104, Direction.TABUP],    // Numpad Up
-    [201, Direction.TABUP],    // Left Trigger
-    [98, Direction.TABDOWN],   // Numpad Down
-    [202, Direction.TABDOWN],  // Right Trigger
-    [111, Direction.VIEW],     // Numpad Divide
-    [208, Direction.VIEW],     // View Button
-    [106, Direction.MENU],     // Numpad Multiply
-    [207, Direction.MENU],     // Menu Button
+    [keys.LeftArrow, Direction.LEFT],
+    [keys.GamepadLeftThumbstickLeft, Direction.LEFT],
+    [keys.GamepadDPadLeft, Direction.LEFT],
+    [keys.NavigationLeft, Direction.LEFT],
+
+    [keys.RightArrow, Direction.RIGHT],
+    [keys.GamepadLeftThumbstickRight, Direction.RIGHT],
+    [keys.GamepadDPadRight, Direction.RIGHT],
+    [keys.NavigationRight, Direction.RIGHT],
+
+    [keys.UpArrow, Direction.UP],
+    [keys.GamepadLeftThumbstickUp, Direction.UP],
+    [keys.GamepadDPadUp, Direction.UP],
+    [keys.NavigationUp, Direction.UP],
+
+    [keys.DownArrow, Direction.DOWN],
+    [keys.GamepadLeftThumbstickDown, Direction.DOWN],
+    [keys.GamepadDPadDown, Direction.DOWN],
+    [keys.NavigationDown, Direction.DOWN],
+
+    [keys.Enter, Direction.SUBMIT],
+    [keys.NavigationAccept, Direction.SUBMIT],
+    [keys.GamepadA, Direction.SUBMIT],
+
+    [keys.Escape, Direction.BACK],
+    [keys.GamepadB, Direction.BACK],
+
+    [keys.Numpad7, Direction.X],
+    [keys.GamepadX, Direction.X],
+    [keys.Numpad9, Direction.Y],
+    [keys.GamepadY, Direction.Y],
+
+    [keys.Numpad4, Direction.TABLEFT],
+    [keys.GamepadLeftShoulder, Direction.TABLEFT],
+    [keys.Numpad6, Direction.TABRIGHT],
+    [keys.GamepadRightShoulder, Direction.TABRIGHT],
+    [keys.Numpad8, Direction.TABUP],
+    [keys.GamepadLeftTrigger, Direction.TABUP],
+    [keys.Numpad2, Direction.TABDOWN],
+    [keys.GamepadRightTrigger, Direction.TABDOWN],
+
+    [keys.Divide, Direction.VIEW],
+    [keys.GamepadView, Direction.VIEW],
+    [keys.Multiply, Direction.MENU],
+    [keys.GamepadMenu, Direction.MENU],
   ]);
 
   /**
