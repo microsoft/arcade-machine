@@ -7,7 +7,6 @@ import { RegistryService } from './registry.service';
 export { InputService } from './input.service';
 export { FocusService } from './focus.service';
 export { RegistryService } from './registry.service';
-export { keys } from './keymap';
 export * from './model';
 
 @NgModule({

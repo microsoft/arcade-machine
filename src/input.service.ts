@@ -2,13 +2,13 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { Subscription } from 'rxjs/Subscription';
+import { keys } from 'uwp-keycodes';
 
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/observable/merge';
 
 import { ArcEvent } from './event';
 import { FocusService } from './focus.service';
-import { keys } from './keymap';
 import { Direction } from './model';
 
 const directionNumsList: number[] = Object.keys(Direction).map(dir => Number(dir)).filter(n => !isNaN(n));
