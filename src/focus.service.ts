@@ -599,10 +599,8 @@ export class FocusService {
       return false;
     }
 
-    const style = window.getComputedStyle(el);
-    if (style.display === 'none' || style.visibility === 'hidden') {
-      return false;
-    }
+    // check visibility
+    if (!(el.offsetWidth || el.offsetHeight || el.getClientRects().length)) { return false; }
 
     for (let parent = el; parent; parent = parent.parentElement) {
       const parentRecord = this.registry.find(parent);
