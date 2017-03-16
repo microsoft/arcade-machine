@@ -261,7 +261,7 @@ function isNodeAttached(node: HTMLElement, root: HTMLElement) {
 
 @Injectable()
 export class FocusService {
-
+  public enableArcExclude = true;
   // Focus root, the service operates below here.
   private root: HTMLElement;
   public focusRoot: HTMLElement = defaultFocusRoot;
@@ -598,10 +598,6 @@ export class FocusService {
    */
   private isFocusable(el: HTMLElement): boolean {
     const record = this.registry.find(el);
-    if (record && record.excludeThis && record.excludeThis()) {
-      return false;
-    }
-
     const tabIndex = el.getAttribute('tabIndex');
 
     if (!!tabIndex && Number(tabIndex) < 0) {
@@ -613,10 +609,17 @@ export class FocusService {
       return false;
     }
 
-    for (let parent = el; parent; parent = parent.parentElement) {
-      const parentRecord = this.registry.find(parent);
-      if (parentRecord && parentRecord.exclude && parentRecord.exclude()) {
+    // Eventually depricate arc-exclude as it is rarely used but consumes CPU cycles
+    if (this.enableArcExclude) {
+      if (record && record.excludeThis && record.excludeThis()) {
         return false;
+      }
+
+      for (let parent = el; parent; parent = parent.parentElement) {
+        const parentRecord = this.registry.find(parent);
+        if (parentRecord && parentRecord.exclude && parentRecord.exclude()) {
+          return false;
+        }
       }
     }
 
