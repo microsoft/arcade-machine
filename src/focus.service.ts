@@ -262,6 +262,7 @@ function isNodeAttached(node: HTMLElement, root: HTMLElement) {
 @Injectable()
 export class FocusService {
   public enableArcExclude = true;
+  public focusTabIndexOnly = false;
   // Focus root, the service operates below here.
   private root: HTMLElement;
   public focusRoot: HTMLElement = defaultFocusRoot;
@@ -597,19 +598,18 @@ export class FocusService {
    * Returns if the element can receive focus.
    */
   private isFocusable(el: HTMLElement): boolean {
-    const record = this.registry.find(el);
     const tabIndex = el.getAttribute('tabIndex');
 
     if (!!tabIndex && Number(tabIndex) < 0) {
       return false;
     }
 
-    const style = window.getComputedStyle(el);
-    if (style.display === 'none' || style.visibility === 'hidden') {
-      return false;
-    }
+    if (!this.isVisible(el)) { return false; }
+
+    if (this.focusTabIndexOnly) { return true; }
 
     // Eventually depricate arc-exclude as it is rarely used but consumes CPU cycles
+    const record = this.registry.find(el);
     if (this.enableArcExclude) {
       if (record && record.excludeThis && record.excludeThis()) {
         return false;
@@ -631,6 +631,14 @@ export class FocusService {
     return focusableTags.indexOf(el.tagName) > -1
       || (!!tabIndex && Number(tabIndex) >= 0)
       || !!record;
+  }
+
+  private isVisible(el: HTMLElement) {
+    const style = window.getComputedStyle(el);
+    if (style.display === 'none' || style.visibility === 'hidden') {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -679,9 +687,11 @@ export class FocusService {
     // method of transversal would be slow, but it's actually really freaking
     // fast. Like, 6 million op/sec on complex pages. So don't bother trying
     // to optimize it unless you have to.
-    const focusableElems = this.focusRoot.querySelectorAll('*');
+    const focusableElems = this.focusTabIndexOnly ? this.focusRoot.querySelectorAll('[tabindex') : this.focusRoot.querySelectorAll('*');
+
     for (let i = 0; i < focusableElems.length; i += 1) {
       const potentialElement = <HTMLElement>focusableElems[i];
+
       if (selected === potentialElement || !this.isFocusable(potentialElement)) {
         continue;
       }
