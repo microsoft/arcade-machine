@@ -73,6 +73,14 @@ const focusableRoles = Object.freeze([
   'treeitem',
 ]);
 
+const focusableTags = Object.freeze([
+  'A',
+  'BUTTON',
+  'INPUT',
+  'SELECT',
+  'TEXTAREA',
+]);
+
 function roundRect(rect: HTMLElement | ClientRect): ClientRect {
   if (rect instanceof HTMLElement) {
     rect = rect.getBoundingClientRect();
@@ -395,10 +403,11 @@ export class FocusService {
       }
     }
 
-    this.referenceRect = next.getBoundingClientRect();
-    this.selected = next;
     next.classList.add(cssClass.direct);
     next.focus(); // intentially done last in case onFocusChange fires
+
+    this.selected = next;
+    this.referenceRect = next.getBoundingClientRect();
   }
 
   private triggerFocusChange(el: HTMLElement, next: HTMLElement) {
@@ -616,11 +625,7 @@ export class FocusService {
       return true;
     }
 
-    return el.tagName === 'A'
-      || el.tagName === 'BUTTON'
-      || el.tagName === 'INPUT'
-      || el.tagName === 'SELECT'
-      || el.tagName === 'TEXTAREA'
+    return focusableTags.indexOf(el.tagName) > -1
       || (!!tabIndex && Number(tabIndex) >= 0)
       || !!record;
   }
