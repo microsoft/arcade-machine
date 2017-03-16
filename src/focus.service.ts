@@ -599,8 +599,7 @@ export class FocusService {
       return false;
     }
 
-    // check visibility
-    if (!(el.offsetWidth || el.offsetHeight || el.getClientRects().length)) { return false; }
+    if (!this.isVisible(el)) { return false; }
 
     for (let parent = el; parent; parent = parent.parentElement) {
       const parentRecord = this.registry.find(parent);
@@ -621,6 +620,10 @@ export class FocusService {
       || el.tagName === 'TEXTAREA'
       || (!!tabIndex && Number(tabIndex) >= 0)
       || !!record;
+  }
+
+  private isVisible(el: HTMLElement) {
+    return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
   }
 
   /**
