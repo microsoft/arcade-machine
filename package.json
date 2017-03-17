@@ -63,7 +63,7 @@
     "systemjs": "~0.19.42",
     "ts-helpers": "^1.1.1",
     "tslint": "^4.3.1",
-    "tslint-microsoft-contrib": "^4.0.0",
+    "tslint-microsoft-contrib": "4.0.0",
     "typescript": "~2.1.5",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.3.0",
