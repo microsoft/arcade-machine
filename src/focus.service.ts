@@ -687,7 +687,7 @@ export class FocusService {
     // method of transversal would be slow, but it's actually really freaking
     // fast. Like, 6 million op/sec on complex pages. So don't bother trying
     // to optimize it unless you have to.
-    const focusableElems = this.focusTabIndexOnly ? this.focusRoot.querySelectorAll('[tabindex') : this.focusRoot.querySelectorAll('*');
+    const focusableElems = this.focusTabIndexOnly ? this.focusRoot.querySelectorAll('[tabindex]') : this.focusRoot.querySelectorAll('*');
 
     for (let i = 0; i < focusableElems.length; i += 1) {
       const potentialElement = <HTMLElement>focusableElems[i];

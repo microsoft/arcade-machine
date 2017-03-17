@@ -27,7 +27,7 @@ module.exports = {
   },
   devServer: {
     host: '0.0.0.0',
-    port: 8087,
+    port: 8080,
     historyApiFallback: true,
     contentBase: 'demo/dist'
   },
