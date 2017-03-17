@@ -17,6 +17,7 @@
     "trailing-comma": [true, {"multiline": "always", "singleline": "never"}],
     "no-for-in-array": false,
     "restrict-plus-operands": false,
+    "no-increment-decrement": false,
     "function-name": [true, {
       "method-regex": "^[a-z][\\w\\d]+$",
       "private-method-regex": "^[a-z][\\w\\d]+$",
