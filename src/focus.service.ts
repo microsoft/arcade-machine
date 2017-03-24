@@ -381,24 +381,8 @@ export class FocusService {
 
       const common = getCommonAncestor(next, selected);
       selected.classList.remove(cssClass.direct);
-      for (let el = selected; el !== common && el; el = el.parentElement) {
-        //el.classList.remove(cssClass.selected);
-        this.triggerFocusChange(el, null);
-      }
-      for (let el = next; el !== common && el; el = el.parentElement) {
-        //el.classList.add(cssClass.selected);
-        this.triggerFocusChange(el, next);
-        this.parents.push(el);
-      }
+
       for (let el = common; el !== this.root && el; el = el.parentElement) {
-        this.triggerFocusChange(el, next);
-        this.parents.push(el);
-      }
-    } else {
-      // Trigger focus changes and add selected classes everywhere
-      // from the target element to the root.
-      for (let el = next; el !== this.root && el; el = el.parentElement) {
-        //el.classList.add(cssClass.selected);
         this.triggerFocusChange(el, next);
         this.parents.push(el);
       }
