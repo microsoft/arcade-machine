@@ -17,7 +17,6 @@ const scoringConstants = Object.freeze({
 });
 
 const cssClass = Object.freeze({
-  selected: 'arc--selected',
   direct: 'arc--selected-direct',
 });
 
@@ -358,7 +357,7 @@ export class FocusService {
    * Updates the selected DOM node.
    */
   public selectNode(next: HTMLElement, scrollSpeed: number) {
-    const { selected, parents } = this;
+    const { selected } = this;
     if (selected === next) {
       return;
     }
@@ -366,9 +365,6 @@ export class FocusService {
     this.rescroll(next, scrollSpeed, this.root);
 
     const attached = selected && isNodeAttached(selected, this.root);
-    if (!attached && parents) {
-      parents.forEach(parent => parent.classList.remove(cssClass.selected));
-    }
 
     this.parents = [];
 
@@ -382,11 +378,9 @@ export class FocusService {
       const common = getCommonAncestor(next, selected);
       selected.classList.remove(cssClass.direct);
       for (let el = selected; el !== common && el; el = el.parentElement) {
-        el.classList.remove(cssClass.selected);
         this.triggerFocusChange(el, null);
       }
       for (let el = next; el !== common && el; el = el.parentElement) {
-        el.classList.add(cssClass.selected);
         this.triggerFocusChange(el, next);
         this.parents.push(el);
       }
@@ -398,7 +392,6 @@ export class FocusService {
       // Trigger focus changes and add selected classes everywhere
       // from the target element to the root.
       for (let el = next; el !== this.root && el; el = el.parentElement) {
-        el.classList.add(cssClass.selected);
         this.triggerFocusChange(el, next);
         this.parents.push(el);
       }
