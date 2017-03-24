@@ -17,7 +17,6 @@ const scoringConstants = Object.freeze({
 });
 
 const cssClass = Object.freeze({
-  selected: 'arc--selected',
   direct: 'arc--selected-direct',
 });
 
@@ -213,6 +212,20 @@ function calculateScore(
 }
 
 /**
+ * Returns the common ancestor in the DOM of two nodes. From:
+ * http://stackoverflow.com/a/7648545
+ */
+function getCommonAncestor(a: HTMLElement, b: HTMLElement): HTMLElement {
+  const mask = 0x10;
+  while (a = a.parentElement) {
+    if ((a.compareDocumentPosition(b) & mask) === mask) { // tslint:disable-line
+      return a;
+    }
+  }
+  return undefined;
+}
+
+/**
  * Returns if the direction is left/right/up/down.
  */
 function isDirectional(ev: Direction) {
@@ -362,7 +375,26 @@ export class FocusService {
       // element that we touch.
       selected.blur();
 
+      const common = getCommonAncestor(next, selected);
       selected.classList.remove(cssClass.direct);
+      for (let el = selected; el !== common && el; el = el.parentElement) {
+        this.triggerFocusChange(el, null);
+      }
+      for (let el = next; el !== common && el; el = el.parentElement) {
+        this.triggerFocusChange(el, next);
+        this.parents.push(el);
+      }
+      for (let el = common; el !== this.root && el; el = el.parentElement) {
+        this.triggerFocusChange(el, next);
+        this.parents.push(el);
+      }
+    } else {
+      // Trigger focus changes and add selected classes everywhere
+      // from the target element to the root.
+      for (let el = next; el !== this.root && el; el = el.parentElement) {
+        this.triggerFocusChange(el, next);
+        this.parents.push(el);
+      }
     }
 
     next.classList.add(cssClass.direct);
@@ -370,6 +402,13 @@ export class FocusService {
 
     this.selected = next;
     this.referenceRect = next.getBoundingClientRect();
+  }
+
+  private triggerFocusChange(el: HTMLElement, next: HTMLElement) {
+    const directive = this.registry.find(el);
+    if (directive) {
+      directive.onFocus(next);
+    }
   }
 
   /**
