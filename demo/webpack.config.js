@@ -39,7 +39,8 @@ module.exports = {
           {
             loader: 'awesome-typescript-loader',
             query: {
-              tsconfig: paths.tsconfig
+              tsconfig: paths.tsconfig,
+              declaration: false,
             }
           },
         ],

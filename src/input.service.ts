@@ -217,6 +217,10 @@ function isForForm(direction: Direction, selected: Element): boolean {
     || (cursor < input.value.length && direction === Direction.RIGHT);
 }
 
+export interface IWindowsInputPane {
+  tryShow(): void;
+}
+
 /**
  * InputService handles passing input from the external device (gamepad API
  * or keyboard) to the arc internals.
@@ -227,7 +231,11 @@ export class InputService {
   /**
    * Inputpane and boolean to indicate whether it's visible
    */
-  public inputPane = (<any>window).Windows ? Windows.UI.ViewManagement.InputPane.getForCurrentView() : null;
+  private inputPane = (<any>window).Windows ? Windows.UI.ViewManagement.InputPane.getForCurrentView() : null;
+
+  public getInputPane (): IWindowsInputPane {
+    return <IWindowsInputPane>this.inputPane;
+  }
 
   public get keyboardVisible(): boolean {
     return !!this.inputPane && (this.inputPane.occludedRect.y !== 0 || this.inputPane.visible);
