@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/operator/filter';
 
 import { ArcEvent } from './event';
-import { Direction } from './model';
+import { Direction, isHorizontal } from './model';
 import { RegistryService } from './registry.service';
 
 const defaultFocusRoot = document.body;
@@ -14,10 +14,10 @@ const scoringConstants = Object.freeze({
   primaryAxisDistanceWeight: 30,
   secondaryAxisDistanceWeight: 20,
   percentInHistoryShadowWeight: 100000,
-});
-
-const cssClass = Object.freeze({
-  direct: 'arc--selected-direct',
+  maxFastSearchSize: 0.5,
+  fastSearchPointDistance: 10,
+  fastSearchMinimumDistance: 40,
+  fastSearchMaxPointChecks: 30,
 });
 
 interface IFocusState {
@@ -53,32 +53,6 @@ const defaultRect: ClientRect = Object.freeze({
   height: 0,
   width: 0,
 });
-
-// A list of aria `roles` which can receive focus.
-const focusableRoles = Object.freeze([
-  'button',
-  'checkbox',
-  'combobox',
-  'link',
-  'menuitem',
-  'menuitemcheckbox',
-  'menuitemradio',
-  'option',
-  'radio',
-  'slider',
-  'spinbutton',
-  'tab',
-  'textbox',
-  'treeitem',
-]);
-
-const focusableTags = Object.freeze([
-  'A',
-  'BUTTON',
-  'INPUT',
-  'SELECT',
-  'TEXTAREA',
-]);
 
 function roundRect(rect: HTMLElement | ClientRect): ClientRect {
   if (rect instanceof HTMLElement) {
@@ -260,8 +234,6 @@ function isNodeAttached(node: HTMLElement, root: HTMLElement) {
 
 @Injectable()
 export class FocusService {
-  public enableArcExclude = true;
-  public focusTabIndexOnly = false;
   // Focus root, the service operates below here.
   private root: HTMLElement;
   public focusRoot: HTMLElement = defaultFocusRoot;
@@ -272,8 +244,6 @@ export class FocusService {
 
   // The currently selected element.
   public selected: HTMLElement;
-  // Parents of the selected element.
-  private parents: HTMLElement[] = [];
   // The client bounding rect when we first selected the element, cached
   // so that we can reuse it if the element gets detached.
   private referenceRect: ClientRect;
@@ -362,46 +332,35 @@ export class FocusService {
       return;
     }
 
-    this.rescroll(next, scrollSpeed, this.root);
-
     const attached = selected && isNodeAttached(selected, this.root);
-
-    this.parents = [];
 
     if (attached) {
       // Find the common ancestor of the next and currently selected element.
       // Remove selected classes in the current subtree, and add selected
       // classes in the other subtree. Trigger focus changes on every
       // element that we touch.
-      selected.blur();
-
       const common = getCommonAncestor(next, selected);
-      selected.classList.remove(cssClass.direct);
       for (let el = selected; el !== common && el; el = el.parentElement) {
         this.triggerFocusChange(el, null);
       }
       for (let el = next; el !== common && el; el = el.parentElement) {
         this.triggerFocusChange(el, next);
-        this.parents.push(el);
       }
       for (let el = common; el !== this.root && el; el = el.parentElement) {
         this.triggerFocusChange(el, next);
-        this.parents.push(el);
       }
     } else {
       // Trigger focus changes and add selected classes everywhere
       // from the target element to the root.
       for (let el = next; el !== this.root && el; el = el.parentElement) {
         this.triggerFocusChange(el, next);
-        this.parents.push(el);
       }
     }
 
-    next.classList.add(cssClass.direct);
-    next.focus(); // intentially done last in case onFocusChange fires
-
+    next.focus();
     this.selected = next;
     this.referenceRect = next.getBoundingClientRect();
+    this.rescroll(next, scrollSpeed, this.root);
   }
 
   private triggerFocusChange(el: HTMLElement, next: HTMLElement) {
@@ -421,10 +380,17 @@ export class FocusService {
 
   public createArcEvent(direction: Direction): ArcEvent {
     const directional = isDirectional(direction);
+    let element: HTMLElement;
+    if (directional) {
+      element = this.findNextFocusByRaycast(direction);
+      if (!element) {
+        element = this.findNextFocus(direction);
+      }
+    }
     return new ArcEvent({
       directive: this.registry.find(this.selected),
       event: direction,
-      next: directional ? this.findNextFocus(direction) : null,
+      next: element,
       target: this.selected,
     });
   }
@@ -508,8 +474,7 @@ export class FocusService {
     // The scroll calculation loop. Starts at the element and goes up, ensuring
     // that the element (or the box where the element will be after scrolling
     // is applied) is visible in all containers.
-    const rect = el.getBoundingClientRect();
-    const { width, height, top, left } = rect;
+    const { width, height, top, left } = this.referenceRect;
 
     for (let parent = el.parentElement; parent !== container.parentElement && parent; parent = parent.parentElement) {
 
@@ -591,23 +556,16 @@ export class FocusService {
    * Returns if the element can receive focus.
    */
   private isFocusable(el: HTMLElement): boolean {
-    const tabIndex = el.getAttribute('tabIndex');
-
-    if (!!tabIndex && Number(tabIndex) < 0) {
+    if (el.tabIndex < 0) {
       return false;
     }
 
-    if (!this.isVisible(el)) { return false; }
-
-    if (this.focusTabIndexOnly) { return true; }
-
-    // Eventually depricate arc-exclude as it is rarely used but consumes CPU cycles
     const record = this.registry.find(el);
-    if (this.enableArcExclude) {
-      if (record && record.excludeThis && record.excludeThis()) {
-        return false;
-      }
+    if (record && record.excludeThis && record.excludeThis()) {
+      return false;
+    }
 
+    if (this.registry.hasExcludedDeepElements()) {
       for (let parent = el; parent; parent = parent.parentElement) {
         const parentRecord = this.registry.find(parent);
         if (parentRecord && parentRecord.exclude && parentRecord.exclude()) {
@@ -616,14 +574,15 @@ export class FocusService {
       }
     }
 
-    const role = el.getAttribute('role');
-    if (role && focusableRoles.indexOf(role) > -1) {
-      return true;
-    }
+    return true;
+  }
 
-    return focusableTags.indexOf(el.tagName) > -1
-      || (!!tabIndex && Number(tabIndex) >= 0)
-      || !!record;
+  /**
+   * Runs a final check, which can be more expensive, run only if we want to
+   * set the element as our next preferred candidate for focus.
+   */
+  private checkFinalFocusable(el: HTMLElement): boolean {
+    return this.isVisible(el);
   }
 
   private isVisible(el: HTMLElement) {
@@ -657,6 +616,81 @@ export class FocusService {
   }
 
   /**
+   * findNextFocusByRaycast is a speedy implementation of focus searching
+   * that uses a raycast to determine the next best element.
+   */
+  private findNextFocusByRaycast(direction: Direction) {
+    const { root, selected } = this;
+    const referenceRect = isNodeAttached(selected, root)
+      ? selected.getBoundingClientRect()
+      : this.referenceRect;
+
+    let maxDistance = scoringConstants.maxFastSearchSize *
+      (isHorizontal(direction) ? referenceRect.width : referenceRect.height);
+    if (maxDistance < scoringConstants.fastSearchMinimumDistance) {
+      maxDistance = scoringConstants.fastSearchMinimumDistance;
+    }
+
+    // Sanity check so that we don't freeze if we get some insanely big element
+    let searchPointDistance = scoringConstants.fastSearchPointDistance;
+    if (maxDistance / searchPointDistance > scoringConstants.fastSearchMaxPointChecks) {
+      searchPointDistance = maxDistance / scoringConstants.fastSearchMaxPointChecks;
+    }
+
+    let baseX: number;
+    let baseY: number;
+    let seekX = 0;
+    let seekY = 0;
+    switch (direction) {
+      case Direction.LEFT:
+        baseX = referenceRect.left - 1;
+        baseY = referenceRect.top + referenceRect.height / 2;
+        seekX = -1;
+        break;
+      case Direction.RIGHT:
+        baseX = referenceRect.left + referenceRect.width + 1;
+        baseY = referenceRect.top + referenceRect.height / 2;
+        seekX = 1;
+        break;
+      case Direction.UP:
+        baseX = referenceRect.left + referenceRect.width / 2;
+        baseY = referenceRect.top - 1;
+        seekY = -1;
+        break;
+      case Direction.DOWN:
+        baseX = referenceRect.left + referenceRect.width / 2;
+        baseY = referenceRect.top + referenceRect.height + 1;
+        seekY = 1;
+        break;
+    }
+
+    for (let i = 0; i < maxDistance; i += searchPointDistance) {
+      const el = <HTMLElement> document.elementFromPoint(
+        baseX + seekX * i,
+        baseY + seekY * i,
+      );
+
+      if (!el || el === selected) {
+        continue;
+      }
+
+      if (!isNodeAttached(selected, root) || !this.isFocusable(el) || !this.checkFinalFocusable(el)) {
+        continue;
+      }
+
+      this.updateHistoryRect(direction, {
+        element: el,
+        rect: roundRect(el.getBoundingClientRect()),
+        referenceRect,
+      });
+
+      return el;
+    }
+
+    return null;
+  }
+
+  /**
    * Looks for and returns the next focusable element in the given direction.
    * It can return null if no such element is found.
    */
@@ -680,7 +714,7 @@ export class FocusService {
     // method of transversal would be slow, but it's actually really freaking
     // fast. Like, 6 million op/sec on complex pages. So don't bother trying
     // to optimize it unless you have to.
-    const focusableElems = this.focusTabIndexOnly ? this.focusRoot.querySelectorAll('[tabindex]') : this.focusRoot.querySelectorAll('*');
+    const focusableElems = this.focusRoot.querySelectorAll('[tabIndex]');
 
     for (let i = 0; i < focusableElems.length; i += 1) {
       const potentialElement = <HTMLElement>focusableElems[i];
@@ -695,7 +729,7 @@ export class FocusService {
       }
 
       const score = calculateScore(direction, maxDistance, historyRect, referenceRect, potentialRect);
-      if (score > bestPotential.score) {
+      if (score > bestPotential.score && this.checkFinalFocusable(potentialElement)) {
         bestPotential.element = potentialElement;
         bestPotential.rect = potentialRect;
         bestPotential.score = score;

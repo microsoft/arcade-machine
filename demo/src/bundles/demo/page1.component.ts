@@ -43,7 +43,7 @@ import { Observable } from "rxjs/Observable";
       color: #fff;
     }
 
-    .box.arc--selected {
+    .box:focus {
       background: #f00;
     }
 
@@ -65,7 +65,7 @@ import { Observable } from "rxjs/Observable";
       outline: 0 !important;
     }
 
-    input.arc--selected, button.arc--selected, textarea.arc--selected {
+    input:focus, button:focus, textarea:focus {
       border-color: #f00;
     }
 
