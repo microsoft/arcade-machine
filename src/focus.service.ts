@@ -674,7 +674,7 @@ export class FocusService {
         continue;
       }
 
-      if (!isNodeAttached(selected, root) || !this.isFocusable(el) || !this.checkFinalFocusable(el)) {
+      if (!isNodeAttached(el, root) || !this.isFocusable(el) || !this.checkFinalFocusable(el)) {
         continue;
       }
 
