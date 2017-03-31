@@ -6,9 +6,7 @@ import { FocusService } from '../../../../src';
   template: `
   <div>
     <label>Iterations<input type="number" [(ngModel)]="iterations"></label>
-    <button (click)="runTest(iterations, enableArcExclude, focusTabIndexOnly)">Start Test</button>
-    <label><input type="checkbox" [(ngModel)]="enableArcExclude">enableArcExclude</label>
-    <label><input type="checkbox" [(ngModel)]="focusTabIndexOnly">focusTabIndexOnly</label>
+    <button (click)="runTest(iterations)">Start Test</button>
   </div>
   <div *ngIf="results">
     <h2>Results</h2>
@@ -42,9 +40,6 @@ export class BenchmarkPageComponent {
   public results: string[] = [];
   public testElems = 100;
 
-  public focusTabIndexOnly = false;
-  public enableArcExclude = true;
-
   @ViewChildren('tiles') public tilesElemRef: QueryList<ElementRef>;
 
   constructor(
@@ -53,10 +48,7 @@ export class BenchmarkPageComponent {
     this.initTestElems(this.testElems);
   }
 
-  public runTest(iterations: number, enableArcExclude: boolean, focusTabIndexOnly: boolean) {
-    this.focusService.enableArcExclude = enableArcExclude;
-    this.focusService.focusTabIndexOnly = focusTabIndexOnly;
-
+  public runTest(iterations: number) {
     this.focusService.selectNode(this.tilesElemRef.first.nativeElement, Infinity);
     let keyCode = 39;
     let count = 0;
@@ -67,7 +59,7 @@ export class BenchmarkPageComponent {
       count = count + 1;
       if (count > iterations) {
         const totalDuration = performance.now() - t1;
-        this.results.push(`${totalDuration}ms, focusTabIndexOnly=${focusTabIndexOnly}, enableArcExclude= ${enableArcExclude}`);
+        this.results.push(`${totalDuration}ms`);
         clearInterval(interval);
       }
     });

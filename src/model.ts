@@ -21,6 +21,20 @@ export enum Direction {
 }
 
 /**
+ * Returns if the direction is left or right.
+ */
+export function isHorizontal(direction: Direction) {
+  return direction === Direction.LEFT || direction === Direction.RIGHT;
+}
+
+/**
+ * Returns if the direction is up or down.
+ */
+export function isVertical(direction: Direction) {
+  return direction === Direction.UP || direction === Direction.DOWN;
+}
+
+/**
  * IArcEvents are fired on an element when an input occurs. They include
  * information about the input and provide utilities similar to standard
  * HTML events.
