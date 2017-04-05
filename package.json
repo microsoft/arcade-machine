@@ -1,6 +1,6 @@
 {
   "name": "arcade-machine",
-  "version": "0.11.0",
+  "version": "0.12.0-0",
   "scripts": {
     "gulp": "gulp",
     "build": "gulp build",
