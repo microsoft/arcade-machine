@@ -662,6 +662,8 @@ export class FocusService {
         baseY = referenceRect.top + referenceRect.height + 1;
         seekY = 1;
         break;
+      default:
+        throw new Error('Invalid direction');
     }
 
     for (let i = 0; i < maxDistance; i += searchPointDistance) {
