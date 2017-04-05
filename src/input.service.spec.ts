@@ -26,7 +26,7 @@ describe('input service', () => {
       shiftKey: true,
     });
 
-    delete e.keyCode;
+    delete (<any>e).keyCode;
     Object.defineProperty(e, 'keyCode', { value: keyCode });
     target.dispatchEvent(e);
   };

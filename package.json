@@ -21,18 +21,18 @@
     "url": "git://github.com/WatchBeam/arcade-machine.git"
   },
   "dependencies": {
-    "@angular/core": "~2.4.7",
-    "@angular/router": "^3.4.8",
+    "@angular/core": "^2.4.0 || ^4.0.0",
+    "@angular/router": "^3.4.0 || ^4.0.0",
     "rxjs": "~5.0.3",
     "uwp-keycodes": "^1.0.1"
   },
   "devDependencies": {
-    "@angular/common": "~2.4.7",
-    "@angular/compiler": "~2.4.7",
-    "@angular/compiler-cli": "~2.4.7",
-    "@angular/forms": "^2.4.10",
-    "@angular/platform-browser": "~2.4.7",
-    "@angular/platform-browser-dynamic": "~2.4.7",
+    "@angular/common": "^2.4.0 || ^4.0.0",
+    "@angular/compiler": "^2.4.0 || ^4.0.0",
+    "@angular/compiler-cli": "^2.4.0 || ^4.0.0",
+    "@angular/forms": "^2.4.0 || ^4.0.0",
+    "@angular/platform-browser": "^2.4.0 || ^4.0.0",
+    "@angular/platform-browser-dynamic": "^2.4.0 || ^4.0.0",
     "@types/core-js": "^0.9.34",
     "@types/jasmine": "^2.5.35",
     "@types/node": "^6.0.45",
@@ -60,13 +60,13 @@
     "npm-run-all": "^4.0.0",
     "rimraf": "^2.5.1",
     "run-sequence": "^1.2.2",
-    "systemjs": "~0.19.42",
+    "systemjs": "^0.20.11",
     "ts-helpers": "^1.1.1",
     "tslint": "^4.3.1",
     "tslint-microsoft-contrib": "4.0.0",
-    "typescript": "~2.1.5",
+    "typescript": "^2.2.2",
     "webpack": "^2.2.1",
     "webpack-dev-server": "^2.3.0",
-    "zone.js": "^0.7.6"
+    "zone.js": "^0.8.5"
   }
 }
