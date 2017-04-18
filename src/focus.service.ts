@@ -234,6 +234,7 @@ function isNodeAttached(node: HTMLElement, root: HTMLElement) {
 
 @Injectable()
 export class FocusService {
+  public enableRaycast = true;
   // Focus root, the service operates below here.
   private root: HTMLElement;
   public focusRoot: HTMLElement = defaultFocusRoot;
@@ -382,7 +383,9 @@ export class FocusService {
     const directional = isDirectional(direction);
     let element: HTMLElement;
     if (directional) {
-      element = this.findNextFocusByRaycast(direction);
+      if (this.enableRaycast) {
+        element = this.findNextFocusByRaycast(direction);
+      }
       if (!element) {
         element = this.findNextFocus(direction);
       }
