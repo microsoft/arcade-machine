@@ -234,7 +234,7 @@ function isNodeAttached(node: HTMLElement, root: HTMLElement) {
 
 @Injectable()
 export class FocusService {
-  public enableRayTrace = true;
+  public enableRaycast = true;
   // Focus root, the service operates below here.
   private root: HTMLElement;
   public focusRoot: HTMLElement = defaultFocusRoot;
@@ -383,8 +383,12 @@ export class FocusService {
     const directional = isDirectional(direction);
     let element: HTMLElement;
     if (directional) {
-      if (this.enableRayTrace) { element = this.findNextFocusByRaycast(direction); }
-      if (!element) { element = this.findNextFocus(direction); }
+      if (this.enableRaycast) {
+        element = this.findNextFocusByRaycast(direction);
+      }
+      if (!element) {
+        element = this.findNextFocus(direction);
+      }
     }
     return new ArcEvent({
       directive: this.registry.find(this.selected),
