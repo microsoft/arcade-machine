@@ -235,6 +235,7 @@ function isNodeAttached(node: HTMLElement, root: HTMLElement) {
 @Injectable()
 export class FocusService {
   public enableRaycast = true;
+  public focusedClass = 'arc--selected-direct';
   // Focus root, the service operates below here.
   private root: HTMLElement;
   public focusRoot: HTMLElement = defaultFocusRoot;
@@ -358,10 +359,20 @@ export class FocusService {
       }
     }
 
+    this.switchFocusClass(this.selected, next, this.focusedClass);
     next.focus();
     this.selected = next;
     this.referenceRect = next.getBoundingClientRect();
     this.rescroll(next, scrollSpeed, this.root);
+  }
+
+  private switchFocusClass(prevElem: HTMLElement, nextElem: HTMLElement, className: string) {
+    if (className) {
+      if (prevElem) {
+        prevElem.classList.remove(className);
+      }
+      nextElem.classList.add(className);
+    }
   }
 
   private triggerFocusChange(el: HTMLElement, next: HTMLElement) {
@@ -670,7 +681,7 @@ export class FocusService {
     }
 
     for (let i = 0; i < maxDistance; i += searchPointDistance) {
-      const el = <HTMLElement> document.elementFromPoint(
+      const el = <HTMLElement>document.elementFromPoint(
         baseX + seekX * i,
         baseY + seekY * i,
       );
