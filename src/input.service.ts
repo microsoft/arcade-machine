@@ -231,14 +231,20 @@ export class InputService {
   /**
    * Inputpane and boolean to indicate whether it's visible
    */
-  private inputPane = (<any>window).Windows ? Windows.UI.ViewManagement.InputPane.getForCurrentView() : null;
-
-  public getInputPane (): IWindowsInputPane {
-    return <IWindowsInputPane>this.inputPane;
-  }
+  private inputPane = (() => {
+    try {
+      return Windows.UI.ViewManagement.InputPane.getForCurrentView();
+    } catch (_ignored) {
+      return null;
+    }
+  })();
 
   public get keyboardVisible(): boolean {
-    return !!this.inputPane && (this.inputPane.occludedRect.y !== 0 || this.inputPane.visible);
+    if (!this.inputPane) {
+      return false;
+    }
+
+    return this.inputPane.occludedRect.y !== 0 || this.inputPane.visible;
   }
 
   /**
