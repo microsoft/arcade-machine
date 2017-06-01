@@ -30,7 +30,6 @@ export class FocusByRegistry {
     return null;
   }
 
-
   private getElement(el: (HTMLElement | string)) {
     if (typeof el === 'string') {
       return <HTMLElement>document.querySelector(el);
