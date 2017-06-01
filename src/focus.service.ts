@@ -236,6 +236,12 @@ function isNodeAttached(node: HTMLElement, root: HTMLElement) {
 export class FocusService {
   public enableRaycast = true;
   public focusedClass = 'arc--selected-direct';
+
+  /**
+   * Animation speed in pixels per second for scrolling elements into view.
+   * This can be Infinity to disable the animation, or null to disable scrolling.
+   */
+  public scrollSpeed = 1000;
   // Focus root, the service operates below here.
   private root: HTMLElement;
   public focusRoot: HTMLElement = defaultFocusRoot;
@@ -587,7 +593,9 @@ export class FocusService {
    * Returns if the element can receive focus.
    */
   private isFocusable(el: HTMLElement): boolean {
-    if (el.tabIndex < 0) {
+    //Dev note: el.tabindex is not consistent across browsers
+    const tabIndex = el.getAttribute('tabIndex');
+    if (!tabIndex || +tabIndex < 0) {
       return false;
     }
 

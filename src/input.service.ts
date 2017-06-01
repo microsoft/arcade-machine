@@ -321,12 +321,6 @@ export class InputService {
     preventDefault: () => void,
   }>();
 
-  /**
-   * Animation speed in pixels per second for scrolling elements into view.
-   * This can be Infinity to disable the animation, or null to disable scrolling.
-   */
-  public scrollSpeed = 1000;
-
   private gamepads: { [key: string]: IGamepadWrapper } = {};
   private subscriptions: Subscription[] = [];
   private pollRaf: number = null;
@@ -355,11 +349,14 @@ export class InputService {
     }
 
     this.addKeyboardListeners();
-    this.focus.setRoot(root, this.scrollSpeed);
+    this.focus.setRoot(root, this.focus.scrollSpeed);
 
     this.subscriptions.push(
-      Observable.fromEvent<FocusEvent>(document, 'focusin', { passive: true })
-        .subscribe(ev => this.focus.onFocusChange(<HTMLElement>ev.target, this.scrollSpeed)),
+      Observable.fromEvent<FocusEvent>(document, 'focusin')
+        .filter(ev => ev.target !== this.focus.selected)
+        .subscribe(ev => {
+          this.focus.onFocusChange(<HTMLElement>ev.target, this.focus.scrollSpeed);
+        }),
     );
   }
 
@@ -378,7 +375,7 @@ export class InputService {
   }
 
   public setRoot(root: HTMLElement) {
-    this.focus.setRoot(root, this.scrollSpeed);
+    this.focus.setRoot(root, this.focus.scrollSpeed);
   }
 
   /**
