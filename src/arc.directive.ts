@@ -90,6 +90,18 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
     this.handlers.push(createDirectionCapture(Direction.DOWN, target));
   }
 
+  @Input('arc-focus-left')
+  public arcFocusLeft: HTMLElement | string;
+
+  @Input('arc-focus-right')
+  public arcFocusRight: HTMLElement | string;
+
+  @Input('arc-focus-up')
+  public arcFocusUp: HTMLElement | string;
+
+  @Input('arc-focus-down')
+  public arcFocusDown: HTMLElement | string;
+
   private handlers: ((ev: IArcEvent) => void)[] = [];
   private innerExcludeThis = false;
   private innerExclude = false;

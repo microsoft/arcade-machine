@@ -18,7 +18,7 @@ We use [WinJS' navigation algorithm](https://github.com/winjs/winjs/blob/master/
 
 For the majority of navigation, we represent controller actions as keyboard events; the left joystick or arrow keys on a keyboard can be used to fire up, down, left, and right events in order to navigate the page. We determine the next element to focus in a direction using WinJS' algorithm based on each focusable element's physical location, but you can also fine tune what happens when via directives. This can help to avoid [inaccessible UI](https://msdn.microsoft.com/windows/uwp/input-and-devices/designing-for-tv#inaccessible-ui) and provide more fined-tuned experiences on each platform.
 
-It's possible that an element contains multiple other elements which can be focused. For instance,
+> By default only elements that explicity have `tabindex > 0` are considered for focus
 
 ## Demo App
 
@@ -122,28 +122,44 @@ export enum Direction {
 
 Allows you to explicitly tell the directive which element to focus when off the element in the provided direction. Again, this is a shortcut to a `arc-capture-outgoing` handler which sets the `next` element if it matches the target direction.
 
+##### [arc-focus-[left|right|up|down]]="Element | CSSQueryString"
+
+Allows you to explicitly tell the directive which element to focus when off the element in the provided direction. This will take precedence over all other FindFocus strategies
+
 ### Focus Service
 
 #### trapFocus
 ```typescript
-/**
-* To trap the focus inside newRootElem.
-* To release the focus, call releaseFocus
-*/
 trapFocus(newRootElem: HTMLElement)
 ```
+To trap the focus inside newRootElem.
+To release the focus, call releaseFocus
+
+#### releaseFocus
+
+```typescript
+releaseFocus(releaseElem?: HTMLElement)
+```
+To trap the release the previously trapped focus.
+Multiple call to this method will precedurally remove focus traps all the way up to body.
+Further calls without releaseElem param will throw a warning on console while keeping the focus at body.
+If releaseElem is provided, this method will release focus only if the last trapped focus element was releaseElem.
 
 #### releaseFocus
 ```typescript
-/**
-* To trap the release the previously trapped focus.
-* Multiple call to this method will precedurally remove focus traps all the way up to body.
-* Further calls without releaseElem param will throw a warning on console while keeping the focus at body.
-* If releaseElem is provided, this method will release focus only if the last trapped focus element was releaseElem.
-*/
-releaseFocus(releaseElem?: HTMLElement, scrollSpeed: number = Infinity)
+clearAllTraps()
 ```
+Useful for resetting all focus traps e.g. on page navigation
 
 ### Classes
 
-By default, the `arc--selected` class is added to any element which is selected or who has a child element selected. An `arc--selected-direct` class is additionally added to the lowermost node in the tree which is selected.
+By default, the `arc--selected-direct` class is added to the selected node.
+
+### Events
+#### arcselectingnode
+
+Fired when arcade machine is about to select a node
+
+#### arcfocuschanging
+
+Fire when arcade-machine is about to call native focus method. This event can be canceled for example to smooth-scroll to the element before focusing it in browser.
