@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/operator/filter';
 
 import { ArcEvent } from './event';
+import { FocusByRegistry } from './focus-strategies/focus-by-registry';
 import { Direction, isHorizontal } from './model';
 import { RegistryService } from './registry.service';
 
@@ -256,6 +257,7 @@ export class FocusService {
   // so that we can reuse it if the element gets detached.
   private referenceRect: ClientRect;
   private focusStack: IFocusState[] = [];
+  private focusByRegistry = new FocusByRegistry();
 
   constructor(
     private registry: RegistryService,
@@ -417,11 +419,14 @@ export class FocusService {
     const directional = isDirectional(direction);
     let element: HTMLElement;
     if (directional) {
-      if (this.enableRaycast) {
+      element = this.focusByRegistry.findNextFocus(direction, this.registry.find(this.selected));
+
+      if (!element && this.enableRaycast) {
         element = this.findNextFocusByRaycast(direction);
       }
+
       if (!element) {
-        element = this.findNextFocus(direction);
+        element = this.findNextFocusByBoundary(direction);
       }
     }
     return new ArcEvent({
@@ -637,7 +642,7 @@ export class FocusService {
    */
   private setDefaultFocus(scrollSpeed: number = this.scrollSpeed) {
     const { selected } = this;
-    const focusableElems = this.focusRoot.querySelectorAll('*');
+    const focusableElems = this.focusRoot.querySelectorAll('[tabIndex]');
     for (let i = 0; i < focusableElems.length; i += 1) {
       const potentialElement = <HTMLElement>focusableElems[i];
       if (selected === potentialElement || !this.isFocusable(potentialElement)) {
@@ -659,7 +664,11 @@ export class FocusService {
    * that uses a raycast to determine the next best element.
    */
   private findNextFocusByRaycast(direction: Direction) {
+    if (!this.selected) { this.setDefaultFocus(); }
+    if (!this.selected) { throw new Error('No focusable elements'); }
+
     const { root, selected } = this;
+
     const referenceRect = isNodeAttached(selected, root)
       ? selected.getBoundingClientRect()
       : this.referenceRect;
@@ -735,7 +744,10 @@ export class FocusService {
    * Looks for and returns the next focusable element in the given direction.
    * It can return null if no such element is found.
    */
-  private findNextFocus(direction: Direction) {
+  private findNextFocusByBoundary(direction: Direction) {
+    if (!this.selected) { this.setDefaultFocus(); }
+    if (!this.selected) { throw new Error('No focusable elements'); }
+
     const { root, selected, historyRect } = this;
 
     // Don't attempt to focus to elemenents which are not displayed on the screen.
