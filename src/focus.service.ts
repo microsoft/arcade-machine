@@ -326,9 +326,22 @@ export class FocusService {
   }
 
   /**
-   * Updates the selected DOM node.
+   * Wrapper around moveFocus to dispatch arcselectingnode event
    */
-  public selectNode(next: HTMLElement, scrollSpeed: number) {
+  public selectNode(next: HTMLElement, scrollSpeed: number = null) {
+    const canceled = !next.dispatchEvent(new Event('arcselectingnode', { bubbles: true, cancelable: true }));
+    if (canceled) {
+      return;
+    }
+    this.selectNodeWithoutEvent(next, scrollSpeed);
+  }
+
+  /**
+   * Updates the selected DOM node.
+   * This is useful when you do not want to dispatch another event
+   * e.g. when intercepting and transfering focus
+   */
+  public selectNodeWithoutEvent(next: HTMLElement, scrollSpeed: number = null) {
     const { selected } = this;
     if (selected === next) {
       return;
@@ -360,10 +373,14 @@ export class FocusService {
     }
 
     this.switchFocusClass(this.selected, next, this.focusedClass);
-    next.focus();
     this.selected = next;
     this.referenceRect = next.getBoundingClientRect();
     this.rescroll(next, scrollSpeed, this.root);
+
+    const canceled = !next.dispatchEvent(new Event('arcfocuschanging', { bubbles: true, cancelable: true }));
+    if (!canceled) {
+      next.focus();
+    }
   }
 
   private switchFocusClass(prevElem: HTMLElement, nextElem: HTMLElement, className: string) {
