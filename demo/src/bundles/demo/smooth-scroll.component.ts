@@ -35,7 +35,7 @@ export class SmoothScrollPageComponent implements AfterViewInit {
 
   public ngAfterViewInit() {
     const scrollContainer = <HTMLElement>document.querySelector('.scroll-container');
-    scrollContainer.addEventListener('focuschanging', (ev) => {
+    scrollContainer.addEventListener('arcfocuschanging', (ev) => {
       ev.preventDefault();
       const topOffset = (<HTMLElement>ev.target).offsetTop - (scrollContainer.offsetHeight / 2);
       this.scrollService.smoothScroll(scrollContainer, topOffset);
