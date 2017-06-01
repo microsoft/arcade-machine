@@ -570,7 +570,9 @@ export class FocusService {
    * Returns if the element can receive focus.
    */
   private isFocusable(el: HTMLElement): boolean {
-    if (el.tabIndex < 0) {
+    //Dev note: el.tabindex is not consistent across browsers
+    const tabIndex = el.getAttribute('tabIndex');
+    if (!tabIndex || +tabIndex < 0) {
       return false;
     }
 
