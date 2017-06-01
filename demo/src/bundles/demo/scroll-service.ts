@@ -43,5 +43,5 @@ export class ScrollService {
     return this.startOffset + (this.endOffset - this.startOffset) * this.easeOutCubic(elapsedTime / this.duration);
   }
 
-  private easeOutCubic(t: number) { return (--t) * t * t + 1; }
+  private easeOutCubic(t: number) { return (t - 1) ** 3 + 1; }
 }
