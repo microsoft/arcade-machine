@@ -20,6 +20,8 @@ import 'rxjs/add/operator/take';
 import { ArcModule, Direction, FocusService, InputService, RegistryService } from '../../../../src';
 import { Page1Component } from './page1.component';
 import { Page2Component } from './page2.component';
+import { ScrollService } from './scroll-service';
+import { SmoothScrollPageComponent } from './smooth-scroll.component';
 
 @Component({
   selector: 'demo-app',
@@ -27,6 +29,7 @@ import { Page2Component } from './page2.component';
     <nav>
       <a [routerLink]="['/page1']">Page1</a>
       <a [routerLink]="['/page2']">Page2</a>
+      <a [routerLink]="['/smooth-scroll']">Smooth Scroll</a>
       <a [routerLink]="['/benchmark']">Benchmark</a>
     </nav>
     <h1>Arcade Machine Demo</h1>
@@ -102,6 +105,7 @@ const routes = [
   { path: '', pathMatch: 'full', redirectTo: 'page1' },
   { path: 'page1', component: Page1Component },
   { path: 'page2', component: Page2Component },
+  { path: 'smooth-scroll', component: SmoothScrollPageComponent },
   { path: 'benchmark', component: BenchmarkPageComponent },
 ];
 
@@ -121,13 +125,15 @@ const routes = [
     FocusService,
     InputService,
     RegistryService,
+    ScrollService,
   ],
   declarations: [
     DemoAppComponent,
     Page1Component,
     Page2Component,
-    DialogComponent,
+    SmoothScrollPageComponent,
     BenchmarkPageComponent,
+    DialogComponent,
   ],
   bootstrap: [
     DemoAppComponent,
