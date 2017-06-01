@@ -91,23 +91,23 @@ import { Observable } from "rxjs/Observable";
         </div>
       </div>
       <div class="box-wrapper">
-        <div class="box" arc #override1
-          [arc-up]="override3"
-          [arc-down]="override2">
+        <div id="override1" class="box" arc #override1
+          [arc-focus-up]="override3"
+          [arc-focus-down]="override2">
           up/down override
         </div>
       </div>
       <div class="box-wrapper">
         <div class="box" arc #override2
-          [arc-up]="override1"
-          [arc-down]="override3">
+          [arc-focus-up]="'#override1'"
+          [arc-focus-down]="'#override3'">
           up/down override
         </div>
       </div>
       <div class="box-wrapper">
-        <div class="box" arc #override3
-          [arc-up]="override2"
-          [arc-down]="override1">
+        <div id="override3" class="box" arc #override3
+          [arc-focus-up]="override2"
+          [arc-focus-down]="override1">
           up/down override
         </div>
       </div>
