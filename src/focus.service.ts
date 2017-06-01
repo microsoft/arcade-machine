@@ -270,7 +270,7 @@ export class FocusService {
     this.focusRoot = newRootElem;
   }
 
-  public releaseFocus(releaseElem?: HTMLElement, scrollSpeed: number = Infinity) {
+  public releaseFocus(releaseElem?: HTMLElement, scrollSpeed: number = this.scrollSpeed) {
     if (releaseElem) {
       if (releaseElem === this.focusRoot) {
         this.releaseFocus(null, scrollSpeed);
@@ -299,7 +299,7 @@ export class FocusService {
   /**
    * Sets the root element to use for focusing.
    */
-  public setRoot(root: HTMLElement, scrollSpeed: number) {
+  public setRoot(root: HTMLElement, scrollSpeed: number = this.scrollSpeed) {
     if (this.registrySubscription) {
       this.registrySubscription.unsubscribe();
     }
@@ -327,14 +327,14 @@ export class FocusService {
    * this is handle adjustments if the user interacts with other input
    * devices, or if other application logic requests focus.
    */
-  public onFocusChange(focus: HTMLElement, scrollSpeed: number) {
+  public onFocusChange(focus: HTMLElement, scrollSpeed: number = this.scrollSpeed) {
     this.selectNode(focus, scrollSpeed);
   }
 
   /**
    * Wrapper around moveFocus to dispatch arcselectingnode event
    */
-  public selectNode(next: HTMLElement, scrollSpeed: number = null) {
+  public selectNode(next: HTMLElement, scrollSpeed: number = this.scrollSpeed) {
     const canceled = !next.dispatchEvent(new Event('arcselectingnode', { bubbles: true, cancelable: true }));
     if (canceled) {
       return;
@@ -347,7 +347,7 @@ export class FocusService {
    * This is useful when you do not want to dispatch another event
    * e.g. when intercepting and transfering focus
    */
-  public selectNodeWithoutEvent(next: HTMLElement, scrollSpeed: number = null) {
+  public selectNodeWithoutEvent(next: HTMLElement, scrollSpeed: number = this.scrollSpeed) {
     const { selected } = this;
     if (selected === next) {
       return;
@@ -457,7 +457,7 @@ export class FocusService {
     return false;
   }
 
-  public defaultFires(ev: ArcEvent, scrollSpeed: number = Infinity): boolean {
+  public defaultFires(ev: ArcEvent, scrollSpeed: number = this.scrollSpeed): boolean {
     if (ev.defaultPrevented) {
       return true;
     }
@@ -635,7 +635,7 @@ export class FocusService {
   /**
    * Reset the focus if arcade-machine wanders out of root
    */
-  private setDefaultFocus(scrollSpeed: number) {
+  private setDefaultFocus(scrollSpeed: number = this.scrollSpeed) {
     const { selected } = this;
     const focusableElems = this.focusRoot.querySelectorAll('*');
     for (let i = 0; i < focusableElems.length; i += 1) {
