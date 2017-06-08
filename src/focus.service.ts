@@ -171,7 +171,7 @@ function calculateScore(
       throw new Error(`Attempted to navigate to unknown direction ${direction}`);
   }
 
-  if (primaryAxisDistance >= 0) {
+  if (primaryAxisDistance >= -1) { //<-- due to rounding sometimes it returns -0.5. therefore -1
     // The score needs to be a positive number so we make these distances positive numbers
     primaryAxisDistance = maxDistance - primaryAxisDistance;
     secondaryAxisDistance = maxDistance - secondaryAxisDistance;
