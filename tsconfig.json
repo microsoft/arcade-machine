@@ -10,7 +10,7 @@
         "noFallthroughCasesInSwitch": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "strictNullChecks": false,
+        "strictNullChecks": true,
         "module": "commonjs",
         "sourceMap": true,
         "target": "es5",
