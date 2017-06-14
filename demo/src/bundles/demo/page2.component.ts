@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
   template: `
   <h1>Page 2</h1>
   <p>Try navigating with gamepad-B. Back buttons will not work here</p>
-  <button (click)="goBack()">Go Back</button>
+  <button tabindex="0" (click)="goBack()">Go Back</button>
   `,
 })
 export class Page2Component {

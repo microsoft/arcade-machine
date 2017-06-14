@@ -27,10 +27,10 @@ import { SmoothScrollPageComponent } from './smooth-scroll.component';
   selector: 'demo-app',
   template: `
     <nav>
-      <a [routerLink]="['/page1']">Page1</a>
-      <a [routerLink]="['/page2']">Page2</a>
-      <a [routerLink]="['/smooth-scroll']">Smooth Scroll</a>
-      <a [routerLink]="['/benchmark']">Benchmark</a>
+      <a tabindex="0" [routerLink]="['/page1']">Page1</a>
+      <a tabindex="0" [routerLink]="['/page2']">Page2</a>
+      <a tabindex="0" [routerLink]="['/smooth-scroll']">Smooth Scroll</a>
+      <a tabindex="0" [routerLink]="['/benchmark']">Benchmark</a>
     </nav>
     <h1>Arcade Machine Demo</h1>
     <router-outlet></router-outlet>
@@ -59,7 +59,7 @@ export class DemoAppComponent implements AfterViewInit {
   template: `
   <ng-content></ng-content>
   <div>
-    <button (click)="onClose.emit()">Close</button>
+    <button tabindex="0" (click)="onClose.emit()">Close</button>
   </div>
   `,
   styles: [`

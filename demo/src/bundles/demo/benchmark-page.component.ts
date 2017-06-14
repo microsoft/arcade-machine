@@ -5,8 +5,8 @@ import { FocusService } from '../../../../src';
   selector: 'benchmark-page',
   template: `
   <div>
-    <label>Iterations<input type="number" [(ngModel)]="iterations"></label>
-    <button (click)="runTest(iterations)">Start Test</button>
+    <label>Iterations<input tabindex="0" type="number" [(ngModel)]="iterations"></label>
+    <button tabindex="0" (click)="runTest(iterations)">Start Test</button>
   </div>
   <div *ngIf="results">
     <h2>Results</h2>
@@ -31,7 +31,7 @@ import { FocusService } from '../../../../src';
   styles: [`
     .test-subjects{display: flex; flex-wrap: wrap;}
     .inner-component{ border: 1px solid green; }
-    .another-container.arc--selected{border: 1px solid red; }
+    .inner-component.arc--selected-direct{ outline: 2px solid red; }
   `],
 })
 export class BenchmarkPageComponent {

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Observable } from "rxjs/Observable";
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'page-1',
@@ -78,7 +78,7 @@ import { Observable } from "rxjs/Observable";
     <h1>Page 1</h1>
     <h1>Back Button Binding</h1>
     <div class="area">
-      <a [routerLink]="['/page2']">Goto Page 2</a>
+      <a tabindex="0" [routerLink]="['/page2']">Goto Page 2</a>
     </div>
 
     <h1>Special Handlers</h1>
@@ -135,7 +135,7 @@ import { Observable } from "rxjs/Observable";
 
     <h1>A Form</h1>
     <div class="area">
-      <form (submit)="alert('Submitting form')">
+      <form>
         <div><input placeholder="Username"></div>
         <div><input placeholder="Password" type="password"></div>
         <div><textarea></textarea></div>
@@ -162,27 +162,27 @@ import { Observable } from "rxjs/Observable";
 
     <div class="area">
       <h1>Focus Child Elements Only</h1>
-      <button (click)="isDialogVisible=true">Open Dialog</button>
+      <button tabindex="0" (click)="isDialogVisible=true">Open Dialog</button>
     </div>
 
     <dialog class="area"
       *ngIf="isDialogVisible"
       (onClose)="isDialogVisible=false">
       <div>
-        <button>Button 1</button>
-        <button>Button 2</button>
+        <button tabindex="0">Button 1</button>
+        <button tabindex="0">Button 2</button>
       </div>
       <div>
-        <button>Button 3</button>
-        <button>Button 4</button>
+        <button tabindex="0">Button 3</button>
+        <button tabindex="0">Button 4</button>
       </div>
       <div>
-        <button (click)="isChildDialogVisible=true">Open Sub Dialog</button>
+        <button tabindex="0" (click)="isChildDialogVisible=true">Open Sub Dialog</button>
       </div>
       <dialog *ngIf="isChildDialogVisible" (onClose)="isChildDialogVisible=false">
         <div>
-          <button>Button 5</button>
-          <button>Button 6</button>
+          <button tabindex="0">Button 5</button>
+          <button tabindex="0">Button 6</button>
         </div>
       </dialog>
     </dialog>
