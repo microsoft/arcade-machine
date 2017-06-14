@@ -367,33 +367,34 @@ export class FocusService {
 
   private triggerOnFocusHandlers(next: HTMLElement) {
     const isAttached = this.selected !== null && this.root.contains(this.selected);
-    if (isAttached) {
-      // Find the common ancestor of the next and currently selected element.
-      // Trigger focus changes on every element that we touch.
-      const common = getCommonAncestor(next, this.selected);
-      let el: HTMLElement | null = this.selected;
-      while (el !== common && el !== null) {
-        this.triggerFocusChange(el, null);
-        el = el.parentElement;
-      }
-
-      el = next;
-      while (el !== common && el !== null) {
-        this.triggerFocusChange(el, null);
-        el = el.parentElement;
-      }
-
-      el = common;
-      while (el !== this.root && el !== null) {
-        this.triggerFocusChange(el, null);
-        el = el.parentElement;
-      }
-    } else {
+    if (!isAttached) {
       let el: HTMLElement | null = next;
       while (el !== null && el !== this.root) {
         this.triggerFocusChange(el, null);
         el = el.parentElement;
       }
+      return;
+    }
+
+    // Find the common ancestor of the next and currently selected element.
+    // Trigger focus changes on every element that we touch.
+    const common = getCommonAncestor(next, this.selected);
+    let el = this.selected;
+    while (el !== common && el !== null) {
+      this.triggerFocusChange(el, null);
+      el = el.parentElement;
+    }
+
+    el = next;
+    while (el !== common && el !== null) {
+      this.triggerFocusChange(el, null);
+      el = el.parentElement;
+    }
+
+    el = common;
+    while (el !== this.root && el !== null) {
+      this.triggerFocusChange(el, null);
+      el = el.parentElement;
     }
   }
 
@@ -483,8 +484,6 @@ export class FocusService {
       if (this.selected) {
         this.selected.click();
         return true;
-      } else {
-        throw new Error('No node selected');
       }
     } else if (ev.event === Direction.BACK) {
       this.location.back();
