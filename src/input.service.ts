@@ -171,17 +171,19 @@ class XboxGamepadWrapper implements IGamepadWrapper {
  * Based on the currently focused DOM element, returns whether the directional
  * input is part of a form control and should be allowed to bubble through.
  */
-function isForForm(direction: Direction, selected: Element): boolean {
+function isForForm(direction: Direction, selected: HTMLElement | null): boolean {
   if (!selected) {
     return false;
   }
 
   // Always allow the browser to handle enter key presses in a form or text area.
   if (direction === Direction.SUBMIT) {
-    for (let parent = selected; parent; parent = parent.parentElement) {
+    let parent: HTMLElement | null = selected;
+    while (parent) {
       if (parent.tagName === 'FORM' || parent.tagName === 'INPUT' || parent.tagName === 'TEXTAREA') {
         return true;
       }
+      parent = parent.parentElement;
     }
 
     return false;
@@ -301,7 +303,7 @@ export class InputService {
   /**
    * Gets the (global) ArcEvent emitter for a direction
    */
-  public getDirectionEmitter(direction: Direction): EventEmitter<ArcEvent> {
+  public getDirectionEmitter(direction: Direction): EventEmitter<ArcEvent> | undefined {
     return this.emitters.get(direction);
   }
 
@@ -323,7 +325,7 @@ export class InputService {
 
   private gamepads: { [key: string]: IGamepadWrapper } = {};
   private subscriptions: Subscription[] = [];
-  private pollRaf: number = null;
+  private pollRaf: number | null = null;
   private emitters = new Map<Direction, EventEmitter<ArcEvent>>();
 
   constructor(private focus: FocusService) { }
@@ -384,7 +386,7 @@ export class InputService {
    */
   private watchForGamepad() {
     const addGamepad = (pad: Gamepad) => {
-      let gamepad: IGamepadWrapper;
+      let gamepad: IGamepadWrapper | null = null;
       if (/xbox/i.test(pad.id)) {
         gamepad = new XboxGamepadWrapper(pad);
       }
@@ -411,7 +413,7 @@ export class InputService {
         Observable.fromEvent(window, 'gamepadconnected'),
       ).subscribe(ev => {
         addGamepad((<any>ev).gamepad);
-        cancelAnimationFrame(this.pollRaf);
+        if (this.pollRaf) { cancelAnimationFrame(this.pollRaf); }
         this.scheduleGamepadPoll();
       }),
     );
@@ -452,7 +454,8 @@ export class InputService {
 
       directionNumsList
         .forEach(dir => {
-          if (gamepad.events.get(dir)(now)) {
+          const gamepadEvt = gamepad.events.get(dir);
+          if (gamepadEvt && gamepadEvt(now)) {
             this.handleDirection(dir);
           }
         });
@@ -492,7 +495,10 @@ export class InputService {
     const ev = this.focus.createArcEvent(direction);
     const forForm = isForForm(direction, this.focus.selected);
     dirHandled = !forForm && this.bubbleDirection(ev);
-    this.emitters.get(direction).emit(ev);
+
+    const dirEmitter = this.emitters.get(direction);
+    if (dirEmitter) { dirEmitter.emit(ev); }
+
     if (!forForm && !dirHandled) {
       return this.focus.defaultFires(ev);
     }

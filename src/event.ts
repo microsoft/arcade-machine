@@ -12,10 +12,10 @@ export class ArcEvent implements IArcEvent {
   public propagationStopped = false;
 
   constructor(opts: {
-    directive: IArcHandler,
-    next: HTMLElement,
+    directive?: IArcHandler,
+    next: HTMLElement | null,
     event: Direction,
-    target: HTMLElement,
+    target: HTMLElement | null,
   }) { Object.assign(this, opts); }
 
   public stopPropagation() {

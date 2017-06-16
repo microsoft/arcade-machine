@@ -91,7 +91,7 @@ export interface IArcHandler {
   /**
    * Triggers a focus change event.
    */
-  onFocus?(el: HTMLElement): void;
+  onFocus?(el: HTMLElement | null): void;
 
   arcFocusLeft: HTMLElement | string;
   arcFocusRight: HTMLElement | string;

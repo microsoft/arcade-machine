@@ -41,7 +41,11 @@ export class SmoothScrollPageComponent implements AfterViewInit {
       this.scrollService.smoothScroll(scrollContainer, topOffset);
       this.scrollService.scrollCompleted
         .take(1)
-        .subscribe(() => (this.focus.selected.focus()));
+        .subscribe(() => {
+          if (this.focus.selected) {
+            this.focus.selected.focus();
+          }
+        });
     });
   }
 }

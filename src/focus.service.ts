@@ -23,7 +23,7 @@ const scoringConstants = Object.freeze({
 
 interface IFocusState {
   root: HTMLElement;
-  focusedElem: HTMLElement;
+  focusedElem: HTMLElement | null;
 }
 
 interface IMutableClientRect {
@@ -102,7 +102,7 @@ function calculateScore(
     case Direction.LEFT:
       // Make sure we don't evaluate any potential elements to the right of the reference element
       if (potentialRect.left >= referenceRect.left) {
-        break;
+        return 0;
       }
       percentInShadow = calculatePercentInShadow(referenceRect.top, referenceRect.bottom, potentialRect.top, potentialRect.bottom);
       primaryAxisDistance = referenceRect.left - potentialRect.right;
@@ -119,7 +119,7 @@ function calculateScore(
     case Direction.RIGHT:
       // Make sure we don't evaluate any potential elements to the left of the reference element
       if (potentialRect.right <= referenceRect.right) {
-        break;
+        return 0;
       }
       percentInShadow = calculatePercentInShadow(referenceRect.top, referenceRect.bottom, potentialRect.top, potentialRect.bottom);
       primaryAxisDistance = potentialRect.left - referenceRect.right;
@@ -136,7 +136,7 @@ function calculateScore(
     case Direction.UP:
       // Make sure we don't evaluate any potential elements below the reference element
       if (potentialRect.top >= referenceRect.top) {
-        break;
+        return 0;
       }
       percentInShadow = calculatePercentInShadow(referenceRect.left, referenceRect.right, potentialRect.left, potentialRect.right);
       primaryAxisDistance = referenceRect.top - potentialRect.bottom;
@@ -153,7 +153,7 @@ function calculateScore(
     case Direction.DOWN:
       // Make sure we don't evaluate any potential elements above the reference element
       if (potentialRect.bottom <= referenceRect.bottom) {
-        break;
+        return 0;
       }
       percentInShadow = calculatePercentInShadow(referenceRect.left, referenceRect.right, potentialRect.left, potentialRect.right);
       primaryAxisDistance = potentialRect.top - referenceRect.bottom;
@@ -190,14 +190,18 @@ function calculateScore(
  * Returns the common ancestor in the DOM of two nodes. From:
  * http://stackoverflow.com/a/7648545
  */
-function getCommonAncestor(a: HTMLElement, b: HTMLElement): HTMLElement {
+function getCommonAncestor(nodeA: HTMLElement | null, nodeB: HTMLElement | null): HTMLElement | null {
+  if (nodeA === null || nodeB === null) {
+    return null;
+  }
+
   const mask = 0x10;
-  while (a = a.parentElement) {
-    if ((a.compareDocumentPosition(b) & mask) === mask) { // tslint:disable-line
-      return a;
+  while (nodeA != null && (nodeA = nodeA.parentElement)) {
+    if ((nodeA.compareDocumentPosition(nodeB) & mask) === mask) { // tslint:disable-line
+      return nodeA;
     }
   }
-  return undefined;
+  return null;
 }
 
 /**
@@ -226,11 +230,9 @@ function quad(start: number, end: number, progress: number): number {
 /**
  * Returns whether the target DOM node is a child of the root.
  */
-function isNodeAttached(node: HTMLElement, root: HTMLElement) {
-  while (node && node !== root) {
-    node = node.parentElement;
-  }
-  return node === root;
+function isNodeAttached(node: HTMLElement | null, root: HTMLElement | null) {
+  if (!node || !root) { return false; }
+  return root.contains(node);
 }
 
 @Injectable()
@@ -242,7 +244,7 @@ export class FocusService {
    * Animation speed in pixels per second for scrolling elements into view.
    * This can be Infinity to disable the animation, or null to disable scrolling.
    */
-  public scrollSpeed = 1000;
+  public scrollSpeed: number | null = 1000;
   // Focus root, the service operates below here.
   private root: HTMLElement;
   public focusRoot: HTMLElement = defaultFocusRoot;
@@ -252,7 +254,7 @@ export class FocusService {
   private registrySubscription: Subscription;
 
   // The currently selected element.
-  public selected: HTMLElement;
+  public selected: HTMLElement | null;
   // The client bounding rect when we first selected the element, cached
   // so that we can reuse it if the element gets detached.
   private referenceRect: ClientRect;
@@ -272,16 +274,16 @@ export class FocusService {
     this.focusRoot = newRootElem;
   }
 
-  public releaseFocus(releaseElem?: HTMLElement, scrollSpeed: number = this.scrollSpeed) {
+  public releaseFocus(releaseElem?: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
     if (releaseElem) {
       if (releaseElem === this.focusRoot) {
-        this.releaseFocus(null, scrollSpeed);
+        this.releaseFocus(undefined, scrollSpeed);
       }
       return;
     }
 
     const lastFocusState = this.focusStack.pop();
-    if (lastFocusState) {
+    if (lastFocusState && lastFocusState.focusedElem) {
       this.focusRoot = lastFocusState.root;
       this.selectNode(lastFocusState.focusedElem, scrollSpeed);
     } else {
@@ -301,7 +303,7 @@ export class FocusService {
   /**
    * Sets the root element to use for focusing.
    */
-  public setRoot(root: HTMLElement, scrollSpeed: number = this.scrollSpeed) {
+  public setRoot(root: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
     if (this.registrySubscription) {
       this.registrySubscription.unsubscribe();
     }
@@ -316,11 +318,8 @@ export class FocusService {
       return;
     }
 
-    for (let el = this.selected; el !== root; el = el.parentElement) {
-      if (!el) {
-        this.setDefaultFocus(scrollSpeed);
-        return;
-      }
+    if (!root.contains(this.selected)) {
+      this.setDefaultFocus(scrollSpeed);
     }
   }
 
@@ -329,14 +328,14 @@ export class FocusService {
    * this is handle adjustments if the user interacts with other input
    * devices, or if other application logic requests focus.
    */
-  public onFocusChange(focus: HTMLElement, scrollSpeed: number = this.scrollSpeed) {
+  public onFocusChange(focus: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
     this.selectNode(focus, scrollSpeed);
   }
 
   /**
    * Wrapper around moveFocus to dispatch arcselectingnode event
    */
-  public selectNode(next: HTMLElement, scrollSpeed: number = this.scrollSpeed) {
+  public selectNode(next: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
     const canceled = !next.dispatchEvent(new Event('arcselectingnode', { bubbles: true, cancelable: true }));
     if (canceled) {
       return;
@@ -349,37 +348,12 @@ export class FocusService {
    * This is useful when you do not want to dispatch another event
    * e.g. when intercepting and transfering focus
    */
-  public selectNodeWithoutEvent(next: HTMLElement, scrollSpeed: number = this.scrollSpeed) {
-    const { selected } = this;
-    if (selected === next) {
+  public selectNodeWithoutEvent(next: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
+    if (this.selected === next) {
       return;
     }
 
-    const attached = selected && isNodeAttached(selected, this.root);
-
-    if (attached) {
-      // Find the common ancestor of the next and currently selected element.
-      // Remove selected classes in the current subtree, and add selected
-      // classes in the other subtree. Trigger focus changes on every
-      // element that we touch.
-      const common = getCommonAncestor(next, selected);
-      for (let el = selected; el !== common && el; el = el.parentElement) {
-        this.triggerFocusChange(el, null);
-      }
-      for (let el = next; el !== common && el; el = el.parentElement) {
-        this.triggerFocusChange(el, next);
-      }
-      for (let el = common; el !== this.root && el; el = el.parentElement) {
-        this.triggerFocusChange(el, next);
-      }
-    } else {
-      // Trigger focus changes and add selected classes everywhere
-      // from the target element to the root.
-      for (let el = next; el !== this.root && el; el = el.parentElement) {
-        this.triggerFocusChange(el, next);
-      }
-    }
-
+    this.triggerOnFocusHandlers(next);
     this.switchFocusClass(this.selected, next, this.focusedClass);
     this.selected = next;
     this.referenceRect = next.getBoundingClientRect();
@@ -391,7 +365,40 @@ export class FocusService {
     }
   }
 
-  private switchFocusClass(prevElem: HTMLElement, nextElem: HTMLElement, className: string) {
+  private triggerOnFocusHandlers(next: HTMLElement) {
+    const isAttached = this.selected !== null && this.root.contains(this.selected);
+    if (!isAttached) {
+      let el: HTMLElement | null = next;
+      while (el !== null && el !== this.root) {
+        this.triggerFocusChange(el, null);
+        el = el.parentElement;
+      }
+      return;
+    }
+
+    // Find the common ancestor of the next and currently selected element.
+    // Trigger focus changes on every element that we touch.
+    const common = getCommonAncestor(next, this.selected);
+    let el = this.selected;
+    while (el !== common && el !== null) {
+      this.triggerFocusChange(el, null);
+      el = el.parentElement;
+    }
+
+    el = next;
+    while (el !== common && el !== null) {
+      this.triggerFocusChange(el, null);
+      el = el.parentElement;
+    }
+
+    el = common;
+    while (el !== this.root && el !== null) {
+      this.triggerFocusChange(el, null);
+      el = el.parentElement;
+    }
+  }
+
+  private switchFocusClass(prevElem: HTMLElement | null, nextElem: HTMLElement, className: string) {
     if (className) {
       if (prevElem) {
         prevElem.classList.remove(className);
@@ -400,9 +407,9 @@ export class FocusService {
     }
   }
 
-  private triggerFocusChange(el: HTMLElement, next: HTMLElement) {
+  private triggerFocusChange(el: HTMLElement, next: HTMLElement | null) {
     const directive = this.registry.find(el);
-    if (directive) {
+    if (directive && directive.onFocus) {
       directive.onFocus(next);
     }
   }
@@ -412,27 +419,29 @@ export class FocusService {
    */
   public teardown() {
     this.registrySubscription.unsubscribe();
-    this.registrySubscription = null;
   }
 
   public createArcEvent(direction: Direction): ArcEvent {
     const directional = isDirectional(direction);
-    let element: HTMLElement;
+    let nextElem: HTMLElement | null = null;
+    const directive = this.selected ? this.registry.find(this.selected) : undefined;
     if (directional) {
-      element = this.focusByRegistry.findNextFocus(direction, this.registry.find(this.selected));
-
-      if (!element && this.enableRaycast) {
-        element = this.findNextFocusByRaycast(direction);
+      if (directive) {
+        nextElem = this.focusByRegistry.findNextFocus(direction, directive);
       }
 
-      if (!element) {
-        element = this.findNextFocusByBoundary(direction);
+      if (!nextElem && this.enableRaycast) {
+        nextElem = this.findNextFocusByRaycast(direction);
+      }
+
+      if (!nextElem) {
+        nextElem = this.findNextFocusByBoundary(direction);
       }
     }
     return new ArcEvent({
-      directive: this.registry.find(this.selected),
+      directive,
       event: direction,
-      next: element,
+      next: nextElem,
       target: this.selected,
     });
   }
@@ -462,7 +471,7 @@ export class FocusService {
     return false;
   }
 
-  public defaultFires(ev: ArcEvent, scrollSpeed: number = this.scrollSpeed): boolean {
+  public defaultFires(ev: ArcEvent, scrollSpeed: number | null = this.scrollSpeed): boolean {
     if (ev.defaultPrevented) {
       return true;
     }
@@ -472,8 +481,10 @@ export class FocusService {
       this.selectNode(ev.next, scrollSpeed);
       return true;
     } else if (ev.event === Direction.SUBMIT) {
-      this.selected.click();
-      return true;
+      if (this.selected) {
+        this.selected.click();
+        return true;
+      }
     } else if (ev.event === Direction.BACK) {
       this.location.back();
       return true;
@@ -485,7 +496,7 @@ export class FocusService {
   /**
    * Scrolls the page so that the selected element is visible.
    */
-  private rescroll(el: HTMLElement, scrollSpeed: number, container: HTMLElement) {
+  private rescroll(el: HTMLElement, scrollSpeed: number | null, container: HTMLElement) {
     // Abort if scrolling is disabled.
     if (scrollSpeed === null) {
       return;
@@ -518,16 +529,16 @@ export class FocusService {
     // is applied) is visible in all containers.
     const { width, height, top, left } = this.referenceRect;
 
-    for (let parent = el.parentElement; parent !== container.parentElement && parent; parent = parent.parentElement) {
-
+    let parent = el.parentElement;
+    while (parent != null && parent !== container.parentElement) {
       // Special case: treat the body as the viewport as far as scrolling goes.
       let prect: IReducedClientRect;
       if (parent === container) {
-        const containerStyle = window.getComputedStyle(container, null);
-        const paddingTop = Number(containerStyle.paddingTop.slice(0, -2));
-        const paddingBottom = Number(containerStyle.paddingBottom.slice(0, -2));
-        const paddingLeft = Number(containerStyle.paddingLeft.slice(0, -2));
-        const paddingRight = Number(containerStyle.paddingRight.slice(0, -2));
+        const containerStyle = window.getComputedStyle(container, undefined);
+        const paddingTop = containerStyle.paddingTop ? Number(containerStyle.paddingTop.slice(0, -2)) : 0;
+        const paddingBottom = containerStyle.paddingBottom ? Number(containerStyle.paddingBottom.slice(0, -2)) : 0;
+        const paddingLeft = containerStyle.paddingLeft ? Number(containerStyle.paddingLeft.slice(0, -2)) : 0;
+        const paddingRight = containerStyle.paddingRight ? Number(containerStyle.paddingRight.slice(0, -2)) : 0;
         prect = {
           top: paddingTop,
           left: paddingLeft,
@@ -545,9 +556,9 @@ export class FocusService {
         const showsBottom = showsTop + (height - prect.height);
 
         if (showsTop < scrollTop) {
-          animate(parent, showsTop, scrollTop, x => parent.scrollTop = x);
+          animate(parent, showsTop, scrollTop, x => (<HTMLElement>parent).scrollTop = x);
         } else if (showsBottom > scrollTop) {
-          animate(parent, showsBottom, scrollTop, x => parent.scrollTop = x);
+          animate(parent, showsBottom, scrollTop, x => (<HTMLElement>parent).scrollTop = x);
         }
       }
 
@@ -558,11 +569,12 @@ export class FocusService {
         const showsRight = showsLeft + (width - prect.width);
 
         if (showsLeft < scrollLeft) {
-          animate(parent, showsLeft, scrollLeft, x => parent.scrollLeft = x);
+          animate(parent, showsLeft, scrollLeft, x => (<HTMLElement>parent).scrollLeft = x);
         } else if (showsRight > scrollLeft) {
-          animate(parent, showsRight, scrollLeft, x => parent.scrollLeft = x);
+          animate(parent, showsRight, scrollLeft, x => (<HTMLElement>parent).scrollLeft = x);
         }
       }
+      parent = parent.parentElement;
     }
   }
 
@@ -570,11 +582,11 @@ export class FocusService {
    * Bubbles the ArcEvent from the currently selected element
    * to all parent arc directives.
    */
-  private bubbleEvent(ev: ArcEvent, incoming: boolean, source: HTMLElement = this.selected): ArcEvent {
+  private bubbleEvent(ev: ArcEvent, incoming: boolean, source: HTMLElement | null = this.selected): ArcEvent {
     for (let el = source; !ev.propagationStopped && el !== this.root && el; el = el.parentElement) {
       if (el === undefined) {
         console.warn(
-          `arcade-machine focusable element <${el.tagName}> was moved outside of` +
+          `arcade-machine focusable element was moved outside of` +
           'the focus root. We may not be able to handle focus correctly.',
           el,
         );
@@ -610,11 +622,13 @@ export class FocusService {
     }
 
     if (this.registry.hasExcludedDeepElements()) {
-      for (let parent = el; parent; parent = parent.parentElement) {
+      let parent: HTMLElement | null = el;
+      while (parent) {
         const parentRecord = this.registry.find(parent);
         if (parentRecord && parentRecord.exclude && parentRecord.exclude()) {
           return false;
         }
+        parent = parent.parentElement;
       }
     }
 
@@ -640,7 +654,7 @@ export class FocusService {
   /**
    * Reset the focus if arcade-machine wanders out of root
    */
-  private setDefaultFocus(scrollSpeed: number = this.scrollSpeed) {
+  private setDefaultFocus(scrollSpeed: number | null = this.scrollSpeed) {
     const { selected } = this;
     const focusableElems = this.focusRoot.querySelectorAll('[tabIndex]');
     for (let i = 0; i < focusableElems.length; i += 1) {
@@ -667,10 +681,8 @@ export class FocusService {
     if (!this.selected) { this.setDefaultFocus(); }
     if (!this.selected) { throw new Error('No focusable elements'); }
 
-    const { root, selected } = this;
-
-    const referenceRect = isNodeAttached(selected, root)
-      ? selected.getBoundingClientRect()
+    const referenceRect = isNodeAttached(this.selected, this.root)
+      ? this.selected.getBoundingClientRect()
       : this.referenceRect;
 
     let maxDistance = scoringConstants.maxFastSearchSize *
@@ -720,7 +732,7 @@ export class FocusService {
         baseY + seekY * i,
       );
 
-      if (!el || el === selected) {
+      if (!el || el === this.selected) {
         continue;
       }
 
@@ -748,18 +760,16 @@ export class FocusService {
     if (!this.selected) { this.setDefaultFocus(); }
     if (!this.selected) { throw new Error('No focusable elements'); }
 
-    const { root, selected, historyRect } = this;
-
     // Don't attempt to focus to elemenents which are not displayed on the screen.
     const maxDistance = Math.max(screen.availHeight, screen.availWidth);
-    const referenceRect = isNodeAttached(selected, root)
-      ? selected.getBoundingClientRect()
+    const referenceRect = isNodeAttached(this.selected, this.root)
+      ? this.selected.getBoundingClientRect()
       : this.referenceRect;
 
     // Calculate scores for each element in the root
     const bestPotential = {
-      element: <HTMLElement>null,
-      rect: <ClientRect>null,
+      element: <HTMLElement | null>null,
+      rect: <ClientRect | null>null,
       score: 0,
     };
 
@@ -772,7 +782,7 @@ export class FocusService {
     for (let i = 0; i < focusableElems.length; i += 1) {
       const potentialElement = <HTMLElement>focusableElems[i];
 
-      if (selected === potentialElement || !this.isFocusable(potentialElement)) {
+      if (this.selected === potentialElement || !this.isFocusable(potentialElement)) {
         continue;
       }
       const potentialRect = roundRect(potentialElement.getBoundingClientRect());
@@ -781,7 +791,7 @@ export class FocusService {
         continue;
       }
 
-      const score = calculateScore(direction, maxDistance, historyRect, referenceRect, potentialRect);
+      const score = calculateScore(direction, maxDistance, this.historyRect, referenceRect, potentialRect);
       if (score > bestPotential.score && this.checkFinalFocusable(potentialElement)) {
         bestPotential.element = potentialElement;
         bestPotential.rect = potentialRect;
@@ -789,7 +799,7 @@ export class FocusService {
       }
     }
 
-    if (!bestPotential.element) {
+    if (!bestPotential.element || !bestPotential.rect) {
       return null;
     }
 

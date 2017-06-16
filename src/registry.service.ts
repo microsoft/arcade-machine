@@ -15,7 +15,7 @@ export class RegistryService {
   /**
    * Subject on which observable can request focus.
    */
-  public readonly setFocus = new BehaviorSubject<HTMLElement>(null);
+  public readonly setFocus = new BehaviorSubject<HTMLElement | null>(null);
 
   /**
    * Stores a directive into the registry.
@@ -41,7 +41,9 @@ export class RegistryService {
    * Returns the ArcDirective associated with the element. Returns
    * undefined if the element has no associated arc.
    */
-  public find(el: HTMLElement) { return RegistryService.arcs.get(el); }
+  public find(el: HTMLElement) {
+    return RegistryService.arcs.get(el);
+  }
 
   /**
    * Returns whether there are any elements with deep exclusions in the registry.
