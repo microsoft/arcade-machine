@@ -48,7 +48,10 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
   public arcFocus = new EventEmitter<HTMLElement>();
 
   @Input('arc-default-focus')
-  public set arcDefaultFocus(_ignored: any) {
+  public set arcDefaultFocus(shouldFocus: boolean) {
+    if (shouldFocus === false) {
+      return;
+    }
     this.arcSetFocus = this.arcSetFocus.startWith(undefined);
   }
 
