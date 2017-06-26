@@ -87,7 +87,7 @@ import { Observable } from 'rxjs/Observable';
         <div class="box" arc arc-default-focus
           *ngIf="defaultBox"
           (click)="toggleDefaultBox()">
-          I capture focus! Click me to toggle!
+          I capture default focus! Click me to toggle!
         </div>
       </div>
       <div class="box-wrapper">

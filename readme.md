@@ -55,6 +55,13 @@ You can pass an Observable to `arc-set-focus` which, when fired, will forcefully
 
 When `arc-focus` is on an element, that element will steal the page focus when it's instantiated. Setting this is a shortcut to passing `Observable.of(undefined)` to `arc-set-focus` to immediately trigger a focus capture.
 
+It can also be used with *ngFor. For instance, following will focus the 3rd element in ngFor
+```html
+<div
+  *ngFor="let box of boxes; let i = index"
+  arc [arc-default-focus]="i === 2">
+</div>
+```
 ##### (arc-capture-outgoing)="onEvent(IArcEvent)"
 
 `arc-capture-outgoing` can be set to handle, and possibly cancel, events sent while the element or one of its children are focused. See the `IArcEvent` type for more details:
