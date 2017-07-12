@@ -58,7 +58,6 @@ export interface IArcEvent {
 }
 
 export interface IArcHandler {
-
   /**
    * Returns the associated DOM element.
    */

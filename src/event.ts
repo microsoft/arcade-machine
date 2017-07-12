@@ -1,7 +1,6 @@
 import { Direction, IArcEvent, IArcHandler } from './model';
 
 export class ArcEvent implements IArcEvent {
-
   public readonly directive: IArcHandler;
   public next: HTMLElement;
 

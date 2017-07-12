@@ -36,5 +36,5 @@ export class FocusByRegistry {
     }
 
     return el;
-  };
+  }
 }

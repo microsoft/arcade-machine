@@ -8,7 +8,6 @@ import { IArcHandler } from './model';
  */
 @Injectable()
 export class RegistryService {
-
   private static arcs = new Map<HTMLElement, IArcHandler>();
   private excludedDeepCount = 0;
 
