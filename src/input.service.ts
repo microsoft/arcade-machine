@@ -42,7 +42,6 @@ enum DebouncerStage {
  * handling "holding" states.
  */
 class DirectionalDebouncer {
-
   /**
    * fn is a bound function that can be called to check if the key is held.
    */
@@ -204,8 +203,8 @@ function isForForm(direction: Direction, selected: HTMLElement | null): boolean 
   // Deal with the output ourselves, allowing arcade-machine to handle it only
   // if the key press would not have any effect in the context of the input.
   const input = <HTMLInputElement | HTMLTextAreaElement>selected;
-
-  if (input.type !== 'text' && input.type !== 'search' && input.type !== 'url' && input.type !== 'tel' && input.type !== 'password') {
+  const { type } = input;
+  if (type !== 'text' && type !== 'search' && type !== 'url' && type !== 'tel' && type !== 'password') {
     return false;
   }
 
@@ -229,7 +228,6 @@ export interface IWindowsInputPane {
  */
 @Injectable()
 export class InputService {
-
   /**
    * Inputpane and boolean to indicate whether it's visible
    */

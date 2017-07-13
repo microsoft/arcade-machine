@@ -368,10 +368,10 @@ export class FocusService {
   private triggerOnFocusHandlers(next: HTMLElement) {
     const isAttached = this.selected !== null && this.root.contains(this.selected);
     if (!isAttached) {
-      let el: HTMLElement | null = next;
-      while (el !== null && el !== this.root) {
-        this.triggerFocusChange(el, null);
-        el = el.parentElement;
+      let elem: HTMLElement | null = next;
+      while (elem !== null && elem !== this.root) {
+        this.triggerFocusChange(elem, null);
+        elem = elem.parentElement;
       }
       return;
     }
@@ -504,9 +504,9 @@ export class FocusService {
 
     // Animation function to transition a scroll on the `parent` from the
     // `original` value to the `target` value by calling `set.
-    const animate = (parent: HTMLElement, target: number, original: number, setter: (x: number) => void) => {
+    const animate = (parentElement: HTMLElement, target: number, original: number, setter: (x: number) => void) => {
       if (scrollSpeed === Infinity) {
-        parent.scrollTop = target;
+        parentElement.scrollTop = target;
         return;
       }
 

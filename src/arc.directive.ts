@@ -32,7 +32,6 @@ function createDirectionCapture(direction: Direction, target: HTMLElement) {
 
 @Directive({ selector: '[arc]' })
 export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
-
   // 'Primitive' I/O handlers: ================================================
 
   @Input('arc-set-focus')
