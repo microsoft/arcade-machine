@@ -17,6 +17,7 @@
         "target": "es5",
         "pretty": true,
         "declaration": true,
+        "skipLibCheck": true,
         "lib": [
             "dom",
             "es2015"
