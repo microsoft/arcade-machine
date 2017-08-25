@@ -336,10 +336,15 @@ export class FocusService {
    * Wrapper around moveFocus to dispatch arcselectingnode event
    */
   public selectNode(next: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
+    if (!this.focusRoot.contains(next)) {
+      return;
+    }
+
     const canceled = !next.dispatchEvent(new Event('arcselectingnode', { bubbles: true, cancelable: true }));
     if (canceled) {
       return;
     }
+
     this.selectNodeWithoutEvent(next, scrollSpeed);
   }
 
