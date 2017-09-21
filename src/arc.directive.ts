@@ -115,9 +115,6 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
 
   public ngOnInit() {
     this.registry.add(this);
-    if (!this.innerExclude && !this.innerExcludeThis) {
-      this.el.nativeElement.tabIndex = 0;
-    }
     this.arcSetFocus.subscribe(() => this.registry.setFocus.next(this.el.nativeElement));
   }
 
