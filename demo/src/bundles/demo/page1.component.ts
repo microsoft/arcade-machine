@@ -84,28 +84,28 @@ import { Observable } from 'rxjs/Observable';
     <h1>Special Handlers</h1>
     <div class="area">
       <div class="box-wrapper" style="width:200px">
-        <div class="box" arc arc-default-focus
+        <div class="box" arc arc-default-focus tabindex="0"
           *ngIf="defaultBox"
           (click)="toggleDefaultBox()">
           I capture default focus! Click me to toggle!
         </div>
       </div>
       <div class="box-wrapper">
-        <div id="override1" class="box" arc #override1
+        <div id="override1" class="box" arc tabindex="0" #override1
           [arc-focus-up]="override3"
           [arc-focus-down]="override2">
           up/down override
         </div>
       </div>
       <div class="box-wrapper">
-        <div class="box" arc #override2
+        <div class="box" arc tabindex="0" #override2
           [arc-focus-up]="'#override1'"
           [arc-focus-down]="'#override3'">
           up/down override
         </div>
       </div>
       <div class="box-wrapper">
-        <div id="override3" class="box" arc #override3
+        <div id="override3" class="box" arc tabindex="0" #override3
           [arc-focus-up]="override2"
           [arc-focus-down]="override1">
           up/down override
@@ -116,7 +116,7 @@ import { Observable } from 'rxjs/Observable';
     <h1>A Grid</h1>
     <div class="area">
       <div class="box-wrapper" *ngFor="let box of boxes">
-        <div class="box" #el arc (click)="onClick(el)">{{ box }}</div>
+        <div class="box" #el arc tabindex="0" (click)="onClick(el)">{{ box }}</div>
       </div>
     </div>
 
@@ -124,12 +124,12 @@ import { Observable } from 'rxjs/Observable';
     <div class="area">
       <div class="box-wrapper" *ngFor="let box of boxes.slice(0, 3); let i = index"
         style="padding-right: 200px">
-        <div class="box" arc style="height:50px">{{ box }}</div>
+        <div class="box" arc tabindex="0" style="height:50px">{{ box }}</div>
       </div>
       <br>
       <div class="box-wrapper" *ngFor="let box of boxes.slice(0, 3); let i = index"
         style="padding-left: 200px">
-        <div class="box" arc style="height:50px">{{ box }}</div>
+        <div class="box" arc tabindex="0" style="height:50px">{{ box }}</div>
       </div>
     </div>
 
@@ -145,18 +145,18 @@ import { Observable } from 'rxjs/Observable';
 
     <h1>Scrolling</h1>
     <div class="area scroll-restriction">
-      <div class="box" arc>Lorem</div>
-      <div class="box" arc>Ipsum</div>
-      <div class="box" arc>Dolor</div>
-      <div class="box" arc>Sit</div>
-      <div class="box" arc>Amet</div>
-      <div class="box" arc>Consectur</div>
+      <div class="box" arc tabindex="0">Lorem</div>
+      <div class="box" arc tabindex="0">Ipsum</div>
+      <div class="box" arc tabindex="0">Dolor</div>
+      <div class="box" arc tabindex="0">Sit</div>
+      <div class="box" arc tabindex="0">Amet</div>
+      <div class="box" arc tabindex="0">Consectur</div>
     </div>
 
     <h1>Adding/Removing Elements</h1>
     <div class="area">
       <div class="box-wrapper" *ngFor="let box of boxes.slice(0, 15); let i = index">
-        <div class="box" arc *ngIf="(i + (ticker | async)) % 2 === 0">{{ box }}</div>
+        <div class="box" arc tabindex="0" *ngIf="(i + (ticker | async)) % 2 === 0">{{ box }}</div>
       </div>
     </div>
 
