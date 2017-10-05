@@ -684,7 +684,7 @@ export class FocusService {
    */
   private findNextFocusByRaycast(direction: Direction) {
     if (!this.selected) { this.setDefaultFocus(); }
-    if (!this.selected) { throw new Error('No focusable elements'); }
+    if (!this.selected) { return null; }
 
     const referenceRect = isNodeAttached(this.selected, this.root)
       ? this.selected.getBoundingClientRect()
@@ -763,7 +763,7 @@ export class FocusService {
    */
   private findNextFocusByBoundary(direction: Direction) {
     if (!this.selected) { this.setDefaultFocus(); }
-    if (!this.selected) { throw new Error('No focusable elements'); }
+    if (!this.selected) { return null; }
 
     // Don't attempt to focus to elemenents which are not displayed on the screen.
     const maxDistance = Math.max(screen.availHeight, screen.availWidth);
