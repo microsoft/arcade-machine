@@ -178,7 +178,6 @@ function isForForm(direction: Direction, selected: HTMLElement | null): boolean 
   // Always allow the browser to handle enter key presses in a form or text area.
   if (direction === Direction.SUBMIT) {
     let parent: HTMLElement | null = selected;
-     parent;
     while (parent) {
       if (parent.tagName === 'FORM' || (parent.tagName === 'INPUT' && (<HTMLInputElement>parent).type !== 'button') || parent.tagName === 'TEXTAREA') {
         return true;
