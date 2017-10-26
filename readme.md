@@ -18,7 +18,7 @@ We use [WinJS' navigation algorithm](https://github.com/winjs/winjs/blob/master/
 
 For the majority of navigation, we represent controller actions as keyboard events; the left joystick or arrow keys on a keyboard can be used to fire up, down, left, and right events in order to navigate the page. We determine the next element to focus in a direction using WinJS' algorithm based on each focusable element's physical location, but you can also fine tune what happens when via directives. This can help to avoid [inaccessible UI](https://msdn.microsoft.com/windows/uwp/input-and-devices/designing-for-tv#inaccessible-ui) and provide more fined-tuned experiences on each platform.
 
-> By default only elements that explicity have `tabindex > 0` are considered for focus
+> By default only elements that explicity have `tabindex >= 0` are considered for focus
 
 ## Demo App
 
