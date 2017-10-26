@@ -179,7 +179,8 @@ function isForForm(direction: Direction, selected: HTMLElement | null): boolean 
   if (direction === Direction.SUBMIT) {
     let parent: HTMLElement | null = selected;
     while (parent) {
-      if (parent.tagName === 'FORM' || (parent.tagName === 'INPUT' && (<HTMLInputElement>parent).type !== 'button') || parent.tagName === 'TEXTAREA') {
+      if (parent.tagName === 'FORM' || parent.tagName === 'TEXTAREA'
+        || (parent.tagName === 'INPUT' && (<HTMLInputElement>parent).type !== 'button')) {
         return true;
       }
       parent = parent.parentElement;
