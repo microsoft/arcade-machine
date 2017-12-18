@@ -1,4 +1,3 @@
-import { Location } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -263,7 +262,6 @@ export class FocusService {
 
   constructor(
     private registry: RegistryService,
-    private location: Location,
   ) { }
 
   public trapFocus(newRootElem: HTMLElement) {
@@ -490,9 +488,6 @@ export class FocusService {
         this.selected.click();
         return true;
       }
-    } else if (ev.event === Direction.BACK) {
-      this.location.back();
-      return true;
     }
 
     return false;
