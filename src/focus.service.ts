@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/operator/filter';
 
 import { ArcEvent } from './event';
+import { findElByDistance } from './focus-strategies/focus-by-distance';
 import { FocusByRegistry } from './focus-strategies/focus-by-registry';
 import { Direction, isHorizontal } from './model';
 import { RegistryService } from './registry.service';
@@ -11,9 +12,6 @@ import { RegistryService } from './registry.service';
 const defaultFocusRoot = document.body;
 // These factors can be tweaked to adjust which elements are favored by the focus algorithm
 const scoringConstants = Object.freeze({
-  primaryAxisDistanceWeight: 30,
-  secondaryAxisDistanceWeight: 20,
-  percentInHistoryShadowWeight: 100000,
   maxFastSearchSize: 0.5,
   fastSearchPointDistance: 10,
   fastSearchMinimumDistance: 40,
@@ -23,15 +21,6 @@ const scoringConstants = Object.freeze({
 interface IFocusState {
   root: HTMLElement;
   focusedElem: HTMLElement | null;
-}
-
-interface IMutableClientRect {
-  top: number;
-  bottom: number;
-  right: number;
-  left: number;
-  height: number;
-  width: number;
 }
 
 interface IReducedClientRect {
@@ -68,121 +57,6 @@ function roundRect(rect: HTMLElement | ClientRect): ClientRect {
     height: Math.floor(rect.height),
     width: Math.floor(rect.width),
   };
-}
-
-function calculatePercentInShadow(
-  minReferenceCoord: number,
-  maxReferenceCoord: number,
-  minPotentialCoord: number,
-  maxPotentialCoord: number,
-) {
-  /// Calculates the percentage of the potential element that is in the shadow of the reference element.
-  if ((minReferenceCoord >= maxPotentialCoord) || (maxReferenceCoord <= minPotentialCoord)) {
-    // Potential is not in the reference's shadow.
-    return 0;
-  }
-  const pixelOverlap = Math.min(maxReferenceCoord, maxPotentialCoord) - Math.max(minReferenceCoord, minPotentialCoord);
-  const shortEdge = Math.min(maxPotentialCoord - minPotentialCoord, maxReferenceCoord - minReferenceCoord);
-  return shortEdge === 0 ? 0 : (pixelOverlap / shortEdge);
-}
-
-function calculateScore(
-  direction: Direction,
-  maxDistance: number,
-  historyRect: ClientRect,
-  referenceRect: ClientRect,
-  potentialRect: ClientRect,
-): number {
-  let percentInShadow: number;
-  let primaryAxisDistance: number;
-  let secondaryAxisDistance = 0;
-  let percentInHistoryShadow = 0;
-  switch (direction) {
-    case Direction.LEFT:
-      // Make sure we don't evaluate any potential elements to the right of the reference element
-      if (potentialRect.left >= referenceRect.left) {
-        return 0;
-      }
-      percentInShadow = calculatePercentInShadow(referenceRect.top, referenceRect.bottom, potentialRect.top, potentialRect.bottom);
-      primaryAxisDistance = referenceRect.left - potentialRect.right;
-      if (percentInShadow > 0) {
-        percentInHistoryShadow = calculatePercentInShadow(historyRect.top, historyRect.bottom, potentialRect.top, potentialRect.bottom);
-      } else {
-        // If the potential element is not in the shadow, then we calculate secondary axis distance
-        secondaryAxisDistance = (referenceRect.bottom <= potentialRect.top)
-          ? (potentialRect.top - referenceRect.bottom)
-          : referenceRect.top - potentialRect.bottom;
-      }
-      break;
-
-    case Direction.RIGHT:
-      // Make sure we don't evaluate any potential elements to the left of the reference element
-      if (potentialRect.right <= referenceRect.right) {
-        return 0;
-      }
-      percentInShadow = calculatePercentInShadow(referenceRect.top, referenceRect.bottom, potentialRect.top, potentialRect.bottom);
-      primaryAxisDistance = potentialRect.left - referenceRect.right;
-      if (percentInShadow > 0) {
-        percentInHistoryShadow = calculatePercentInShadow(historyRect.top, historyRect.bottom, potentialRect.top, potentialRect.bottom);
-      } else {
-        // If the potential element is not in the shadow, then we calculate secondary axis distance
-        secondaryAxisDistance = (referenceRect.bottom <= potentialRect.top)
-          ? (potentialRect.top - referenceRect.bottom)
-          : referenceRect.top - potentialRect.bottom;
-      }
-      break;
-
-    case Direction.UP:
-      // Make sure we don't evaluate any potential elements below the reference element
-      if (potentialRect.top >= referenceRect.top) {
-        return 0;
-      }
-      percentInShadow = calculatePercentInShadow(referenceRect.left, referenceRect.right, potentialRect.left, potentialRect.right);
-      primaryAxisDistance = referenceRect.top - potentialRect.bottom;
-      if (percentInShadow > 0) {
-        percentInHistoryShadow = calculatePercentInShadow(historyRect.left, historyRect.right, potentialRect.left, potentialRect.right);
-      } else {
-        // If the potential element is not in the shadow, then we calculate secondary axis distance
-        secondaryAxisDistance = (referenceRect.right <= potentialRect.left)
-          ? (potentialRect.left - referenceRect.right)
-          : referenceRect.left - potentialRect.right;
-      }
-      break;
-
-    case Direction.DOWN:
-      // Make sure we don't evaluate any potential elements above the reference element
-      if (potentialRect.bottom <= referenceRect.bottom) {
-        return 0;
-      }
-      percentInShadow = calculatePercentInShadow(referenceRect.left, referenceRect.right, potentialRect.left, potentialRect.right);
-      primaryAxisDistance = potentialRect.top - referenceRect.bottom;
-      if (percentInShadow > 0) {
-        percentInHistoryShadow = calculatePercentInShadow(historyRect.left, historyRect.right, potentialRect.left, potentialRect.right);
-      } else {
-        // If the potential element is not in the shadow, then we calculate secondary axis distance
-        secondaryAxisDistance = (referenceRect.right <= potentialRect.left)
-          ? (potentialRect.left - referenceRect.right)
-          : referenceRect.left - potentialRect.right;
-      }
-      break;
-
-    default:
-      throw new Error(`Attempted to navigate to unknown direction ${direction}`);
-  }
-
-  if (primaryAxisDistance >= -1) { //<-- due to rounding sometimes it returns -0.5. therefore -1
-    // The score needs to be a positive number so we make these distances positive numbers
-    primaryAxisDistance = maxDistance - primaryAxisDistance;
-    secondaryAxisDistance = maxDistance - secondaryAxisDistance;
-    if (primaryAxisDistance >= 0 && secondaryAxisDistance >= 0) {
-      // Potential elements in the shadow get a multiplier to their final score
-      primaryAxisDistance += primaryAxisDistance * percentInShadow;
-      return primaryAxisDistance * scoringConstants.primaryAxisDistanceWeight
-        + secondaryAxisDistance * scoringConstants.secondaryAxisDistanceWeight
-        + percentInHistoryShadow * scoringConstants.percentInHistoryShadowWeight;
-    }
-  }
-  return 0;
 }
 
 /**
@@ -247,8 +121,6 @@ export class FocusService {
   // Focus root, the service operates below here.
   private root: HTMLElement;
   public focusRoot: HTMLElement = defaultFocusRoot;
-  // The previous rectange that the user had selected.
-  private historyRect = defaultRect;
   // Subscription to focus update events.
   private registrySubscription: Subscription;
 
@@ -425,22 +297,13 @@ export class FocusService {
   }
 
   public createArcEvent(direction: Direction): ArcEvent {
-    const directional = isDirectional(direction);
-    let nextElem: HTMLElement | null = null;
-    const directive = this.selected ? this.registry.find(this.selected) : undefined;
-    if (directional) {
-      if (directive) {
-        nextElem = this.focusByRegistry.findNextFocus(direction, directive);
-      }
-
-      if (!nextElem && this.enableRaycast) {
-        nextElem = this.findNextFocusByRaycast(direction);
-      }
-
-      if (!nextElem) {
-        nextElem = this.findNextFocusByBoundary(direction);
-      }
+    let nextElem = null;
+    if (isDirectional(direction)) {
+      const refRect = this.selected ? this.selected.getBoundingClientRect() : defaultRect;
+      nextElem = this.getFocusableElement(direction, this.focusRoot, refRect);
     }
+
+    const directive = this.selected ? this.registry.find(this.selected) : undefined;
     return new ArcEvent({
       directive,
       event: direction,
@@ -491,6 +354,37 @@ export class FocusService {
     }
 
     return false;
+  }
+
+  private getFocusableElement(direction: Direction, root: HTMLElement, refRect: ClientRect): HTMLElement | null {
+    let el: HTMLElement | null | undefined = this.findNextFocusable(direction, root, refRect);
+    if (!el) { return null; }
+
+    const directive = this.registry.find(el);
+    if (directive && directive.arcFocusInside) {
+      el = this.getFocusableElement(direction, el, refRect);
+    }
+    return el;
+  }
+
+  private findNextFocusable(direction: Direction, root: HTMLElement, refRect: ClientRect) {
+    const directive = this.selected ? this.registry.find(this.selected) : undefined;
+    let nextElem: HTMLElement | null = null;
+
+    if (directive) {
+      nextElem = this.focusByRegistry.findNextFocus(direction, directive);
+    }
+
+    if (!nextElem && this.enableRaycast) {
+      nextElem = this.findNextFocusByRaycast(direction);
+    }
+
+    if (!nextElem) {
+      const focusableElems = <HTMLElement[]>Array.from(root.querySelectorAll('[tabIndex]'))
+        .filter((el: any) => this.isFocusable(el));
+      nextElem = findElByDistance(direction, focusableElems, refRect);
+    }
+    return nextElem;
   }
 
   /**
@@ -610,6 +504,15 @@ export class FocusService {
    * Returns if the element can receive focus.
    */
   private isFocusable(el: HTMLElement): boolean {
+    if (el === this.selected) {
+      return false;
+    }
+
+    // to prevent navigating to parent container elements with arc-focus-inside
+    if (this.selected && el.contains(this.selected)) {
+      return false;
+    }
+
     //Dev note: el.tabindex is not consistent across browsers
     const tabIndex = el.getAttribute('tabIndex');
     if (!tabIndex || +tabIndex < 0) {
@@ -740,139 +643,9 @@ export class FocusService {
         continue;
       }
 
-      this.updateHistoryRect(direction, {
-        element: el,
-        rect: roundRect(el.getBoundingClientRect()),
-        referenceRect,
-      });
-
       return el;
     }
 
     return null;
-  }
-
-  /**
-   * Looks for and returns the next focusable element in the given direction.
-   * It can return null if no such element is found.
-   */
-  private findNextFocusByBoundary(direction: Direction) {
-    if (!this.selected) { this.setDefaultFocus(); }
-    if (!this.selected) { return null; }
-
-    // Don't attempt to focus to elemenents which are not displayed on the screen.
-    const maxDistance = Math.max(screen.availHeight, screen.availWidth);
-    const referenceRect = isNodeAttached(this.selected, this.root)
-      ? this.selected.getBoundingClientRect()
-      : this.referenceRect;
-
-    // Calculate scores for each element in the root
-    const bestPotential = {
-      element: <HTMLElement | null>null,
-      rect: <ClientRect | null>null,
-      score: 0,
-    };
-
-    // Note for future devs: copying from the MS project, I thought the below
-    // method of transversal would be slow, but it's actually really freaking
-    // fast. Like, 6 million op/sec on complex pages. So don't bother trying
-    // to optimize it unless you have to.
-    const focusableElems = this.focusRoot.querySelectorAll('[tabIndex]');
-
-    for (let i = 0; i < focusableElems.length; i += 1) {
-      const potentialElement = <HTMLElement>focusableElems[i];
-
-      if (this.selected === potentialElement || !this.isFocusable(potentialElement)) {
-        continue;
-      }
-      const potentialRect = roundRect(potentialElement.getBoundingClientRect());
-      // Skip elements that have either a width of zero or a height of zero
-      if (potentialRect.width === 0 || potentialRect.height === 0) {
-        continue;
-      }
-
-      const score = calculateScore(direction, maxDistance, this.historyRect, referenceRect, potentialRect);
-      if (score > bestPotential.score && this.checkFinalFocusable(potentialElement)) {
-        bestPotential.element = potentialElement;
-        bestPotential.rect = potentialRect;
-        bestPotential.score = score;
-      }
-    }
-
-    if (!bestPotential.element || !bestPotential.rect) {
-      return null;
-    }
-
-    this.updateHistoryRect(direction, {
-      element: bestPotential.element,
-      rect: bestPotential.rect,
-      referenceRect,
-    });
-
-    return bestPotential.element;
-  }
-
-  private updateHistoryRect(direction: Direction, result: {
-    element: HTMLElement,
-    rect: ClientRect,
-    referenceRect: ClientRect,
-  }) {
-    const newHistoryRect: IMutableClientRect = Object.assign({}, defaultRect);
-    // It's possible to get into a situation where the target element has
-    // no overlap with the reference edge.
-    //
-    //..╔══════════════╗..........................
-    //..║   reference  ║..........................
-    //..╚══════════════╝..........................
-    //.....................╔═══════════════════╗..
-    //.....................║                   ║..
-    //.....................║       target      ║..
-    //.....................║                   ║..
-    //.....................╚═══════════════════╝..
-    //
-    // If that is the case, we need to reset the coordinates to
-    // the edge of the target element.
-    if (direction === Direction.LEFT || direction === Direction.RIGHT) {
-      newHistoryRect.top = Math.max(
-        result.rect.top,
-        result.referenceRect.top,
-        this.historyRect ? this.historyRect.top : Number.MIN_VALUE,
-      );
-      newHistoryRect.bottom = Math.min(
-        result.rect.bottom,
-        result.referenceRect.bottom,
-        this.historyRect ? this.historyRect.bottom : Number.MAX_VALUE,
-      );
-
-      if (newHistoryRect.bottom <= newHistoryRect.top) {
-        newHistoryRect.top = result.rect.top;
-        newHistoryRect.bottom = result.rect.bottom;
-      }
-      newHistoryRect.height = newHistoryRect.bottom - newHistoryRect.top;
-      newHistoryRect.width = Number.MAX_VALUE;
-      newHistoryRect.left = Number.MIN_VALUE;
-      newHistoryRect.right = Number.MAX_VALUE;
-    } else {
-      newHistoryRect.left = Math.max(
-        result.rect.left,
-        result.referenceRect.left,
-        this.historyRect ? this.historyRect.left : Number.MIN_VALUE,
-      );
-      newHistoryRect.right = Math.min(
-        result.rect.right,
-        result.referenceRect.right,
-        this.historyRect ? this.historyRect.right : Number.MAX_VALUE,
-      );
-
-      if (newHistoryRect.right <= newHistoryRect.left) {
-        newHistoryRect.left = result.rect.left;
-        newHistoryRect.right = result.rect.right;
-      }
-      newHistoryRect.width = newHistoryRect.right - newHistoryRect.left;
-      newHistoryRect.height = Number.MAX_VALUE;
-      newHistoryRect.top = Number.MIN_VALUE;
-      newHistoryRect.bottom = Number.MAX_VALUE;
-    }
-    this.historyRect = newHistoryRect;
   }
 }
