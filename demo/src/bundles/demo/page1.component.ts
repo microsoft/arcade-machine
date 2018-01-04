@@ -120,6 +120,19 @@ import { Observable } from 'rxjs/Observable';
       </div>
     </div>
 
+    <h1>Focus Inside</h1>
+    Transfer focus to elements inside me
+    <div class="area" tabindex="0" arc arc-focus-inside="true" style="display: flex; align-items: center;">
+      <div class="box" arc tabindex="0" style="display: inline-block; margin-left:50px; width:50px; height:50px">Short</div>
+      <div id="focus-inside1" class="area" arc arc-focus-inside="true" tabindex="0" style="display: inline-block; margin:50px;">
+        me too
+        <div class="box" arc tabindex="0" style="margin-left:50px; width:50px; height:50px">Short</div>
+        <div class="box" arc tabindex="0" style="margin-left:150px; width:50px; height:50px">Short</div>
+        <div class="box" arc tabindex="0" style="margin-left:250px; width:50px; height:50px">Short</div>
+      </div>
+      <div class="box" arc tabindex="0" style="display: inline-block; margin-left:50px; width:50px; height:50px">Short</div>
+    </div>
+
     <h1>Non-Overlapping Elements</h1>
     <div class="area">
       <div class="box-wrapper" *ngFor="let box of boxes.slice(0, 3); let i = index"
@@ -136,10 +149,10 @@ import { Observable } from 'rxjs/Observable';
     <h1>A Form</h1>
     <div class="area">
       <form>
-        <div><input placeholder="Username"></div>
-        <div><input placeholder="Password" type="password"></div>
-        <div><textarea></textarea></div>
-        <div><button>Submit</button></div>
+        <div><input tabindex="0" placeholder="Username"></div>
+        <div><input tabindex="0" placeholder="Password" type="password"></div>
+        <div><textarea tabindex="0"></textarea></div>
+        <div><button tabindex="0">Submit</button></div>
       </form>
     </div>
 

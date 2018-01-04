@@ -257,7 +257,7 @@ export class FocusService {
   public selected: HTMLElement | null;
   // The client bounding rect when we first selected the element, cached
   // so that we can reuse it if the element gets detached.
-  private referenceRect: ClientRect;
+  private referenceRect: ClientRect = defaultRect;
   private focusStack: IFocusState[] = [];
   private focusByRegistry = new FocusByRegistry();
 
@@ -427,28 +427,49 @@ export class FocusService {
   }
 
   public createArcEvent(direction: Direction): ArcEvent {
-    const directional = isDirectional(direction);
-    let nextElem: HTMLElement | null = null;
     const directive = this.selected ? this.registry.find(this.selected) : undefined;
-    if (directional) {
-      if (directive) {
-        nextElem = this.focusByRegistry.findNextFocus(direction, directive);
-      }
 
-      if (!nextElem && this.enableRaycast) {
-        nextElem = this.findNextFocusByRaycast(direction);
-      }
-
-      if (!nextElem) {
-        nextElem = this.findNextFocusByBoundary(direction);
-      }
+    let nextElem: HTMLElement | null = null;
+    if (isDirectional(direction)) {
+      nextElem = this.getFocusableElement(direction, this.focusRoot);
     }
+
     return new ArcEvent({
       directive,
       event: direction,
       next: nextElem,
       target: this.selected,
     });
+  }
+
+  private getFocusableElement(direction: Direction, root: HTMLElement): HTMLElement | null {
+    let el: HTMLElement | null | undefined = this.findNextFocusable(direction, root);
+    if (!el) { return null; }
+    const directive = this.registry.find(el);
+    if (directive && directive.arcFocusInside) {
+      el = this.getFocusableElement(direction, el);
+    }
+    return el;
+  }
+
+  private findNextFocusable(direction: Direction, root: HTMLElement) {
+    const directive = this.selected ? this.registry.find(this.selected) : undefined;
+    let nextElem: HTMLElement | null = null;
+    if (directive) {
+      nextElem = this.focusByRegistry.findNextFocus(direction, directive);
+    }
+
+    const referenceRect = this.selected && isNodeAttached(this.selected, this.root)
+      ? this.selected.getBoundingClientRect()
+      : this.referenceRect;
+
+    if (!nextElem && this.enableRaycast) {
+      nextElem = this.findNextFocusByRaycast(direction, root, referenceRect);
+    }
+    if (!nextElem) {
+      nextElem = this.findNextFocusByBoundary(direction, root, referenceRect);
+    }
+    return nextElem;
   }
 
   /**
@@ -615,6 +636,14 @@ export class FocusService {
    * Returns if the element can receive focus.
    */
   private isFocusable(el: HTMLElement): boolean {
+    if (el === this.selected) {
+      return false;
+    }
+    // to prevent navigating to parent container elements with arc-focus-inside
+    if (this.selected && el.contains(this.selected)) {
+      return false;
+    }
+
     //Dev note: el.tabindex is not consistent across browsers
     const tabIndex = el.getAttribute('tabIndex');
     if (!tabIndex || +tabIndex < 0) {
@@ -682,13 +711,9 @@ export class FocusService {
    * findNextFocusByRaycast is a speedy implementation of focus searching
    * that uses a raycast to determine the next best element.
    */
-  private findNextFocusByRaycast(direction: Direction) {
+  private findNextFocusByRaycast(direction: Direction, root: HTMLElement, referenceRect: ClientRect) {
     if (!this.selected) { this.setDefaultFocus(); }
     if (!this.selected) { return null; }
-
-    const referenceRect = isNodeAttached(this.selected, this.root)
-      ? this.selected.getBoundingClientRect()
-      : this.referenceRect;
 
     let maxDistance = scoringConstants.maxFastSearchSize *
       (isHorizontal(direction) ? referenceRect.width : referenceRect.height);
@@ -741,7 +766,7 @@ export class FocusService {
         continue;
       }
 
-      if (!isNodeAttached(el, this.focusRoot) || !this.isFocusable(el) || !this.checkFinalFocusable(el)) {
+      if (!isNodeAttached(el, root) || !this.isFocusable(el) || !this.checkFinalFocusable(el)) {
         continue;
       }
 
@@ -761,15 +786,12 @@ export class FocusService {
    * Looks for and returns the next focusable element in the given direction.
    * It can return null if no such element is found.
    */
-  private findNextFocusByBoundary(direction: Direction) {
+  private findNextFocusByBoundary(direction: Direction, root: HTMLElement, referenceRect: ClientRect) {
     if (!this.selected) { this.setDefaultFocus(); }
     if (!this.selected) { return null; }
 
     // Don't attempt to focus to elemenents which are not displayed on the screen.
     const maxDistance = Math.max(screen.availHeight, screen.availWidth);
-    const referenceRect = isNodeAttached(this.selected, this.root)
-      ? this.selected.getBoundingClientRect()
-      : this.referenceRect;
 
     // Calculate scores for each element in the root
     const bestPotential = {
@@ -782,7 +804,7 @@ export class FocusService {
     // method of transversal would be slow, but it's actually really freaking
     // fast. Like, 6 million op/sec on complex pages. So don't bother trying
     // to optimize it unless you have to.
-    const focusableElems = this.focusRoot.querySelectorAll('[tabIndex]');
+    const focusableElems = root.querySelectorAll('[tabIndex]');
 
     for (let i = 0; i < focusableElems.length; i += 1) {
       const potentialElement = <HTMLElement>focusableElems[i];

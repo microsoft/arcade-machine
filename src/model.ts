@@ -96,4 +96,9 @@ export interface IArcHandler {
   arcFocusRight: HTMLElement | string;
   arcFocusUp: HTMLElement | string;
   arcFocusDown: HTMLElement | string;
+
+  /**
+   * If focused, the element transfers focus to its children if true
+   */
+  arcFocusInside: boolean;
 }
