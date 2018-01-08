@@ -62,6 +62,18 @@ It can also be used with *ngFor. For instance, following will focus the 3rd elem
   arc [arc-default-focus]="i === 2">
 </div>
 ```
+
+##### arc-focus-inside
+
+If arc-focus-inside is present on a focusable element; on focus, it transfers the focus to its next best child element.
+This is particularly useful to make elements focusable that are not directly in the focus direction.
+
+```html
+<div tabindex="0" arc arc-focus-inside="true">
+  <div tabindex="0">I will be focused instead</div>
+</div>
+```
+
 ##### (arc-capture-outgoing)="onEvent(IArcEvent)"
 
 `arc-capture-outgoing` can be set to handle, and possibly cancel, events sent while the element or one of its children are focused. See the `IArcEvent` type for more details:

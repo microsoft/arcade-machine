@@ -64,6 +64,9 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
     this.innerExcludeThis = exclude !== false;
   }
 
+  @Input('arc-focus-inside')
+  public arcFocusInside: boolean;
+
   // Directional/event shortcuts: =============================================
 
   @Output('arc-submit')
