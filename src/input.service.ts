@@ -489,7 +489,7 @@ export class InputService {
   /**
    * Handles a direction event, returns whether the event has been handled
    */
-  private handleDirection(direction: Direction): boolean {
+  public handleDirection(direction: Direction): boolean {
     let dirHandled: boolean;
     const ev = this.focus.createArcEvent(direction);
     const forForm = isForForm(direction, this.focus.selected);

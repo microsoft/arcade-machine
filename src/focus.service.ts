@@ -309,8 +309,8 @@ export class FocusService {
     this.root = root;
     this.registrySubscription = this.registry
       .setFocus
-      .filter((el: HTMLElement) => !!el)
-      .subscribe((el: HTMLElement) => this.selectNode(el, scrollSpeed));
+      .filter(el => !!el)
+      .subscribe(el => this.selectNode(<HTMLElement>el, scrollSpeed));
 
     if (!this.selected) {
       return;
