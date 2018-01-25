@@ -1,15 +1,9 @@
+// tslint:disable-next-line:import-destructuring-spacing
 import { } from 'jasmine';
 import { FocusService } from './focus.service';
 import { InputService } from './input.service';
 import { Direction } from './model';
 import { RegistryService } from './registry.service';
-
-interface IGamePad {
-  id: string;
-  connected: boolean;
-  axes: number[];
-  buttons: { pressed: boolean }[];
-}
 
 describe('input service', () => {
   let fire: jasmine.Spy;
