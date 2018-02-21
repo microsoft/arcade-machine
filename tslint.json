@@ -27,9 +27,7 @@
         // Basic
         "import-blacklist": [
             true,
-            "lodash",
-            "rxjs/Rx",
-            "rxjs"
+            "rxjs/Rx"
         ],
         "no-multiline-string": false,
         "arrow-parens": [true, "ban-single-arg-parens"],
@@ -108,6 +106,10 @@
         "no-string-literal": false,
         "no-string-throw": true,
         "no-empty-line-after-opening-brace": true,
-        "no-function-expression": true
+        "no-function-expression": true,
+        "no-implicit-dependencies": [true, "dev"],
+        "no-parameter-reassignment": false,
+        "binary-expression-operand-order": false,
+        "no-unnecessary-class": false
     }
 }

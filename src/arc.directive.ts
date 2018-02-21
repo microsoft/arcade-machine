@@ -7,10 +7,7 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-
-import 'rxjs/add/observable/never';
-import 'rxjs/add/operator/startWith';
+import { Observable } from 'rxjs';
 
 import { Direction, IArcEvent, IArcHandler } from './model';
 import { RegistryService } from './registry.service';
@@ -65,7 +62,7 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
   }
 
   @Input('arc-focus-inside')
-  public arcFocusInside: boolean;
+  public arcFocusInside: boolean = false;
 
   // Directional/event shortcuts: =============================================
 
@@ -96,16 +93,16 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
   }
 
   @Input('arc-focus-left')
-  public arcFocusLeft: HTMLElement | string;
+  public arcFocusLeft?: HTMLElement | string;
 
   @Input('arc-focus-right')
-  public arcFocusRight: HTMLElement | string;
+  public arcFocusRight?: HTMLElement | string;
 
   @Input('arc-focus-up')
-  public arcFocusUp: HTMLElement | string;
+  public arcFocusUp?: HTMLElement | string;
 
   @Input('arc-focus-down')
-  public arcFocusDown: HTMLElement | string;
+  public arcFocusDown?: HTMLElement | string;
 
   private handlers: ((ev: IArcEvent) => void)[] = [];
   private innerExcludeThis = false;

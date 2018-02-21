@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
-
-import 'rxjs/add/operator/filter';
+import { Subscription } from 'rxjs';
 
 import { ArcEvent } from './event';
 import { FocusByRegistry } from './focus-strategies/focus-by-registry';
@@ -219,10 +217,10 @@ function isDirectional(ev: Direction) {
 function quad(start: number, end: number, progress: number): number {
   const diff = end - start;
   if (progress < 0.5) {
-    return diff * (2 * progress * progress) + start;
+    return diff * (2 * progress ** 2) + start;
   } else {
     const displaced = progress - 1;
-    return diff * ((-2 * displaced * displaced) + 1) + start;
+    return diff * ((-2 * displaced ** 2) + 1) + start;
   }
 }
 
@@ -245,15 +243,15 @@ export class FocusService {
    */
   public scrollSpeed: number | null = 1000;
   // Focus root, the service operates below here.
-  private root: HTMLElement;
+  private root: HTMLElement | null = null;
   public focusRoot: HTMLElement = defaultFocusRoot;
   // The previous rectange that the user had selected.
   private historyRect = defaultRect;
   // Subscription to focus update events.
-  private registrySubscription: Subscription;
+  private registrySubscription?: Subscription;
 
   // The currently selected element.
-  public selected: HTMLElement | null;
+  public selected: HTMLElement | null = null;
   // The client bounding rect when we first selected the element, cached
   // so that we can reuse it if the element gets detached.
   private referenceRect: ClientRect = defaultRect;
@@ -352,6 +350,9 @@ export class FocusService {
    * e.g. when intercepting and transfering focus
    */
   public selectNodeWithoutEvent(next: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
+    if (!this.root) {
+      throw new Error('root not set');
+    }
     if (this.selected === next) {
       return;
     }
@@ -369,6 +370,9 @@ export class FocusService {
   }
 
   private triggerOnFocusHandlers(next: HTMLElement) {
+    if (!this.root) {
+      throw new Error('root not set');
+    }
     const isAttached = this.selected !== null && this.root.contains(this.selected);
     if (!isAttached) {
       let elem: HTMLElement | null = next;
@@ -421,6 +425,9 @@ export class FocusService {
    * Frees resources associated with the service.
    */
   public teardown() {
+    if (!this.registrySubscription) {
+      return;
+    }
     this.registrySubscription.unsubscribe();
   }
 
@@ -684,11 +691,10 @@ export class FocusService {
    * Reset the focus if arcade-machine wanders out of root
    */
   private setDefaultFocus(scrollSpeed: number | null = this.scrollSpeed) {
-    const { selected } = this;
     const focusableElems = this.focusRoot.querySelectorAll('[tabIndex]');
     for (let i = 0; i < focusableElems.length; i += 1) {
       const potentialElement = <HTMLElement>focusableElems[i];
-      if (selected === potentialElement || !this.isFocusable(potentialElement)) {
+      if (this.selected === potentialElement || !this.isFocusable(potentialElement)) {
         continue;
       }
       const potentialRect = roundRect(potentialElement.getBoundingClientRect());
@@ -835,11 +841,11 @@ export class FocusService {
   }
 
   private updateHistoryRect(direction: Direction, result: {
-    element: HTMLElement,
-    rect: ClientRect,
-    referenceRect: ClientRect,
+    element: HTMLElement;
+    rect: ClientRect;
+    referenceRect: ClientRect;
   }) {
-    const newHistoryRect: IMutableClientRect = Object.assign({}, defaultRect);
+    const newHistoryRect: IMutableClientRect = {...defaultRect};
     // It's possible to get into a situation where the target element has
     // no overlap with the reference edge.
     //

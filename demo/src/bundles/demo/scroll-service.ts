@@ -5,18 +5,20 @@ const defaultDuration = 500; //ms
 @Injectable()
 export class ScrollService {
   public scrollCompleted = new EventEmitter();
-  private scrollContainer: HTMLElement;
-  private startTime: number;
-  private duration: number;
-  private startOffset: number;
-  private endOffset: number;
-  private raf: number;
+  private scrollContainer?: HTMLElement | Window;
+  private startTime?: number;
+  private duration?: number;
+  private startOffset?: number;
+  private endOffset?: number;
+  private raf?: number;
 
-  public smoothScroll(scrollContainer: HTMLElement, endOffset: number, duration?: number) {
-    cancelAnimationFrame(this.raf);
+  public smoothScroll(scrollContainer: HTMLElement | Window = window, endOffset: number, duration?: number) {
+    if (this.raf) {
+      cancelAnimationFrame(this.raf);
+    }
     this.duration = duration || defaultDuration;
-    this.scrollContainer = scrollContainer || <any>window;
-    this.startOffset = scrollContainer.scrollTop || window.pageYOffset;
+    this.scrollContainer = scrollContainer;
+    this.startOffset = scrollContainer instanceof Window ? scrollContainer.scrollY : scrollContainer.scrollTop;
     this.endOffset = endOffset < 0 ? 0 : endOffset;
     this.startTime = performance.now();
 
@@ -24,11 +26,14 @@ export class ScrollService {
   }
 
   private step(currentTime: number) {
+    if (!this.startTime || !this.scrollContainer || !this.duration) {
+      throw new Error('Not initialized');
+    }
     const elapsed = currentTime - this.startTime;
-    if (this.scrollContainer !== <any>window) {
-      this.scrollContainer.scrollTop = this.getPositionAt(elapsed);
-    } else {
+    if (this.scrollContainer instanceof Window) {
       window.scroll(0, this.getPositionAt(elapsed));
+    } else {
+      this.scrollContainer.scrollTop = this.getPositionAt(elapsed);
     }
 
     if (elapsed < this.duration) {
@@ -36,10 +41,15 @@ export class ScrollService {
     } else {
       this.scrollCompleted.next();
     }
-  };
+  }
 
-  private getPositionAt(elapsedTime: number) {
-    if (elapsedTime > this.duration) { return this.endOffset; }
+  private getPositionAt(elapsedTime: number): number {
+    if (!this.duration || !this.startOffset || !this.endOffset) {
+      throw new Error('Not initialized');
+    }
+    if (elapsedTime > this.duration) {
+      return this.endOffset;
+    }
     return this.startOffset + (this.endOffset - this.startOffset) * this.easeOutCubic(elapsedTime / this.duration);
   }
 

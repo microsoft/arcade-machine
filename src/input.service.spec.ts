@@ -1,5 +1,5 @@
-// tslint:disable-next-line:import-destructuring-spacing
-import { } from 'jasmine';
+// tslint:disable-next-line no-implicit-dependencies
+import 'jasmine';
 import { FocusService } from './focus.service';
 import { InputService } from './input.service';
 import { Direction } from './model';
