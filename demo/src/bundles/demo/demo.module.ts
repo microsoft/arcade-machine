@@ -6,16 +6,13 @@ import {
   EventEmitter,
   NgModule,
   OnDestroy,
-  Output
+  Output,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { BenchmarkPageComponent } from './benchmark-page.component';
-
-import 'rxjs/add/observable/interval';
-import 'rxjs/add/operator/take';
 
 import { ArcModule, Direction, FocusService, InputService, RegistryService } from '../../../../src';
 import { Page1Component } from './page1.component';

@@ -47,10 +47,10 @@ export interface IArcEvent {
   // unless the element is cancelled. This *is* settable and you can use it
   // to modify the focus target. This will be set to `null` on non-directional
   // navigation or if we can't find a subsequent element to select.
-  next?: HTMLElement;
+  next: HTMLElement | null;
 
   readonly event: Direction;
-  readonly target: HTMLElement;
+  readonly target: HTMLElement | null;
   readonly defaultPrevented: boolean;
 
   stopPropagation(): void;
@@ -92,10 +92,10 @@ export interface IArcHandler {
    */
   onFocus?(el: HTMLElement | null): void;
 
-  arcFocusLeft: HTMLElement | string;
-  arcFocusRight: HTMLElement | string;
-  arcFocusUp: HTMLElement | string;
-  arcFocusDown: HTMLElement | string;
+  arcFocusLeft?: HTMLElement | string;
+  arcFocusRight?: HTMLElement | string;
+  arcFocusUp?: HTMLElement | string;
+  arcFocusDown?: HTMLElement | string;
 
   /**
    * If focused, the element transfers focus to its children if true

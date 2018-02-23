@@ -35,12 +35,13 @@ import { FocusService } from '../../../../src';
   `],
 })
 export class BenchmarkPageComponent {
-  public tiles: string[];
+  public tiles: string[] = [];
   public iterations = 500;
   public results: string[] = [];
   public testElems = 100;
 
-  @ViewChildren('tiles') public tilesElemRef: QueryList<ElementRef>;
+  @ViewChildren('tiles')
+  public tilesElemRef!: QueryList<ElementRef>;
 
   constructor(
     private focusService: FocusService,
@@ -66,7 +67,6 @@ export class BenchmarkPageComponent {
   }
 
   private initTestElems(count: number) {
-    this.tiles = [];
     for (let i = 0; i < count; i++) {
       this.tiles.push('Tile: ' + i);
     }

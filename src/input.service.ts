@@ -1,11 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { Subject } from 'rxjs/Subject';
-import { Subscription } from 'rxjs/Subscription';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { keys } from 'uwp-keycodes';
-
-import 'rxjs/add/observable/fromEvent';
-import 'rxjs/add/observable/merge';
 
 import { ArcEvent } from './event';
 import { FocusService } from './focus.service';
@@ -45,7 +40,7 @@ class DirectionalDebouncer {
   /**
    * fn is a bound function that can be called to check if the key is held.
    */
-  public fn: (time: number) => boolean;
+  public fn?: (time: number) => boolean;
 
   /**
    * Initial debounce after a joystick is pressed before beginning shorter
@@ -317,9 +312,9 @@ export class InputService {
    * here, but this is mostly for testing purposes.
    */
   public keyboardSrc = new Subject<{
-    defaultPrevented: boolean,
-    keyCode: number,
-    preventDefault: () => void,
+    defaultPrevented: boolean;
+    keyCode: number;
+    preventDefault: () => void;
   }>();
 
   private gamepads: { [key: string]: IGamepadWrapper } = {};
@@ -343,8 +338,8 @@ export class InputService {
       // We want the gamepad to provide gamepad VK keyboard events rather than moving a
       // mouse like cursor. The gamepad will provide such keyboard events and provide
       // input to the DOM
-      (<any>navigator).gamepadInputEmulation = 'keyboard';
-    } else if (typeof navigator.getGamepads === 'function') {
+      navigator.gamepadInputEmulation = 'keyboard';
+    } else if ('getGamepads' in navigator) {
       // Poll connected gamepads and use that for input if keyboard emulation isn't available
       this.watchForGamepad();
     }
