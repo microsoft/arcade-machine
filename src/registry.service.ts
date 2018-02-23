@@ -47,5 +47,7 @@ export class RegistryService {
   /**
    * Returns whether there are any elements with deep exclusions in the registry.
    */
-  public hasExcludedDeepElements(): boolean { return this.excludedDeepCount > 0; }
+  public hasExcludedDeepElements(): boolean {
+    return this.excludedDeepCount > 0;
+  }
 }

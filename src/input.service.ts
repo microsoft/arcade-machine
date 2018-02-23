@@ -6,7 +6,9 @@ import { ArcEvent } from './event';
 import { FocusService } from './focus.service';
 import { Direction } from './model';
 
-const directionNumsList: number[] = Object.keys(Direction).map(dir => Number(dir)).filter(n => !isNaN(n));
+const directionNumsList: number[] = Object.keys(Direction)
+  .map(dir => Number(dir))
+  .filter(n => !isNaN(n));
 
 interface IGamepadWrapper {
   /**
@@ -56,7 +58,7 @@ class DirectionalDebouncer {
   private heldAt = 0;
   private stage = DebouncerStage.IDLE;
 
-  constructor(private predicate: () => boolean) { }
+  constructor(private predicate: () => boolean) {}
 
   /**
    * Returns whether the key should be registered as pressed.
@@ -101,7 +103,7 @@ class DirectionalDebouncer {
 class FiredDebouncer {
   private fired = false;
 
-  constructor(private predicate: () => boolean) { }
+  constructor(private predicate: () => boolean) {}
 
   /**
    * Returns whether the key should be registered as pressed.
@@ -131,19 +133,31 @@ class XboxGamepadWrapper implements IGamepadWrapper {
   constructor(public pad: Gamepad) {
     const left = new DirectionalDebouncer(() => {
       /* left joystick                                 */
-      return this.pad.axes[0] < -XboxGamepadWrapper.joystickThreshold || this.pad.buttons[Direction.LEFT].pressed;
+      return (
+        this.pad.axes[0] < -XboxGamepadWrapper.joystickThreshold ||
+        this.pad.buttons[Direction.LEFT].pressed
+      );
     });
     const right = new DirectionalDebouncer(() => {
       /* right joystick                               */
-      return this.pad.axes[0] > XboxGamepadWrapper.joystickThreshold || this.pad.buttons[Direction.RIGHT].pressed;
+      return (
+        this.pad.axes[0] > XboxGamepadWrapper.joystickThreshold ||
+        this.pad.buttons[Direction.RIGHT].pressed
+      );
     });
     const up = new DirectionalDebouncer(() => {
       /* up joystick                                   */
-      return this.pad.axes[1] < -XboxGamepadWrapper.joystickThreshold || this.pad.buttons[Direction.UP].pressed;
+      return (
+        this.pad.axes[1] < -XboxGamepadWrapper.joystickThreshold ||
+        this.pad.buttons[Direction.UP].pressed
+      );
     });
     const down = new DirectionalDebouncer(() => {
       /* down joystick                                */
-      return this.pad.axes[1] > XboxGamepadWrapper.joystickThreshold || this.pad.buttons[Direction.DOWN].pressed;
+      return (
+        this.pad.axes[1] > XboxGamepadWrapper.joystickThreshold ||
+        this.pad.buttons[Direction.DOWN].pressed
+      );
     });
 
     this.events.set(Direction.LEFT, now => left.attempt(now));
@@ -152,8 +166,18 @@ class XboxGamepadWrapper implements IGamepadWrapper {
     this.events.set(Direction.DOWN, now => down.attempt(now));
 
     directionNumsList
-      .filter(dir => dir !== Direction.LEFT && dir !== Direction.RIGHT && dir !== Direction.UP && dir !== Direction.DOWN)
-      .forEach(dir => this.events.set(dir, () => (new FiredDebouncer(() => this.pad.buttons[dir].pressed).attempt())));
+      .filter(
+        dir =>
+          dir !== Direction.LEFT &&
+          dir !== Direction.RIGHT &&
+          dir !== Direction.UP &&
+          dir !== Direction.DOWN,
+      )
+      .forEach(dir =>
+        this.events.set(dir, () =>
+          new FiredDebouncer(() => this.pad.buttons[dir].pressed).attempt(),
+        ),
+      );
   }
 
   public isConnected() {
@@ -174,8 +198,11 @@ function isForForm(direction: Direction, selected: HTMLElement | null): boolean 
   if (direction === Direction.SUBMIT) {
     let parent: HTMLElement | null = selected;
     while (parent) {
-      if (parent.tagName === 'FORM' || parent.tagName === 'TEXTAREA'
-        || (parent.tagName === 'INPUT' && (<HTMLInputElement>parent).type !== 'button')) {
+      if (
+        parent.tagName === 'FORM' ||
+        parent.tagName === 'TEXTAREA' ||
+        (parent.tagName === 'INPUT' && (<HTMLInputElement>parent).type !== 'button')
+      ) {
         return true;
       }
       parent = parent.parentElement;
@@ -200,18 +227,27 @@ function isForForm(direction: Direction, selected: HTMLElement | null): boolean 
   // if the key press would not have any effect in the context of the input.
   const input = <HTMLInputElement | HTMLTextAreaElement>selected;
   const { type } = input;
-  if (type !== 'text' && type !== 'search' && type !== 'url' && type !== 'tel' && type !== 'password') {
+  if (
+    type !== 'text' &&
+    type !== 'search' &&
+    type !== 'url' &&
+    type !== 'tel' &&
+    type !== 'password'
+  ) {
     return false;
   }
 
   const cursor = input.selectionStart;
-  if (cursor !== input.selectionEnd) { // key input on any range selection will be effectual.
+  if (cursor !== input.selectionEnd) {
+    // key input on any range selection will be effectual.
     return true;
   }
 
-  return (cursor > 0 && direction === Direction.LEFT)
-    || (cursor > 0 && direction === Direction.BACK)
-    || (cursor < input.value.length && direction === Direction.RIGHT);
+  return (
+    (cursor > 0 && direction === Direction.LEFT) ||
+    (cursor > 0 && direction === Direction.BACK) ||
+    (cursor < input.value.length && direction === Direction.RIGHT)
+  );
 }
 
 export interface IWindowsInputPane {
@@ -322,7 +358,7 @@ export class InputService {
   private pollRaf: number | null = null;
   private emitters = new Map<Direction, EventEmitter<ArcEvent>>();
 
-  constructor(private focus: FocusService) { }
+  constructor(private focus: FocusService) {}
 
   /**
    * Bootstrap attaches event listeners from the service to the DOM and sets
@@ -362,7 +398,9 @@ export class InputService {
   public teardown() {
     this.focus.teardown();
     this.gamepads = {};
-    if (this.pollRaf) { cancelAnimationFrame(this.pollRaf); }
+    if (this.pollRaf) {
+      cancelAnimationFrame(this.pollRaf);
+    }
     this.subscriptions.forEach(sub => sub.unsubscribe());
 
     if ('gamepadInputEmulation' in navigator) {
@@ -402,14 +440,15 @@ export class InputService {
     }
 
     this.subscriptions.push(
-      Observable.merge(
-        this.gamepadSrc,
-        Observable.fromEvent(window, 'gamepadconnected'),
-      ).subscribe(ev => {
-        addGamepad((<any>ev).gamepad);
-        if (this.pollRaf) { cancelAnimationFrame(this.pollRaf); }
-        this.scheduleGamepadPoll();
-      }),
+      Observable.merge(this.gamepadSrc, Observable.fromEvent(window, 'gamepadconnected')).subscribe(
+        ev => {
+          addGamepad((<any>ev).gamepad);
+          if (this.pollRaf) {
+            cancelAnimationFrame(this.pollRaf);
+          }
+          this.scheduleGamepadPoll();
+        },
+      ),
     );
   }
 
@@ -446,13 +485,12 @@ export class InputService {
         continue;
       }
 
-      directionNumsList
-        .forEach(dir => {
-          const gamepadEvt = gamepad.events.get(dir);
-          if (gamepadEvt && gamepadEvt(now)) {
-            this.handleDirection(dir);
-          }
-        });
+      directionNumsList.forEach(dir => {
+        const gamepadEvt = gamepad.events.get(dir);
+        if (gamepadEvt && gamepadEvt(now)) {
+          this.handleDirection(dir);
+        }
+      });
     }
 
     if (Object.keys(this.gamepads).length > 0) {
@@ -464,9 +502,14 @@ export class InputService {
 
   private bubbleDirection(ev: ArcEvent): boolean {
     const event = ev.event;
-    if (event === Direction.UP || event === Direction.RIGHT ||
-      event === Direction.DOWN || event === Direction.LEFT ||
-      event === Direction.SUBMIT || event === Direction.BACK) {
+    if (
+      event === Direction.UP ||
+      event === Direction.RIGHT ||
+      event === Direction.DOWN ||
+      event === Direction.LEFT ||
+      event === Direction.SUBMIT ||
+      event === Direction.BACK
+    ) {
       return this.focus.bubble(ev);
     }
     return false;
@@ -491,7 +534,9 @@ export class InputService {
     dirHandled = !forForm && this.bubbleDirection(ev);
 
     const dirEmitter = this.emitters.get(direction);
-    if (dirEmitter) { dirEmitter.emit(ev); }
+    if (dirEmitter) {
+      dirEmitter.emit(ev);
+    }
 
     if (!forForm && !dirHandled) {
       return this.focus.defaultFires(ev);

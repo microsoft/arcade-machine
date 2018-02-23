@@ -16,7 +16,7 @@ function createDirectionCapture(direction: Direction, target: HTMLElement) {
   if (!target) {
     throw new Error(
       `Cannot set [arc-${Direction[direction]}] to an undefined element!` +
-      'Make sure the element you\'re passing is defined correctly.',
+        'Make sure the element you\'re passing is defined correctly.',
     );
   }
 
@@ -31,17 +31,13 @@ function createDirectionCapture(direction: Direction, target: HTMLElement) {
 export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
   // 'Primitive' I/O handlers: ================================================
 
-  @Input('arc-set-focus')
-  public arcSetFocus: Observable<void> = Observable.never<void>();
+  @Input('arc-set-focus') public arcSetFocus: Observable<void> = Observable.never<void>();
 
-  @Output('arc-capture-outgoing')
-  public arcCaptureOutgoing = new EventEmitter<IArcEvent>();
+  @Output('arc-capture-outgoing') public arcCaptureOutgoing = new EventEmitter<IArcEvent>();
 
-  @Output('arc-capture-incoming')
-  public arcCaptureIncoming = new EventEmitter<IArcEvent>();
+  @Output('arc-capture-incoming') public arcCaptureIncoming = new EventEmitter<IArcEvent>();
 
-  @Output('arc-focus')
-  public arcFocus = new EventEmitter<HTMLElement>();
+  @Output('arc-focus') public arcFocus = new EventEmitter<HTMLElement>();
 
   @Input('arc-default-focus')
   public set arcDefaultFocus(shouldFocus: boolean) {
@@ -61,16 +57,13 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
     this.innerExcludeThis = exclude !== false;
   }
 
-  @Input('arc-focus-inside')
-  public arcFocusInside: boolean = false;
+  @Input('arc-focus-inside') public arcFocusInside: boolean = false;
 
   // Directional/event shortcuts: =============================================
 
-  @Output('arc-submit')
-  public arcSubmit = new EventEmitter<IArcEvent>();
+  @Output('arc-submit') public arcSubmit = new EventEmitter<IArcEvent>();
 
-  @Output('arc-back')
-  public arcBack = new EventEmitter<IArcEvent>();
+  @Output('arc-back') public arcBack = new EventEmitter<IArcEvent>();
 
   @Input('arc-left')
   public set arcLeft(target: HTMLElement) {
@@ -92,26 +85,19 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
     this.handlers.push(createDirectionCapture(Direction.DOWN, target));
   }
 
-  @Input('arc-focus-left')
-  public arcFocusLeft?: HTMLElement | string;
+  @Input('arc-focus-left') public arcFocusLeft?: HTMLElement | string;
 
-  @Input('arc-focus-right')
-  public arcFocusRight?: HTMLElement | string;
+  @Input('arc-focus-right') public arcFocusRight?: HTMLElement | string;
 
-  @Input('arc-focus-up')
-  public arcFocusUp?: HTMLElement | string;
+  @Input('arc-focus-up') public arcFocusUp?: HTMLElement | string;
 
-  @Input('arc-focus-down')
-  public arcFocusDown?: HTMLElement | string;
+  @Input('arc-focus-down') public arcFocusDown?: HTMLElement | string;
 
   private handlers: ((ev: IArcEvent) => void)[] = [];
   private innerExcludeThis = false;
   private innerExclude = false;
 
-  constructor(
-    private el: ElementRef,
-    private registry: RegistryService,
-  ) { }
+  constructor(private el: ElementRef, private registry: RegistryService) {}
 
   public ngOnInit() {
     this.registry.add(this);

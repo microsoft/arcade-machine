@@ -9,6 +9,7 @@
     "clean": "rimraf node_modules doc dist && npm cache clean",
     "test:lint": "tslint -t verbose --project tsconfig.json \"src/**/*.ts\"",
     "test:unit": "gulp test",
+    "fmt": "prettier --write \"src/**/*.{js,json,ts}\" && npm run test:lint -- --fix",
     "test": "npm-run-all --parallel test:lint test:unit",
     "start": "npm run serve",
     "serve": "webpack-dev-server --config demo/webpack.config.js"
@@ -61,6 +62,7 @@
     "karma-sourcemap-loader": "^0.3.7",
     "merge2": "^1.2.1",
     "npm-run-all": "^4.1.2",
+    "prettier": "^1.10.2",
     "rimraf": "^2.6.2",
     "run-sequence": "^2.2.1",
     "systemjs": "^0.20.19",
@@ -71,5 +73,10 @@
     "webpack": "^3.11.0",
     "webpack-dev-server": "^2.11.1",
     "zone.js": "^0.8.20"
+  },
+  "prettier": {
+    "trailingComma": "all",
+    "singleQuote": true,
+    "printWidth": 100
   }
 }

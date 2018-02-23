@@ -75,15 +75,20 @@ function calculatePercentInShadow(
   maxPotentialCoord: number,
 ) {
   /// Calculates the percentage of the potential element that is in the shadow of the reference element.
-  if ((minReferenceCoord >= maxPotentialCoord) || (maxReferenceCoord <= minPotentialCoord)) {
+  if (minReferenceCoord >= maxPotentialCoord || maxReferenceCoord <= minPotentialCoord) {
     // Potential is not in the reference's shadow.
     return 0;
   }
-  const pixelOverlap = Math.min(maxReferenceCoord, maxPotentialCoord) - Math.max(minReferenceCoord, minPotentialCoord);
-  const shortEdge = Math.min(maxPotentialCoord - minPotentialCoord, maxReferenceCoord - minReferenceCoord);
-  return shortEdge === 0 ? 0 : (pixelOverlap / shortEdge);
+  const pixelOverlap =
+    Math.min(maxReferenceCoord, maxPotentialCoord) - Math.max(minReferenceCoord, minPotentialCoord);
+  const shortEdge = Math.min(
+    maxPotentialCoord - minPotentialCoord,
+    maxReferenceCoord - minReferenceCoord,
+  );
+  return shortEdge === 0 ? 0 : pixelOverlap / shortEdge;
 }
 
+// tslint:disable-next-line
 function calculateScore(
   direction: Direction,
   maxDistance: number,
@@ -101,15 +106,26 @@ function calculateScore(
       if (potentialRect.left >= referenceRect.left) {
         return 0;
       }
-      percentInShadow = calculatePercentInShadow(referenceRect.top, referenceRect.bottom, potentialRect.top, potentialRect.bottom);
+      percentInShadow = calculatePercentInShadow(
+        referenceRect.top,
+        referenceRect.bottom,
+        potentialRect.top,
+        potentialRect.bottom,
+      );
       primaryAxisDistance = referenceRect.left - potentialRect.right;
       if (percentInShadow > 0) {
-        percentInHistoryShadow = calculatePercentInShadow(historyRect.top, historyRect.bottom, potentialRect.top, potentialRect.bottom);
+        percentInHistoryShadow = calculatePercentInShadow(
+          historyRect.top,
+          historyRect.bottom,
+          potentialRect.top,
+          potentialRect.bottom,
+        );
       } else {
         // If the potential element is not in the shadow, then we calculate secondary axis distance
-        secondaryAxisDistance = (referenceRect.bottom <= potentialRect.top)
-          ? (potentialRect.top - referenceRect.bottom)
-          : referenceRect.top - potentialRect.bottom;
+        secondaryAxisDistance =
+          referenceRect.bottom <= potentialRect.top
+            ? potentialRect.top - referenceRect.bottom
+            : referenceRect.top - potentialRect.bottom;
       }
       break;
 
@@ -118,15 +134,26 @@ function calculateScore(
       if (potentialRect.right <= referenceRect.right) {
         return 0;
       }
-      percentInShadow = calculatePercentInShadow(referenceRect.top, referenceRect.bottom, potentialRect.top, potentialRect.bottom);
+      percentInShadow = calculatePercentInShadow(
+        referenceRect.top,
+        referenceRect.bottom,
+        potentialRect.top,
+        potentialRect.bottom,
+      );
       primaryAxisDistance = potentialRect.left - referenceRect.right;
       if (percentInShadow > 0) {
-        percentInHistoryShadow = calculatePercentInShadow(historyRect.top, historyRect.bottom, potentialRect.top, potentialRect.bottom);
+        percentInHistoryShadow = calculatePercentInShadow(
+          historyRect.top,
+          historyRect.bottom,
+          potentialRect.top,
+          potentialRect.bottom,
+        );
       } else {
         // If the potential element is not in the shadow, then we calculate secondary axis distance
-        secondaryAxisDistance = (referenceRect.bottom <= potentialRect.top)
-          ? (potentialRect.top - referenceRect.bottom)
-          : referenceRect.top - potentialRect.bottom;
+        secondaryAxisDistance =
+          referenceRect.bottom <= potentialRect.top
+            ? potentialRect.top - referenceRect.bottom
+            : referenceRect.top - potentialRect.bottom;
       }
       break;
 
@@ -135,15 +162,26 @@ function calculateScore(
       if (potentialRect.top >= referenceRect.top) {
         return 0;
       }
-      percentInShadow = calculatePercentInShadow(referenceRect.left, referenceRect.right, potentialRect.left, potentialRect.right);
+      percentInShadow = calculatePercentInShadow(
+        referenceRect.left,
+        referenceRect.right,
+        potentialRect.left,
+        potentialRect.right,
+      );
       primaryAxisDistance = referenceRect.top - potentialRect.bottom;
       if (percentInShadow > 0) {
-        percentInHistoryShadow = calculatePercentInShadow(historyRect.left, historyRect.right, potentialRect.left, potentialRect.right);
+        percentInHistoryShadow = calculatePercentInShadow(
+          historyRect.left,
+          historyRect.right,
+          potentialRect.left,
+          potentialRect.right,
+        );
       } else {
         // If the potential element is not in the shadow, then we calculate secondary axis distance
-        secondaryAxisDistance = (referenceRect.right <= potentialRect.left)
-          ? (potentialRect.left - referenceRect.right)
-          : referenceRect.left - potentialRect.right;
+        secondaryAxisDistance =
+          referenceRect.right <= potentialRect.left
+            ? potentialRect.left - referenceRect.right
+            : referenceRect.left - potentialRect.right;
       }
       break;
 
@@ -152,15 +190,26 @@ function calculateScore(
       if (potentialRect.bottom <= referenceRect.bottom) {
         return 0;
       }
-      percentInShadow = calculatePercentInShadow(referenceRect.left, referenceRect.right, potentialRect.left, potentialRect.right);
+      percentInShadow = calculatePercentInShadow(
+        referenceRect.left,
+        referenceRect.right,
+        potentialRect.left,
+        potentialRect.right,
+      );
       primaryAxisDistance = potentialRect.top - referenceRect.bottom;
       if (percentInShadow > 0) {
-        percentInHistoryShadow = calculatePercentInShadow(historyRect.left, historyRect.right, potentialRect.left, potentialRect.right);
+        percentInHistoryShadow = calculatePercentInShadow(
+          historyRect.left,
+          historyRect.right,
+          potentialRect.left,
+          potentialRect.right,
+        );
       } else {
         // If the potential element is not in the shadow, then we calculate secondary axis distance
-        secondaryAxisDistance = (referenceRect.right <= potentialRect.left)
-          ? (potentialRect.left - referenceRect.right)
-          : referenceRect.left - potentialRect.right;
+        secondaryAxisDistance =
+          referenceRect.right <= potentialRect.left
+            ? potentialRect.left - referenceRect.right
+            : referenceRect.left - potentialRect.right;
       }
       break;
 
@@ -168,16 +217,19 @@ function calculateScore(
       throw new Error(`Attempted to navigate to unknown direction ${direction}`);
   }
 
-  if (primaryAxisDistance >= -1) { //<-- due to rounding sometimes it returns -0.5. therefore -1
+  if (primaryAxisDistance >= -1) {
+    //<-- due to rounding sometimes it returns -0.5. therefore -1
     // The score needs to be a positive number so we make these distances positive numbers
     primaryAxisDistance = maxDistance - primaryAxisDistance;
     secondaryAxisDistance = maxDistance - secondaryAxisDistance;
     if (primaryAxisDistance >= 0 && secondaryAxisDistance >= 0) {
       // Potential elements in the shadow get a multiplier to their final score
       primaryAxisDistance += primaryAxisDistance * percentInShadow;
-      return primaryAxisDistance * scoringConstants.primaryAxisDistanceWeight
-        + secondaryAxisDistance * scoringConstants.secondaryAxisDistanceWeight
-        + percentInHistoryShadow * scoringConstants.percentInHistoryShadowWeight;
+      return (
+        primaryAxisDistance * scoringConstants.primaryAxisDistanceWeight +
+        secondaryAxisDistance * scoringConstants.secondaryAxisDistanceWeight +
+        percentInHistoryShadow * scoringConstants.percentInHistoryShadowWeight
+      );
     }
   }
   return 0;
@@ -187,14 +239,18 @@ function calculateScore(
  * Returns the common ancestor in the DOM of two nodes. From:
  * http://stackoverflow.com/a/7648545
  */
-function getCommonAncestor(nodeA: HTMLElement | null, nodeB: HTMLElement | null): HTMLElement | null {
+function getCommonAncestor(
+  nodeA: HTMLElement | null,
+  nodeB: HTMLElement | null,
+): HTMLElement | null {
   if (nodeA === null || nodeB === null) {
     return null;
   }
 
   const mask = 0x10;
   while (nodeA != null && (nodeA = nodeA.parentElement)) {
-    if ((nodeA.compareDocumentPosition(nodeB) & mask) === mask) { // tslint:disable-line
+    // tslint:disable-next-line
+    if ((nodeA.compareDocumentPosition(nodeB) & mask) === mask) {
       return nodeA;
     }
   }
@@ -205,10 +261,9 @@ function getCommonAncestor(nodeA: HTMLElement | null, nodeB: HTMLElement | null)
  * Returns if the direction is left/right/up/down.
  */
 function isDirectional(ev: Direction) {
-  return ev === Direction.LEFT
-    || ev === Direction.RIGHT
-    || ev === Direction.UP
-    || ev === Direction.DOWN;
+  return (
+    ev === Direction.LEFT || ev === Direction.RIGHT || ev === Direction.UP || ev === Direction.DOWN
+  );
 }
 
 /**
@@ -220,7 +275,7 @@ function quad(start: number, end: number, progress: number): number {
     return diff * (2 * progress ** 2) + start;
   } else {
     const displaced = progress - 1;
-    return diff * ((-2 * displaced ** 2) + 1) + start;
+    return diff * (-2 * displaced ** 2 + 1) + start;
   }
 }
 
@@ -228,7 +283,9 @@ function quad(start: number, end: number, progress: number): number {
  * Returns whether the target DOM node is a child of the root.
  */
 function isNodeAttached(node: HTMLElement | null, root: HTMLElement | null) {
-  if (!node || !root) { return false; }
+  if (!node || !root) {
+    return false;
+  }
   return root.contains(node);
 }
 
@@ -258,9 +315,7 @@ export class FocusService {
   private focusStack: IFocusState[] = [];
   private focusByRegistry = new FocusByRegistry();
 
-  constructor(
-    private registry: RegistryService,
-  ) { }
+  constructor(private registry: RegistryService) {}
 
   public trapFocus(newRootElem: HTMLElement) {
     this.focusStack.push({
@@ -283,7 +338,9 @@ export class FocusService {
       this.focusRoot = lastFocusState.root;
       this.selectNode(lastFocusState.focusedElem, scrollSpeed);
     } else {
-      console.warn('No more focus traps to release. Make sure you call trapFocus before using releaseFocus');
+      console.warn(
+        'No more focus traps to release. Make sure you call trapFocus before using releaseFocus',
+      );
       this.clearAllTraps();
     }
   }
@@ -305,8 +362,7 @@ export class FocusService {
     }
 
     this.root = root;
-    this.registrySubscription = this.registry
-      .setFocus
+    this.registrySubscription = this.registry.setFocus
       .filter(el => !!el)
       .subscribe(el => this.selectNode(<HTMLElement>el, scrollSpeed));
 
@@ -336,7 +392,9 @@ export class FocusService {
       return;
     }
 
-    const canceled = !next.dispatchEvent(new Event('arcselectingnode', { bubbles: true, cancelable: true }));
+    const canceled = !next.dispatchEvent(
+      new Event('arcselectingnode', { bubbles: true, cancelable: true }),
+    );
     if (canceled) {
       return;
     }
@@ -363,7 +421,9 @@ export class FocusService {
     this.referenceRect = next.getBoundingClientRect();
     this.rescroll(next, scrollSpeed, this.root);
 
-    const canceled = !next.dispatchEvent(new Event('arcfocuschanging', { bubbles: true, cancelable: true }));
+    const canceled = !next.dispatchEvent(
+      new Event('arcfocuschanging', { bubbles: true, cancelable: true }),
+    );
     if (!canceled) {
       next.focus();
     }
@@ -449,7 +509,9 @@ export class FocusService {
 
   private getFocusableElement(direction: Direction, root: HTMLElement): HTMLElement | null {
     let el: HTMLElement | null | undefined = this.findNextFocusable(direction, root);
-    if (!el) { return null; }
+    if (!el) {
+      return null;
+    }
     const directive = this.registry.find(el);
     if (directive && directive.arcFocusInside) {
       el = this.getFocusableElement(direction, el);
@@ -464,9 +526,10 @@ export class FocusService {
       nextElem = this.focusByRegistry.findNextFocus(direction, directive);
     }
 
-    const referenceRect = this.selected && isNodeAttached(this.selected, this.root)
-      ? this.selected.getBoundingClientRect()
-      : this.referenceRect;
+    const referenceRect =
+      this.selected && isNodeAttached(this.selected, this.root)
+        ? this.selected.getBoundingClientRect()
+        : this.referenceRect;
 
     if (!nextElem && this.enableRaycast) {
       nextElem = this.findNextFocusByRaycast(direction, root, referenceRect);
@@ -532,7 +595,12 @@ export class FocusService {
 
     // Animation function to transition a scroll on the `parent` from the
     // `original` value to the `target` value by calling `set.
-    const animate = (parentElement: HTMLElement, target: number, original: number, setter: (x: number) => void) => {
+    const animate = (
+      parentElement: HTMLElement,
+      target: number,
+      original: number,
+      setter: (x: number) => void,
+    ) => {
       if (scrollSpeed === Infinity) {
         parentElement.scrollTop = target;
         return;
@@ -563,10 +631,18 @@ export class FocusService {
       let prect: IReducedClientRect;
       if (parent === container) {
         const containerStyle = window.getComputedStyle(container, undefined);
-        const paddingTop = containerStyle.paddingTop ? Number(containerStyle.paddingTop.slice(0, -2)) : 0;
-        const paddingBottom = containerStyle.paddingBottom ? Number(containerStyle.paddingBottom.slice(0, -2)) : 0;
-        const paddingLeft = containerStyle.paddingLeft ? Number(containerStyle.paddingLeft.slice(0, -2)) : 0;
-        const paddingRight = containerStyle.paddingRight ? Number(containerStyle.paddingRight.slice(0, -2)) : 0;
+        const paddingTop = containerStyle.paddingTop
+          ? Number(containerStyle.paddingTop.slice(0, -2))
+          : 0;
+        const paddingBottom = containerStyle.paddingBottom
+          ? Number(containerStyle.paddingBottom.slice(0, -2))
+          : 0;
+        const paddingLeft = containerStyle.paddingLeft
+          ? Number(containerStyle.paddingLeft.slice(0, -2))
+          : 0;
+        const paddingRight = containerStyle.paddingRight
+          ? Number(containerStyle.paddingRight.slice(0, -2))
+          : 0;
         prect = {
           top: paddingTop,
           left: paddingLeft,
@@ -584,9 +660,9 @@ export class FocusService {
         const showsBottom = showsTop + (height - prect.height);
 
         if (showsTop < scrollTop) {
-          animate(parent, showsTop, scrollTop, x => (<HTMLElement>parent).scrollTop = x);
+          animate(parent, showsTop, scrollTop, x => ((<HTMLElement>parent).scrollTop = x));
         } else if (showsBottom > scrollTop) {
-          animate(parent, showsBottom, scrollTop, x => (<HTMLElement>parent).scrollTop = x);
+          animate(parent, showsBottom, scrollTop, x => ((<HTMLElement>parent).scrollTop = x));
         }
       }
 
@@ -597,9 +673,9 @@ export class FocusService {
         const showsRight = showsLeft + (width - prect.width);
 
         if (showsLeft < scrollLeft) {
-          animate(parent, showsLeft, scrollLeft, x => (<HTMLElement>parent).scrollLeft = x);
+          animate(parent, showsLeft, scrollLeft, x => ((<HTMLElement>parent).scrollLeft = x));
         } else if (showsRight > scrollLeft) {
-          animate(parent, showsRight, scrollLeft, x => (<HTMLElement>parent).scrollLeft = x);
+          animate(parent, showsRight, scrollLeft, x => ((<HTMLElement>parent).scrollLeft = x));
         }
       }
       parent = parent.parentElement;
@@ -610,12 +686,16 @@ export class FocusService {
    * Bubbles the ArcEvent from the currently selected element
    * to all parent arc directives.
    */
-  private bubbleEvent(ev: ArcEvent, incoming: boolean, source: HTMLElement | null = this.selected): ArcEvent {
+  private bubbleEvent(
+    ev: ArcEvent,
+    incoming: boolean,
+    source: HTMLElement | null = this.selected,
+  ): ArcEvent {
     for (let el = source; !ev.propagationStopped && el !== this.root && el; el = el.parentElement) {
       if (el === undefined) {
         console.warn(
           `arcade-machine focusable element was moved outside of` +
-          'the focus root. We may not be able to handle focus correctly.',
+            'the focus root. We may not be able to handle focus correctly.',
           el,
         );
         break;
@@ -712,11 +792,20 @@ export class FocusService {
    * findNextFocusByRaycast is a speedy implementation of focus searching
    * that uses a raycast to determine the next best element.
    */
-  private findNextFocusByRaycast(direction: Direction, root: HTMLElement, referenceRect: ClientRect) {
-    if (!this.selected) { this.setDefaultFocus(); }
-    if (!this.selected) { return null; }
+  private findNextFocusByRaycast(
+    direction: Direction,
+    root: HTMLElement,
+    referenceRect: ClientRect,
+  ) {
+    if (!this.selected) {
+      this.setDefaultFocus();
+    }
+    if (!this.selected) {
+      return null;
+    }
 
-    let maxDistance = scoringConstants.maxFastSearchSize *
+    let maxDistance =
+      scoringConstants.maxFastSearchSize *
       (isHorizontal(direction) ? referenceRect.width : referenceRect.height);
     if (maxDistance < scoringConstants.fastSearchMinimumDistance) {
       maxDistance = scoringConstants.fastSearchMinimumDistance;
@@ -758,10 +847,7 @@ export class FocusService {
     }
 
     for (let i = 0; i < maxDistance; i += searchPointDistance) {
-      const el = <HTMLElement>document.elementFromPoint(
-        baseX + seekX * i,
-        baseY + seekY * i,
-      );
+      const el = <HTMLElement>document.elementFromPoint(baseX + seekX * i, baseY + seekY * i);
 
       if (!el || el === this.selected) {
         continue;
@@ -787,9 +873,17 @@ export class FocusService {
    * Looks for and returns the next focusable element in the given direction.
    * It can return null if no such element is found.
    */
-  private findNextFocusByBoundary(direction: Direction, root: HTMLElement, referenceRect: ClientRect) {
-    if (!this.selected) { this.setDefaultFocus(); }
-    if (!this.selected) { return null; }
+  private findNextFocusByBoundary(
+    direction: Direction,
+    root: HTMLElement,
+    referenceRect: ClientRect,
+  ) {
+    if (!this.selected) {
+      this.setDefaultFocus();
+    }
+    if (!this.selected) {
+      return null;
+    }
 
     // Don't attempt to focus to elemenents which are not displayed on the screen.
     const maxDistance = Math.max(screen.availHeight, screen.availWidth);
@@ -819,7 +913,13 @@ export class FocusService {
         continue;
       }
 
-      const score = calculateScore(direction, maxDistance, this.historyRect, referenceRect, potentialRect);
+      const score = calculateScore(
+        direction,
+        maxDistance,
+        this.historyRect,
+        referenceRect,
+        potentialRect,
+      );
       if (score > bestPotential.score && this.checkFinalFocusable(potentialElement)) {
         bestPotential.element = potentialElement;
         bestPotential.rect = potentialRect;
@@ -840,12 +940,15 @@ export class FocusService {
     return bestPotential.element;
   }
 
-  private updateHistoryRect(direction: Direction, result: {
-    element: HTMLElement;
-    rect: ClientRect;
-    referenceRect: ClientRect;
-  }) {
-    const newHistoryRect: IMutableClientRect = {...defaultRect};
+  private updateHistoryRect(
+    direction: Direction,
+    result: {
+      element: HTMLElement;
+      rect: ClientRect;
+      referenceRect: ClientRect;
+    },
+  ) {
+    const newHistoryRect: IMutableClientRect = { ...defaultRect };
     // It's possible to get into a situation where the target element has
     // no overlap with the reference edge.
     //
