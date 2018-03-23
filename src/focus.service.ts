@@ -574,6 +574,11 @@ export class FocusService {
     if (directional && ev.next !== null) {
       this.selectNode(ev.next, scrollSpeed);
       return true;
+    } else if (directional && ev.next === null) {
+        if (this.selected) {
+          this.selected.dispatchEvent(new Event('arcselectingundefined', { bubbles: true, cancelable: true }));
+        }
+        return false;
     } else if (ev.event === Direction.SUBMIT) {
       if (this.selected) {
         this.selected.click();
