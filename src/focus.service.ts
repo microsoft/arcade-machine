@@ -507,19 +507,26 @@ export class FocusService {
     });
   }
 
-  private getFocusableElement(direction: Direction, root: HTMLElement): HTMLElement | null {
-    let el: HTMLElement | null | undefined = this.findNextFocusable(direction, root);
+  private getFocusableElement(direction: Direction, root: HTMLElement, ignore?: HTMLElement): HTMLElement | null {
+    let el: HTMLElement | null | undefined = this.findNextFocusable(direction, root, ignore);
     if (!el) {
       return null;
     }
     const directive = this.registry.find(el);
     if (directive && directive.arcFocusInside) {
-      el = this.getFocusableElement(direction, el);
+      const insideEl = this.getFocusableElement(direction, el);
+
+      // get focusable again if no focusable elements inside the current element
+      if (insideEl === null) {
+        el = this.getFocusableElement(direction, root, el);
+      } else {
+        el = insideEl;
+      }
     }
     return el;
   }
 
-  private findNextFocusable(direction: Direction, root: HTMLElement) {
+  private findNextFocusable(direction: Direction, root: HTMLElement, ignore?: HTMLElement) {
     const directive = this.selected ? this.registry.find(this.selected) : undefined;
     let nextElem: HTMLElement | null = null;
     if (directive) {
@@ -535,7 +542,7 @@ export class FocusService {
       nextElem = this.findNextFocusByRaycast(direction, root, referenceRect);
     }
     if (!nextElem) {
-      nextElem = this.findNextFocusByBoundary(direction, root, referenceRect);
+      nextElem = this.findNextFocusByBoundary(direction, root, referenceRect, ignore);
     }
     return nextElem;
   }
@@ -877,6 +884,7 @@ export class FocusService {
     direction: Direction,
     root: HTMLElement,
     referenceRect: ClientRect,
+    ignore?: HTMLElement,
   ) {
     if (!this.selected) {
       this.setDefaultFocus();
@@ -903,6 +911,9 @@ export class FocusService {
 
     for (let i = 0; i < focusableElems.length; i += 1) {
       const potentialElement = <HTMLElement>focusableElems[i];
+      if (ignore && potentialElement === ignore) {
+        continue;
+      }
 
       if (this.selected === potentialElement || !this.isFocusable(potentialElement)) {
         continue;
