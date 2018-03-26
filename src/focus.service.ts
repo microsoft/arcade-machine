@@ -576,7 +576,7 @@ export class FocusService {
       return true;
     } else if (directional && ev.next === null) {
         if (this.selected) {
-          this.selected.dispatchEvent(new Event('arcselectingundefined', { bubbles: true, cancelable: true }));
+          this.selected.dispatchEvent(new Event('arcselectingundefined', { bubbles: true, cancelable: false }));
         }
         return false;
     } else if (ev.event === Direction.SUBMIT) {

@@ -182,3 +182,7 @@ Fired when arcade machine is about to select a node
 #### arcfocuschanging
 
 Fire when arcade-machine is about to call native focus method. This event can be canceled for example to smooth-scroll to the element before focusing it in browser.
+
+#### arcselectingundefined
+
+Fire when arcade-machine creates an ArcEvent with next element equals null.
