@@ -508,7 +508,7 @@ export class FocusService {
   }
 
   private getFocusableElement(direction: Direction, root: HTMLElement, ignore?: HTMLElement): HTMLElement | null {
-    let el: HTMLElement | null | undefined = this.findNextFocusable(direction, root, ignore);
+    const el: HTMLElement | null | undefined = this.findNextFocusable(direction, root, ignore);
     if (!el) {
       return null;
     }
@@ -517,12 +517,9 @@ export class FocusService {
       const insideEl = this.getFocusableElement(direction, el);
 
       // get focusable again if no focusable elements inside the current element
-      if (insideEl === null) {
-        el = this.getFocusableElement(direction, root, el);
-      } else {
-        el = insideEl;
-      }
+      return insideEl || this.getFocusableElement(direction, root, el);
     }
+
     return el;
   }
 
