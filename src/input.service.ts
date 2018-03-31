@@ -243,6 +243,10 @@ function isForForm(direction: Direction, selected: HTMLElement | null): boolean 
     return true;
   }
 
+  if (cursor === null) {
+    return false;
+  }
+
   return (
     (cursor > 0 && direction === Direction.LEFT) ||
     (cursor > 0 && direction === Direction.BACK) ||
@@ -417,8 +421,11 @@ export class InputService {
    * polling them. This is the entry point for gamepad input handling.
    */
   private watchForGamepad() {
-    const addGamepad = (pad: Gamepad) => {
+    const addGamepad = (pad: Gamepad | null) => {
       let gamepad: IGamepadWrapper | null = null;
+      if (pad === null) {
+        return;
+      }
       if (/xbox/i.test(pad.id)) {
         gamepad = new XboxGamepadWrapper(pad);
       }
@@ -470,14 +477,18 @@ export class InputService {
     const rawpads = Array.from(navigator.getGamepads()).filter(pad => !!pad); // refreshes all checked-out gamepads
 
     for (let i = 0; i < rawpads.length; i += 1) {
-      const gamepad = this.gamepads[rawpads[i].id];
+      const pad = rawpads[i];
+      if (pad === null) {
+        continue;
+      }
+      const gamepad = this.gamepads[pad.id];
       if (!gamepad) {
         continue;
       }
-      gamepad.pad = rawpads[i];
+      gamepad.pad = pad;
 
       if (!gamepad.isConnected()) {
-        delete this.gamepads[rawpads[i].id];
+        delete this.gamepads[pad.id];
         continue;
       }
 
