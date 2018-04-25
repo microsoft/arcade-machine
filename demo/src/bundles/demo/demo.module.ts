@@ -16,20 +16,18 @@ import { BenchmarkPageComponent } from './benchmark-page.component';
 
 import { ArcModule, Direction, FocusService, InputService, RegistryService } from '../../../../src';
 import { Page1Component } from './page1.component';
-import { Page2Component } from './page2.component';
 import { ScrollService } from './scroll-service';
 import { SmoothScrollPageComponent } from './smooth-scroll.component';
 
 @Component({
   selector: 'demo-app',
   template: `
+    <h1 style="text-align: center;">Arcade Machine Demo</h1>
     <nav>
-      <a tabindex="0" [routerLink]="['/page1']">Page1</a>
-      <a tabindex="0" [routerLink]="['/page2']">Page2</a>
+      <a tabindex="0" [routerLink]="['/page1']">Specs</a>
       <a tabindex="0" [routerLink]="['/smooth-scroll']">Smooth Scroll</a>
       <a tabindex="0" [routerLink]="['/benchmark']">Benchmark</a>
     </nav>
-    <h1>Arcade Machine Demo</h1>
     <router-outlet></router-outlet>
     `,
 })
@@ -101,7 +99,6 @@ export class DialogComponent implements AfterViewInit, OnDestroy {
 const routes = [
   { path: '', pathMatch: 'full', redirectTo: 'page1' },
   { path: 'page1', component: Page1Component },
-  { path: 'page2', component: Page2Component },
   { path: 'smooth-scroll', component: SmoothScrollPageComponent },
   { path: 'benchmark', component: BenchmarkPageComponent },
 ];
@@ -127,7 +124,6 @@ const routes = [
   declarations: [
     DemoAppComponent,
     Page1Component,
-    Page2Component,
     SmoothScrollPageComponent,
     BenchmarkPageComponent,
     DialogComponent,
