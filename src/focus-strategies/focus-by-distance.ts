@@ -75,26 +75,25 @@ export class ElementFinder {
 
     this.shortlisted.forEach(el => el.calcPercentInShadow(this.refRect, this.dir));
 
-    if (!this.shortlisted.some(el => el.percentInShadow > 0)) {
-      // Case: No elements in shadow
-      //                   +------+
-      //                   |      |
-      //                   +------+
-      // +---------+ --------------
-      // |  X ->   |
-      // +---------+---------------
-      //              +------+   +------+
-      //              |   X  |   |      |
-      //              |      |   |      |
-      //              +------+   +------+
+    const hasElementsInShadow = this.shortlisted.some(el => el.percentInShadow > 0);
+    // Case: No elements in shadow
+    //                   +------+
+    //                   |      |
+    //                   +------+
+    // +---------+ --------------
+    // |  X ->   |
+    // +---------+---------------
+    //              +------+   +------+
+    //              |   X  |   |      |
+    //              |      |   |      |
+    //              +------+   +------+
+    if (!hasElementsInShadow) {
       if (isHorizontal(this.dir)) {
         return null;
       }
 
       this.shortlisted.forEach(el => el.calcPrimaryDistance(this.refRect, this.dir));
-      const shortestPrimaryDist = this.shortlisted
-        .map(el => el.primaryDistance)
-        .reduce((prev, curr) => Math.min(curr, prev));
+      const shortestPrimaryDist = this.getShortestPrimaryDist(this.shortlisted);
 
       this.shortlisted = this.shortlisted.filter(el => el.primaryDistance === shortestPrimaryDist);
       this.shortlisted.forEach(el => el.calcSecondaryDistance(this.refRect, this.dir));
@@ -107,9 +106,7 @@ export class ElementFinder {
 
     this.shortlisted = this.shortlisted.filter(el => el.percentInShadow > 0);
     this.shortlisted.forEach(el => el.calcPrimaryDistance(this.refRect, this.dir));
-    const shortestDist = this.shortlisted
-      .map(el => el.primaryDistance)
-      .reduce((prev, curr) => Math.min(curr, prev));
+    const shortestDist = this.getShortestPrimaryDist(this.shortlisted);
 
     this.shortlisted = this.shortlisted.filter(el => el.primaryDistance === shortestDist);
 
@@ -166,5 +163,15 @@ export class ElementFinder {
           throw new Error(`Invalid direction ${this.dir}`);
       }
     });
+  }
+
+  private getShortestPrimaryDist(elements: PotentialElement[]) {
+    let shortestDist = elements[0].primaryDistance;
+    for (let i = 0; i < elements.length; i++) {
+      if (elements[i].primaryDistance < shortestDist) {
+        shortestDist = elements[i].primaryDistance;
+      }
+    }
+    return shortestDist;
   }
 }
