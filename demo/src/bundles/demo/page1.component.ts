@@ -11,13 +11,6 @@ import { Observable } from 'rxjs/Observable';
       display: block;
     }
 
-    h1 {
-      font-weight: normal;
-      font-size: 12px;
-      margin: 0;
-      padding: 0;
-    }
-
     .area {
       border: 1px solid #000;
       margin: 15px 0;
@@ -44,6 +37,18 @@ import { Observable } from 'rxjs/Observable';
     }
 
     .box:focus {
+      background: #f00;
+    }
+
+    .square {
+      display: inline-block;
+      height: 50px;
+      width: 50px;
+      margin: 15px;
+      background: #000;
+      color: #fff;
+    }
+    .square:focus {
       background: #f00;
     }
 
@@ -75,12 +80,6 @@ import { Observable } from 'rxjs/Observable';
     }
   `],
   template: `
-    <h1>Page 1</h1>
-    <h1>Back Button Binding</h1>
-    <div class="area">
-      <a tabindex="0" [routerLink]="['/page2']">Goto Page 2</a>
-    </div>
-
     <h1>Special Handlers</h1>
     <div class="area">
       <div class="box-wrapper" style="width:200px">
@@ -113,24 +112,58 @@ import { Observable } from 'rxjs/Observable';
       </div>
     </div>
 
-    <h1>A Grid</h1>
-    <div class="area">
-      <div class="box-wrapper" *ngFor="let box of boxes">
-        <div class="box" #el arc tabindex="0" (click)="onClick(el)">{{ box }}</div>
+    <h1>Focus Inside</h1>
+    Transfer focus to elements inside me
+    <div
+      class="area"
+      tabindex="0"
+      arc arc-focus-inside="true"
+      style="display:flex; justify-content: space-evenly;">
+      <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        With arc-focus-inside
+        <div id="focus-inside1" class="area">
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0"></div>
+        </div>
+        <div id="focus-inside1" class="area" arc arc-focus-inside="true" tabindex="0">
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0" style="margin-left:100px"></div>
+        </div>
+        <div id="focus-inside1" class="area">
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0"></div>
+        </div>
+      </div>
+      <div  style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        Without arc-focus-inside
+        <div id="focus-inside1" class="area">
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0"></div>
+        </div>
+        <div id="focus-inside1" class="area">
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0" style="display: inline-block; width:50px; height:50px; margin-left:100px"></div>
+        </div>
+        <div id="focus-inside1" class="area">
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0"></div>
+        </div>
       </div>
     </div>
 
-    <h1>Focus Inside</h1>
-    Transfer focus to elements inside me
+    <h1>History</h1>
+    <h2>Prefer last focused element</h2>
     <div class="area" tabindex="0" arc arc-focus-inside="true" style="display: flex; align-items: center;">
-      <div class="box" arc tabindex="0" style="display: inline-block; margin-left:50px; width:50px; height:50px">Short</div>
-      <div id="focus-inside1" class="area" arc arc-focus-inside="true" tabindex="0" style="display: inline-block; margin:50px;">
-        me too
-        <div class="box" arc tabindex="0" style="margin-left:50px; width:50px; height:50px">Short</div>
-        <div class="box" arc tabindex="0" style="margin-left:150px; width:50px; height:50px">Short</div>
-        <div class="box" arc tabindex="0" style="margin-left:250px; width:50px; height:50px">Short</div>
+      <div class="box" tabindex="0" style="display: inline-block; margin-left:50px; width:150px; height:150px"></div>
+      <div id="focus-inside1" style="display: inline-block; margin:50px;">
+        <div class="box" arc tabindex="0" style="width:50px; height:50px"></div>
+        <div class="box" arc tabindex="0" style="width:50px; height:50px"></div>
+        <div class="box" arc tabindex="0" style="width:50px; height:50px"></div>
       </div>
-      <div class="box" arc tabindex="0" style="display: inline-block; margin-left:50px; width:50px; height:50px">Short</div>
     </div>
 
     <h1>Non-Overlapping Elements</h1>
@@ -173,9 +206,41 @@ import { Observable } from 'rxjs/Observable';
       </div>
     </div>
 
+    <h1>Focus Child Elements Only</h1>
+    <button tabindex="0" (click)="isDialogVisible=true">Open Dialog</button>
+
+    <h1>A Grid</h1>
     <div class="area">
-      <h1>Focus Child Elements Only</h1>
-      <button tabindex="0" (click)="isDialogVisible=true">Open Dialog</button>
+      <div>
+        <div class="square" tabindex="0"></div>
+      </div>
+      <div>
+        <div class="square" tabindex="0"></div>
+        <div class="square" tabindex="0"></div>
+      </div>
+      <div>
+        <div class="square" tabindex="0"></div>
+        <div class="square" tabindex="0"></div>
+        <div class="square" tabindex="0"></div>
+      </div>
+      <div>
+        <div class="square" tabindex="0"></div>
+        <div class="square" tabindex="0"></div>
+        <div class="square" tabindex="0"></div>
+        <div class="square" tabindex="0"></div>
+      </div>
+      <div>
+        <div class="square" tabindex="0"></div>
+        <div class="square" tabindex="0"></div>
+        <div class="square" tabindex="0"></div>
+      </div>
+      <div>
+        <div class="square" tabindex="0"></div>
+        <div class="square" tabindex="0"></div>
+      </div>
+      <div>
+        <div class="square" tabindex="0"></div>
+      </div>
     </div>
 
     <dialog class="area"
@@ -216,9 +281,5 @@ export class Page1Component {
   public toggleDefaultBox() {
     this.defaultBox = false;
     setTimeout(() => this.defaultBox = true, 1000);
-  }
-
-  public onClick(el: HTMLElement) {
-    el.style.background = '#0f0';
   }
 }

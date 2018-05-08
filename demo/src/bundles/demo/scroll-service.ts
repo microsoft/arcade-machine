@@ -26,7 +26,7 @@ export class ScrollService {
   }
 
   private step(currentTime: number) {
-    if (!this.startTime || !this.scrollContainer || !this.duration) {
+    if (this.startTime === undefined || this.scrollContainer === undefined || this.duration === undefined) {
       throw new Error('Not initialized');
     }
     const elapsed = currentTime - this.startTime;
@@ -44,9 +44,14 @@ export class ScrollService {
   }
 
   private getPositionAt(elapsedTime: number): number {
-    if (!this.duration || !this.startOffset || !this.endOffset) {
+    if (this.startTime === undefined ||
+      this.scrollContainer === undefined ||
+      this.duration === undefined ||
+      this.endOffset === undefined ||
+      this.startOffset === undefined) {
       throw new Error('Not initialized');
     }
+
     if (elapsedTime > this.duration) {
       return this.endOffset;
     }
