@@ -320,7 +320,12 @@ export class FocusService {
 
     let nextElem: HTMLElement | null = null;
     if (isDirectional(direction)) {
-      const refRect = this.selected ? this.selected.getBoundingClientRect() : defaultRect;
+      let refRect = this.referenceRect;
+
+      if (this.selected && this.focusRoot.contains(this.selected)) {
+        refRect = this.selected.getBoundingClientRect();
+      }
+
       nextElem = this.getFocusableElement(direction, this.focusRoot, refRect);
     }
 
@@ -336,20 +341,32 @@ export class FocusService {
     direction: Direction,
     root: HTMLElement,
     refRect: ClientRect,
+    ignore?: HTMLElement | null,
   ): HTMLElement | null {
-    let el: HTMLElement | null | undefined = this.findNextFocusable(direction, root, refRect);
-    if (!el) {
+    let nextFocusableEl = this.findNextFocusable(direction, root, refRect, ignore);
+
+    if (!nextFocusableEl) {
       return null;
     }
 
-    const directive = this.registry.find(el);
+    const directive = this.registry.find(nextFocusableEl);
     if (directive && directive.arcFocusInside) {
-      el = this.getFocusableElement(direction, el, refRect);
+      const elementInside = this.getFocusableElement(direction, nextFocusableEl, refRect);
+
+      // get focusable again if no focusable elements inside the current element
+      nextFocusableEl =
+        elementInside || this.getFocusableElement(direction, root, refRect, nextFocusableEl);
     }
-    return el;
+
+    return nextFocusableEl;
   }
 
-  private findNextFocusable(direction: Direction, root: HTMLElement, refRect: ClientRect) {
+  private findNextFocusable(
+    direction: Direction,
+    root: HTMLElement,
+    refRect: ClientRect,
+    ignore?: HTMLElement | null,
+  ) {
     const directive = this.selected ? this.registry.find(this.selected) : undefined;
     let nextElem: HTMLElement | null = null;
 
@@ -362,9 +379,10 @@ export class FocusService {
     }
 
     if (!nextElem) {
-      const focusableElems = <HTMLElement[]>Array.from(root.querySelectorAll('[tabIndex]')).filter(
-        (el: any) => this.isFocusable(el),
+      const focusableElems = Array.from(root.querySelectorAll<HTMLElement>('[tabIndex]')).filter(
+        el => this.isFocusable(el) && el !== ignore,
       );
+
       const finder = new ElementFinder(direction, refRect, focusableElems, this.prevElement);
       nextElem = finder.find();
     }

@@ -136,6 +136,22 @@ import { Observable } from 'rxjs/Observable';
           <div class="square" arc tabindex="0"></div>
         </div>
       </div>
+      <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        With arc-focus-inside
+        <div id="focus-inside1" class="area">
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0"></div>
+        </div>
+        <div id="focus-inside1" class="area" arc arc-focus-inside="true" style="min-height: 85px; width: 100%;" tabindex="0">
+          Empty element with arc-focus-inside
+        </div>
+        <div id="focus-inside1" class="area">
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0"></div>
+          <div class="square" arc tabindex="0"></div>
+        </div>
+      </div>
       <div  style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
         Without arc-focus-inside
         <div id="focus-inside1" class="area">
