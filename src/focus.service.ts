@@ -326,7 +326,7 @@ export class FocusService {
         refRect = this.selected.getBoundingClientRect();
       }
 
-      nextElem = this.getFocusableElement(direction, this.focusRoot, refRect);
+      nextElem = this.getFocusableElement(direction, this.focusRoot, refRect, new Set<HTMLElement>());
     }
 
     return new ArcEvent({
@@ -341,7 +341,7 @@ export class FocusService {
     direction: Direction,
     root: HTMLElement,
     refRect: ClientRect,
-    ignore?: HTMLElement | null,
+    ignore: Set<HTMLElement>,
   ): HTMLElement | null {
     let nextFocusableEl = this.findNextFocusable(direction, root, refRect, ignore);
 
@@ -351,11 +351,11 @@ export class FocusService {
 
     const directive = this.registry.find(nextFocusableEl);
     if (directive && directive.arcFocusInside) {
-      const elementInside = this.getFocusableElement(direction, nextFocusableEl, refRect);
+      const elementInside = this.getFocusableElement(direction, nextFocusableEl, refRect, ignore);
 
       // get focusable again if no focusable elements inside the current element
       nextFocusableEl =
-        elementInside || this.getFocusableElement(direction, root, refRect, nextFocusableEl);
+        elementInside || this.getFocusableElement(direction, root, refRect, ignore.add(nextFocusableEl));
     }
 
     return nextFocusableEl;
@@ -365,7 +365,7 @@ export class FocusService {
     direction: Direction,
     root: HTMLElement,
     refRect: ClientRect,
-    ignore?: HTMLElement | null,
+    ignore: Set<HTMLElement>,
   ) {
     const directive = this.selected ? this.registry.find(this.selected) : undefined;
     let nextElem: HTMLElement | null = null;
@@ -380,7 +380,7 @@ export class FocusService {
 
     if (!nextElem) {
       const focusableElems = Array.from(root.querySelectorAll<HTMLElement>('[tabIndex]')).filter(
-        el => this.isFocusable(el) && el !== ignore,
+        el => this.isFocusable(el) && !ignore.has(el),
       );
 
       const finder = new ElementFinder(direction, refRect, focusableElems, this.prevElement);
@@ -597,7 +597,7 @@ export class FocusService {
       }
     }
 
-    return true;
+    return this.isVisible(el);
   }
 
   /**
@@ -608,12 +608,15 @@ export class FocusService {
     return this.isVisible(el);
   }
 
-  private isVisible(el: HTMLElement) {
+  private isVisible(el: HTMLElement | null) {
+    if (!el) {
+      return false;
+    }
     const style = window.getComputedStyle(el);
     if (style.display === 'none' || style.visibility === 'hidden') {
       return false;
     }
-    return true;
+    return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
   }
 
   /**
