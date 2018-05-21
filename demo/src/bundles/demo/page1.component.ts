@@ -145,6 +145,9 @@ import { Observable } from 'rxjs/Observable';
         </div>
         <div id="focus-inside1" class="area" arc arc-focus-inside="true" style="min-height: 85px; width: 100%;" tabindex="0">
           Empty element with arc-focus-inside
+          <div class="area" arc arc-focus-inside="true" style="min-height: 45px; width: 80%; margin: 15px;" tabindex="0">
+            Empty element with arc-focus-inside
+          </div>
         </div>
         <div id="focus-inside1" class="area">
           <div class="square" arc tabindex="0"></div>

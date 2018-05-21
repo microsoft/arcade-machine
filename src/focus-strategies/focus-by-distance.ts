@@ -68,7 +68,7 @@ export class ElementFinder {
 
   public find() {
     this.shortlisted = this.getElementsInDirection();
-
+    this.shortlisted = this.shortlisted.filter(el => el.rect.width && el.rect.height);
     if (!this.shortlisted.length) {
       return null;
     }
