@@ -380,7 +380,7 @@ export class FocusService {
 
     if (!nextElem) {
       const focusableElems = Array.from(root.querySelectorAll<HTMLElement>('[tabIndex]')).filter(
-        el => this.isFocusable(el) && !ignore.has(el),
+        el => !ignore.has(el) && this.isFocusable(el),
       );
 
       const finder = new ElementFinder(direction, refRect, focusableElems, this.prevElement);
@@ -616,7 +616,7 @@ export class FocusService {
     if (style.display === 'none' || style.visibility === 'hidden') {
       return false;
     }
-    return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+    return true;
   }
 
   /**
