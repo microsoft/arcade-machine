@@ -11,7 +11,8 @@ import {
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
-import { Observable } from 'rxjs';
+import { fromEvent } from 'rxjs';
+import { filter, take } from 'rxjs/operators';
 import { BenchmarkPageComponent } from './benchmark-page.component';
 
 import { ArcModule, Direction, FocusService, InputService, RegistryService } from '../../../../src';
@@ -36,8 +37,8 @@ export class DemoAppComponent implements AfterViewInit {
     const nav: any = navigator;
     nav.gamepadInputEmulation = 'keyboard';
 
-    Observable.fromEvent<KeyboardEvent>(window, 'keydown')
-      .filter(ev => this.inputService.codeDirectionMap.get(ev.keyCode) === Direction.BACK)
+    fromEvent<KeyboardEvent>(window, 'keydown')
+      .pipe(filter(ev => this.inputService.codeDirectionMap.get(ev.keyCode) === Direction.BACK))
       .subscribe((ev: KeyboardEvent) => {
         ev.preventDefault();
         ev.stopPropagation();
@@ -81,10 +82,12 @@ export class DialogComponent implements AfterViewInit, OnDestroy {
   ) { }
 
   public ngAfterViewInit() {
-    Observable.fromEvent<KeyboardEvent>(this.hostElem.nativeElement, 'keydown')
-      .filter(ev => this.inputService.codeDirectionMap.get(ev.keyCode) === Direction.BACK)
-      .take(1)
-      .subscribe((ev: KeyboardEvent) => {
+    fromEvent<KeyboardEvent>(this.hostElem.nativeElement, 'keydown')
+      .pipe(
+        filter(ev => this.inputService.codeDirectionMap.get(ev.keyCode) === Direction.BACK),
+        take(1),
+      )
+      .subscribe(ev => {
         ev.preventDefault();
         this.onClose.emit();
       });

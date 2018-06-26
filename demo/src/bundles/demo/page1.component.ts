@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { interval } from 'rxjs';
 
 @Component({
   selector: 'page-1',
@@ -287,7 +287,7 @@ import { Observable } from 'rxjs/Observable';
 })
 export class Page1Component {
   public boxes: string[] = [];
-  public ticker = Observable.interval(2500);
+  public ticker = interval(2500);
   public defaultBox = true;
   public isDialogVisible = false;
 

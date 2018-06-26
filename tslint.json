@@ -23,6 +23,13 @@
         "invoke-injectable": true,
         "no-unused-css": true,
         "pipe-impure": true,
+        "no-submodule-imports": false,
+
+        // Prettier-incompatible or prettier-handled rules
+        "align": false,
+        "space-within-parens": false,
+        "semicolon": false,
+        "quotemark": false,
 
         // Basic
         "import-blacklist": [

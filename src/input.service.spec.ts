@@ -48,7 +48,7 @@ describe('input service', () => {
     });
   });
 
-  it('enables virtual keyboards when they\'re present', () => {
+  it("enables virtual keyboards when they're present", () => {
     const nav: any = navigator;
     nav.gamepadInputEmulation = 'mouse';
     input.bootstrap();
