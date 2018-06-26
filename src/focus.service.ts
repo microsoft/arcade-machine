@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 import { ArcEvent } from './event';
 import { ElementFinder } from './focus-strategies/focus-by-distance';
@@ -185,7 +186,7 @@ export class FocusService {
 
     this.root = root;
     this.registrySubscription = this.registry.setFocus
-      .filter(el => !!el)
+      .pipe(filter(el => !!el))
       .subscribe(el => this.selectNode(<HTMLElement>el, scrollSpeed));
 
     if (!this.selected) {
@@ -326,7 +327,12 @@ export class FocusService {
         refRect = this.selected.getBoundingClientRect();
       }
 
-      nextElem = this.getFocusableElement(direction, this.focusRoot, refRect, new Set<HTMLElement>());
+      nextElem = this.getFocusableElement(
+        direction,
+        this.focusRoot,
+        refRect,
+        new Set<HTMLElement>(),
+      );
     }
 
     return new ArcEvent({
@@ -355,7 +361,8 @@ export class FocusService {
 
       // get focusable again if no focusable elements inside the current element
       nextFocusableEl =
-        elementInside || this.getFocusableElement(direction, root, refRect, ignore.add(nextFocusableEl));
+        elementInside ||
+        this.getFocusableElement(direction, root, refRect, ignore.add(nextFocusableEl));
     }
 
     return nextFocusableEl;

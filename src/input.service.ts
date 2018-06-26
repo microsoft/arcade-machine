@@ -1,5 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
-import { Observable, Subject, Subscription } from 'rxjs';
+import { fromEvent, merge, Subject, Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { keys } from 'uwp-keycodes';
 
 import { ArcEvent } from './event';
@@ -388,8 +389,8 @@ export class InputService {
     this.focus.setRoot(root, this.focus.scrollSpeed);
 
     this.subscriptions.push(
-      Observable.fromEvent<FocusEvent>(document, 'focusin')
-        .filter(ev => ev.target !== this.focus.selected)
+      fromEvent<FocusEvent>(document, 'focusin')
+        .pipe(filter(ev => ev.target !== this.focus.selected))
         .subscribe(ev => {
           this.focus.onFocusChange(<HTMLElement>ev.target, this.focus.scrollSpeed);
         }),
@@ -447,15 +448,13 @@ export class InputService {
     }
 
     this.subscriptions.push(
-      Observable.merge(this.gamepadSrc, Observable.fromEvent(window, 'gamepadconnected')).subscribe(
-        ev => {
-          addGamepad((<any>ev).gamepad);
-          if (this.pollRaf) {
-            cancelAnimationFrame(this.pollRaf);
-          }
-          this.scheduleGamepadPoll();
-        },
-      ),
+      merge(this.gamepadSrc, fromEvent(window, 'gamepadconnected')).subscribe(ev => {
+        addGamepad((<any>ev).gamepad);
+        if (this.pollRaf) {
+          cancelAnimationFrame(this.pollRaf);
+        }
+        this.scheduleGamepadPoll();
+      }),
     );
   }
 
@@ -561,10 +560,7 @@ export class InputService {
    */
   private addKeyboardListeners() {
     this.subscriptions.push(
-      Observable.merge(
-        this.keyboardSrc,
-        Observable.fromEvent<KeyboardEvent>(window, 'keydown'),
-      ).subscribe(ev => {
+      merge(this.keyboardSrc, fromEvent<KeyboardEvent>(window, 'keydown')).subscribe(ev => {
         if (!ev.defaultPrevented && this.handleKeyDown(ev.keyCode)) {
           ev.preventDefault();
         }

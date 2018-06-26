@@ -1,6 +1,7 @@
 import { AfterViewInit, Component } from '@angular/core';
-import { ScrollService } from './scroll-service';
+import { take } from 'rxjs/operators';
 
+import { ScrollService } from './scroll-service';
 import { FocusService } from '../../../../src/focus.service';
 
 @Component({
@@ -40,7 +41,7 @@ export class SmoothScrollPageComponent implements AfterViewInit {
       const topOffset = (<HTMLElement>ev.target).offsetTop - (scrollContainer.offsetHeight / 2);
       this.scrollService.smoothScroll(scrollContainer, topOffset);
       this.scrollService.scrollCompleted
-        .take(1)
+        .pipe(take(1))
         .subscribe(() => {
           if (this.focus.selected) {
             this.focus.selected.focus();

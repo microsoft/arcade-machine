@@ -7,7 +7,8 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import { Observable } from 'rxjs';
+import { never, Observable } from 'rxjs';
+import { startWith } from 'rxjs/operators';
 
 import { Direction, IArcEvent, IArcHandler } from './model';
 import { RegistryService } from './registry.service';
@@ -16,7 +17,7 @@ function createDirectionCapture(direction: Direction, target: HTMLElement) {
   if (!target) {
     throw new Error(
       `Cannot set [arc-${Direction[direction]}] to an undefined element!` +
-        'Make sure the element you\'re passing is defined correctly.',
+        "Make sure the element you're passing is defined correctly.",
     );
   }
 
@@ -31,7 +32,7 @@ function createDirectionCapture(direction: Direction, target: HTMLElement) {
 export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
   // 'Primitive' I/O handlers: ================================================
 
-  @Input('arc-set-focus') public arcSetFocus: Observable<void> = Observable.never<void>();
+  @Input('arc-set-focus') public arcSetFocus: Observable<void> = never();
 
   @Output('arc-capture-outgoing') public arcCaptureOutgoing = new EventEmitter<IArcEvent>();
 
@@ -44,7 +45,7 @@ export class ArcDirective implements OnInit, OnDestroy, IArcHandler {
     if (shouldFocus === false) {
       return;
     }
-    this.arcSetFocus = this.arcSetFocus.startWith(undefined);
+    this.arcSetFocus = this.arcSetFocus.pipe(startWith(undefined));
   }
 
   @Input('arc-exclude')
