@@ -141,6 +141,9 @@ export class FocusService {
   constructor(private registry: RegistryService) {}
 
   public trapFocus(newRootElem: HTMLElement) {
+    if (newRootElem === this.focusRoot) {
+      return;
+    }
     this.focusStack.push({
       root: this.focusRoot,
       focusedElem: this.selected,
@@ -148,10 +151,10 @@ export class FocusService {
     this.focusRoot = newRootElem;
   }
 
-  public releaseFocus(releaseElem?: HTMLElement, scrollSpeed: number | null = this.scrollSpeed) {
+  public releaseFocus(releaseElem?: HTMLElement, scrollSpeed: number | null = this.scrollSpeed, focusPrevStateElem: boolean = true) {
     if (releaseElem) {
       if (releaseElem === this.focusRoot) {
-        this.releaseFocus(undefined, scrollSpeed);
+        this.releaseFocus(undefined, scrollSpeed, focusPrevStateElem);
       }
       return;
     }
@@ -159,7 +162,9 @@ export class FocusService {
     const lastFocusState = this.focusStack.pop();
     if (lastFocusState && lastFocusState.focusedElem) {
       this.focusRoot = lastFocusState.root;
-      this.selectNode(lastFocusState.focusedElem, scrollSpeed);
+      if (focusPrevStateElem) {
+        this.selectNode(lastFocusState.focusedElem, scrollSpeed);
+      }
     } else {
       console.warn(
         'No more focus traps to release. Make sure you call trapFocus before using releaseFocus',
