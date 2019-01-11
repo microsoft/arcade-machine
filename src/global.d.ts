@@ -4,4 +4,3 @@ interface ScrollOptions {
 interface HTMLElement {
   focus(scrollOptions?: ScrollOptions): void;
 }
-
