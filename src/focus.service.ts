@@ -250,7 +250,7 @@ export class FocusService {
       new Event('arcfocuschanging', { bubbles: true, cancelable: true }),
     );
     if (!canceled) {
-      next.focus();
+      next.focus({ preventScroll: true });
     }
   }
 
