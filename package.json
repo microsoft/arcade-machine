@@ -15,6 +15,7 @@
     "serve": "webpack-dev-server --config demo/webpack.config.js"
   },
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "typings": "dist/index.d.ts",
   "license": "MIT",
   "repository": {
@@ -69,7 +70,7 @@
     "ts-helpers": "^1.1.1",
     "tslint": "^5.9.1",
     "tslint-microsoft-contrib": "^5.0.3",
-    "typescript": "~3.2.0",
+    "typescript": "~3.1.0",
     "webpack": "^3.11.0",
     "webpack-dev-server": "^2.11.1",
     "zone.js": "^0.8.20"
