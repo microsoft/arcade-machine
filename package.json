@@ -1,6 +1,6 @@
 {
   "name": "arcade-machine",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "scripts": {
     "gulp": "gulp",
     "build": "gulp build",
@@ -27,18 +27,18 @@
     "npm": ">=5.3.0"
   },
   "dependencies": {
-    "@angular/core": "^7.2.0",
+    "@angular/core": "^8.2.0",
     "rxjs": "^6.0.0",
     "uwp-keycodes": "^1.0.1"
   },
   "devDependencies": {
-    "@angular/common": "^7.2.0",
-    "@angular/compiler": "^7.2.0",
-    "@angular/compiler-cli": "^7.2.0",
-    "@angular/forms": "^7.2.0",
-    "@angular/platform-browser": "^7.2.0",
-    "@angular/platform-browser-dynamic": "^7.2.0",
-    "@angular/router": "^7.2.0",
+    "@angular/common": "^8.2.0",
+    "@angular/compiler": "^8.2.0",
+    "@angular/compiler-cli": "^8.2.0",
+    "@angular/forms": "^8.2.0",
+    "@angular/platform-browser": "^8.2.0",
+    "@angular/platform-browser-dynamic": "^8.2.0",
+    "@angular/router": "^8.2.0",
     "@types/jasmine": "^2.8.6",
     "@types/node": "^8.9.4",
     "@types/winrt-uwp": "0.0.19",
@@ -70,7 +70,7 @@
     "ts-helpers": "^1.1.1",
     "tslint": "^5.9.1",
     "tslint-microsoft-contrib": "^5.0.3",
-    "typescript": "~3.1.0",
+    "typescript": "~3.4.0",
     "webpack": "^3.11.0",
     "webpack-dev-server": "^2.11.1",
     "zone.js": "^0.8.20"
