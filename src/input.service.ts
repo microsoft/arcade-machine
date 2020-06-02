@@ -379,6 +379,7 @@ export class InputService {
       // We want the gamepad to provide gamepad VK keyboard events rather than moving a
       // mouse like cursor. The gamepad will provide such keyboard events and provide
       // input to the DOM
+      // @ts-ignore
       navigator.gamepadInputEmulation = 'keyboard';
     } else if ('getGamepads' in navigator) {
       // Poll connected gamepads and use that for input if keyboard emulation isn't available
