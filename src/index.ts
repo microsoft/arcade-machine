@@ -14,7 +14,7 @@ export * from './model';
   exports: [ArcDirective],
 })
 export class ArcModule {
-  public static forRoot(): ModuleWithProviders {
+  public static forRoot(): ModuleWithProviders<ArcModule> {
     return {
       ngModule: ArcModule,
       providers: [InputService, FocusService, RegistryService],
